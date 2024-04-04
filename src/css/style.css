@@ -6,14 +6,68 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:24:42 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/04 14:41:13 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/04 18:53:47 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-/* Navbar y Logo */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* {
+    font-family: 'Press Start 2P', cursive;
+}
+
+:root {
+    --black: #000000;
+    --white: #FFFFFF;
+    --electric-blue: #0044FF;
+    --retro-purple: #7200DA;
+    --neon-green: #33FF00;
+    --arcade-red: #FF0000;
+	--dark-arcade-red: #E4000F;
+	--index-red: #a62543;
+}
+
+@media (max-width: 768px) {
+    .navbar-nav .nav-link {
+        font-size: 0.8rem; 
+    }
+    .btn {
+        padding: .375rem .75rem;
+    }
+}
+
+/* body */
+
+body {
+    background-color: var(--black);
+    color: var(--white);
+}
+
+/* Establece una imagen de fondo con un efecto de profundidad */
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('../images/indexWallpaper.png'); /* Asegúrate de que la ruta a tu imagen es correcta */
+    background-size: cover;
+    background-attachment: fixed; /* Esto hará que la imagen se mantenga fija al hacer scroll */
+    background-position: center;
+    z-index: -1; /* Coloca la imagen detrás de tu contenido */
+    opacity: 0.7; /* Ajusta la opacidad para que el texto destaque más */
+}
+
+/* Navbar */
+
+.navbar {
+	background-color: rgba(0, 0, 0, 0.2);
+}
 
 .navbar-nav{
-	background: #0000;
+	display: flex;
+	align-items: center;
 }
 
 .navbar-brand {
@@ -25,37 +79,133 @@
 .navbar-nav .nav-link {
     font-family: 'Press Start 2P', cursive;
     font-size: 1rem;
-    margin-right: 20px;
+	margin-right: 5vh; /* Espacio entre elementos de navegación */
+	display: inline;
+	text-align: center;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--neon-green);
+    box-shadow: 0px 0px 5px var(--neon-green);
+}
+
+.nav-link{
+	font-family: 'Press Start 2P', cursive;
+	display: inline;
+}
+
+.navbar .navbar-nav .btn {
+	display: inline-flex;
+    padding: 0.75rem 0.75rem; /* Tamaño del padding para centrar el texto */
+    margin-right: 0.5rem; /* Espacio entre botones */
+}
+
+.btn-outline-success, .btn-outline-danger {
+    padding: .5rem 1rem;
+    line-height: 1;
+    display: inline;
+    align-items: center; 
+    justify-content: center; 
+}
+
+.btn-outline-success {
+    color: var(--electric-blue);
+    border-color: var(--electric-blue);
+	font-family: 'Press Start 2P', cursive;
+    font-size: 1rem;
+}
+
+.btn-outline-success:hover {
+    background-color: var(--electric-blue);
+    color: var(--black);
+}
+
+.btn-outline-danger {
+    color: var(--retro-purple);
+    border-color: var(--retro-purple);
+	font-family: 'Press Start 2P', cursive;
+    font-size: 1rem;
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--retro-purple);
+	border-color: var(--retro-purple);
+    color: var(--black);
+}
+
+/* Logo */
+.logo {
+	border-radius: 20pt;
+	box-shadow: #FFFFFF;
+	border-color: #FFFFFF;
+	display: block;
+	width: 50%;
+    box-shadow: 0px 0px 50px var(--retro-purple);
 }
 
 /* Hero Section */
 .hero-section {
-    padding: 100px 0;
-    background: linear-gradient(to right, #0072ff, #00c6ff); /* Degradado azul */
-    color: white;
+	transform: translate(0, 100%);
+    color: var(--white);
     text-align: center;
+}
+
+@keyframes glowing {
+	0% {
+		text-shadow: 0 0 5px var(--retro-purple);
+	}
+	50% {
+		text-shadow: 0 0 10px var(--retro-purple), 0 0 10px var(--retro-purple), 0 0 20px var(--retro-purple), 0 0 30px var(--retro-purple);
+	}
+	100% {
+		text-shadow: 0 0 5px var(--retro-purple);
+	}
+}
+
+@keyframes box-glowing {
+	0% {
+		box-shadow: 0 0 5px var(--retro-purple);
+	}
+	50% {
+		box-shadow: 0 0 5px var(--retro-purple), 0 0 10px var(--retro-purple), 0 0 20px var(--retro-purple);
+	}
+	100% {
+		box-shadow: 0 0 5px var(--retro-purple);
+	}
+}
+
+.hero-section h1,
+.hero-section p {
+	animation: glowing 10s infinite ease-in-out;
 }
 
 .hero-section h1 {
     font-size: 4rem;
+	font-family: 'Press Start 2P', cursive;
+	margin-bottom: 3vh;
+}
+
+.hero-section p {
+    font-size: 1.3rem;
+	font-family: 'Press Start 2P', cursive;
+	margin-bottom: 4vh;
 }
 
 /* Botones */
 .btn-primary {
-    background-color: #ff00cc; /* Color rosa neón para estilo retro */
-    border: none;
-    box-shadow: 0 5px #ff99cc; /* Sombra para efecto flotante */
-    transition: all 0.3s ease;
+	font-size: 1rem;
+	font-family: 'Press Start 2P', cursive;
+    background-color: var(--index-red);
+    border-color: var(--index-red);
+	text-align: center;
+	animation: box-glowing 10s infinite ease-in-out;
+	padding: 1vw 1vw;
 }
 
 .btn-primary:hover {
-    background-color: #ff66b5;
-    box-shadow: 0 2px #ff99cc;
-    transform: translateY(-3px);
+    background-color: var(--neon-green);
+    border-color: var(--neon-green);
+	color: #000000;
+	animation: box-glowing 10s infinite ease-in-out;
 }
 
-/* Efectos hover para los elementos del navbar */
-.navbar-nav .nav-link:hover {
-    color: #ff66b5;
-    text-decoration: underline;
-}
