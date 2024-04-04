@@ -1,0 +1,61 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   style.css                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/04 14:24:42 by adpachec          #+#    #+#             */
+/*   Updated: 2024/04/04 14:41:13 by adpachec         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+/* Navbar y Logo */
+
+.navbar-nav{
+	background: #0000;
+}
+
+.navbar-brand {
+    font-family: 'Press Start 2P', cursive; /* Una tipografía que evoca los videojuegos clásicos */
+    font-size: 1.5rem;
+    color: #fff;
+}
+
+.navbar-nav .nav-link {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1rem;
+    margin-right: 20px;
+}
+
+/* Hero Section */
+.hero-section {
+    padding: 100px 0;
+    background: linear-gradient(to right, #0072ff, #00c6ff); /* Degradado azul */
+    color: white;
+    text-align: center;
+}
+
+.hero-section h1 {
+    font-size: 4rem;
+}
+
+/* Botones */
+.btn-primary {
+    background-color: #ff00cc; /* Color rosa neón para estilo retro */
+    border: none;
+    box-shadow: 0 5px #ff99cc; /* Sombra para efecto flotante */
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #ff66b5;
+    box-shadow: 0 2px #ff99cc;
+    transform: translateY(-3px);
+}
+
+/* Efectos hover para los elementos del navbar */
+.navbar-nav .nav-link:hover {
+    color: #ff66b5;
+    text-decoration: underline;
+}

@@ -1,10 +1,9 @@
-# Utilizar la imagen oficial de NGINX
+# Fase única, simplemente sirviendo archivos estáticos con NGINX
 FROM nginx:alpine
 
-# Copiar los archivos del proyecto al directorio de NGINX para servirlos
-COPY src /usr/share/nginx/html
+# Copiar el directorio src y node_modules al contenedor
+COPY ./src /usr/share/nginx/html
+COPY ./node_modules /usr/share/nginx/html/node_modules
 
-# Exponer el puerto 80
+# Exponer puerto 80
 EXPOSE 80
-
-# NGINX arranca automáticamente, no necesitas un CMD
