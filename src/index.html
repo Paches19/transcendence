@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Pong Clásico</title>
+	<title>Classic Pong</title>
 	<link rel="stylesheet" href="dist/css/bootstrap.min.css">
 	<link rel="stylesheet" href="css/style.css">
 	<link href='https://fonts.googleapis.com/css?family=Press Start 2P' rel='stylesheet'>
@@ -12,42 +12,41 @@
 <body>
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dar2">
 		<div class="container">
-			<a class="navbar-brand" href="#">
-                <img class="logo" src="images/logoPong.webp" alt="Logo Pong Classic">
+			<a class="navbar-brand" >
+                <img class="logo" href="#" src="images/logoPong.webp" alt="Logo Pong Classic">
             </a>
 			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
 				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-					<a class="nav-link active" aria-current="page" href="index.html">Inicio</a>
-					<a class="nav-link" href="about.html">Perfil</a>
-					<a class="nav-link" href="how-to-play.html">Cómo Jugar</a>
-					<a class="nav-link" href="play.html">Jugar</a>
-					<a class="nav-link" href="tournaments.html">Torneos</a>
+					<a class="nav-link" href="#" id="link-home">Home</a>
+					<a class="nav-link" href="#profile" id="link-profile">Profile</a>
+					<a class="nav-link" href="#play" id="link-play">Play</a>
+					<a class="nav-link" href="#tournaments" id="link-tournaments">Tournaments</a>
 				</ul> 
 				<div class="navbar-nav">
-					<a class="btn btn-outline-success me-2" href="login.html">Login</a>
-					<a class="btn btn-outline-danger" href="register.html">Registrarse</a>
+					<a class="btn btn-outline-success me-2" href="#login">Log in</a>
+					<a class="btn btn-outline-danger" href="#register">Register</a>
 				</div>
 			</div>
 		</div>
 	</nav>    
 
-	<div class="main-content">
+	<div id="main-content">
 		<!-- Hero Section -->
 		<div class="hero-section">
 			<div class="hero-text-container">
-				<h1>Bienvenido a Trascendence</h1>
-				<p>El regreso del icónico juego que acabará con todo.</p>
-				<a href="#" class="btn btn-primary btn-lg">Jugar Ahora</a>
+				<h1>Welcome to Trascendence</h1>
+				<p>The return of the iconic game that will end everything</p>
+				<a href="#play" class="btn btn-primary btn-lg">PLAY NOW</a>
 			</div>
 		</div>
 
 		<!-- Partners Section -->
 		<div class="partners-section container my-5">
 			<hr> <!-- Línea divisoria -->
-			<h2>Colaboradores</h2>
+			<h2>Collaborators</h2>
 			<div class="row">
 				<div class="col-md-3 mb-3">
 					<div class="card">
@@ -71,7 +70,9 @@
 			</div>
 		</div>	
 	</div>
-	<!-- Bootstrap JS -->
+
 	<script src="dist/js/bootstrap.bundle.min.js"></script>
+	<script type="module" src="js/router.js"></script>
+	<script type="module" src="js/main.js"></script>
 </body>
 </html>
