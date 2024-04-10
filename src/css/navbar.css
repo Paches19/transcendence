@@ -1,0 +1,31 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   navbar.css                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/10 17:16:34 by adpachec          #+#    #+#             */
+/*   Updated: 2024/04/10 17:16:39 by adpachec         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+
+.user-info .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espacio entre el avatar y el nombre de usuario */
+}
+
+.user-info .rounded-circle {
+    width: 40px;
+    height: 40px;
+}
+
+.dropdown-menu {
+    right: 0; /* Asegúrate de que el menú desplegable se alinea correctamente con el avatar */
+}

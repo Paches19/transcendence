@@ -6,9 +6,11 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/10 13:44:42 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/10 17:38:02 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+import router from "./main.js";
 
 const users = [
     { username: 'user1', password: 'pass1' },
@@ -18,14 +20,16 @@ const users = [
 
 function login(username, password) {
     const user = users.find(user => user.username === username && user.password === password);
+	const navBarDiv = document.getElementById('login-navbar');
     if (user) {
         // Generar un token ficticio
         const token = btoa(username + ':' + password);
         localStorage.setItem('userToken', token);
-        alert('Login exitoso');
+		document.getElementById('include-content').innerHTML = `
+			<link rel="stylesheet" href="css/navbar.css">
+		`;
         return true;
     } else {
-        alert('Login fallido');
         return false;
     }
 }
@@ -36,8 +40,7 @@ function isLoggedIn() {
 
 function logout() {
     localStorage.removeItem('userToken');
-    alert('Sesión cerrada');
-	window.location.hash = '#home';
+	router.route('home');
 }
 
 export { login, isLoggedIn, logout };

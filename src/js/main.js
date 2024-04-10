@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:24:45 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/08 13:23:11 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/10 16:57:45 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,3 +41,5 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 });
+
+export default router;

@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:18 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/10 11:37:46 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/10 16:57:21 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,17 @@ fetch('/api/user/profile', {
 .catch(error => console.error('Error:', error));
 */
 
+import { isLoggedIn } from './auth.js';
+import router from './main.js';
+
+
 function loadProfile() {
+
+	if (!isLoggedIn()) {
+		router.route('login');
+		return;
+	}
+	
 	const profileHTML = `
 		<div class="container mt-4">
 			<div class="row">

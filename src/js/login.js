@@ -6,14 +6,16 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:21:53 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/10 13:49:47 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/10 17:37:17 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { login } from './auth.js';
+import updateNavbar from "./navbar.js";
+import router from './main.js';
 
 function loadLogin() {
-    document.getElementById('main-content').innerHTML = `
+	document.getElementById('main-content').innerHTML = `
 		<div class="wrapper">
 			<div class="flip-card__inner">
 				<div class="flip-card__front">
@@ -22,18 +24,30 @@ function loadLogin() {
 							<input type="text" placeholder="Name" id="username" class="flip-card__input">
 							<input type="password" placeholder="Password" id="password" class="flip-card__input">
 							<button type="button" class="flip-card__btn" id="login-btn">Let's go!</button>
+							<div class="text" id="login-msg"></div>
 						</form>
 				</div>
 			</div>   
 		</div>
-    `;
+	`;
 	
 	const loginButton = document.getElementById('login-btn');
 	loginButton.addEventListener('click', () => {
 		const username = document.getElementById('username').value;
 		const password = document.getElementById('password').value;
-		console.log("username: ", username);
-		console.log("password: ", password);
+		
+		if (login(username, password))
+		{
+			updateNavbar();
+			document.getElementById('login-msg').innerText = 'You have ponged in!. Ready to rack up some pong-tastic points?';
+			setTimeout(() => {
+				router.route('profile');
+			}, 1500);
+		}
+		else
+		{
+			document.getElementById('login-msg').innerText = 'Hmm, that username and password don´t seem to match. Are you sure you´re not trying to log into your ex´s account?';
+		}
 	});
 
 	document.getElementById('include-content').innerHTML = `
