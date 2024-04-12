@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:21:53 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/10 17:37:17 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/12 12:48:38 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,8 @@ import { login } from './auth.js';
 import updateNavbar from "./navbar.js";
 import router from './main.js';
 
-function loadLogin() {
+function loadLogin()
+{
 	document.getElementById('main-content').innerHTML = `
 		<div class="wrapper">
 			<div class="flip-card__inner">
@@ -24,7 +25,7 @@ function loadLogin() {
 							<input type="text" placeholder="Name" id="username" class="flip-card__input">
 							<input type="password" placeholder="Password" id="password" class="flip-card__input">
 							<button type="button" class="flip-card__btn" id="login-btn">Let's go!</button>
-							<div class="text" id="login-msg"></div>
+							<div class="text" id="login-msg"> </div>
 						</form>
 				</div>
 			</div>   
@@ -32,7 +33,8 @@ function loadLogin() {
 	`;
 	
 	const loginButton = document.getElementById('login-btn');
-	loginButton.addEventListener('click', () => {
+	loginButton.addEventListener('click', () =>
+	{
 		const username = document.getElementById('username').value;
 		const password = document.getElementById('password').value;
 		

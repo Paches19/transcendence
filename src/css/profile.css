@@ -1,0 +1,170 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   profile.css                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/12 12:46:57 by adpachec          #+#    #+#             */
+/*   Updated: 2024/04/12 13:36:46 by adpachec         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+.profile-container {
+	max-width: 800px;
+	margin: 5vh auto;
+	padding: 20px;
+	color: var(--electric-blue);
+	background: var(--black);
+	border-radius: 2vh;
+	opacity: 0.98;
+  }
+  
+  .profile-header {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+  }
+  
+  .profile-avatar {
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+	border: 3px solid var(--electric-blue);
+	box-shadow: 0px 0px 10px var(--electric-blue);
+  }
+  
+  .profile-username {
+	font-size: 2em;
+  }
+  
+  /* Stats */
+  .stats-content, .history-content {
+	display: none;
+	margin-top: 10px;
+	background: rgba(0, 0, 0, 0.8);
+	padding: 10px;
+	border-radius: 5px;
+  }
+  
+  .stats-content.active, .history-content.active {
+	display: block;
+  }
+  
+  .stats-toggler, .history-toggler {
+	background: var(--index-red);
+	color: var(--white);
+	border: none;
+	padding: 10px;
+	margin-top: 20px;
+	cursor: pointer;
+	font-size: 1em;
+	border-radius: 2vh;
+  }
+  
+  .stats-toggler:hover, .history-toggler:hover {
+	background: var(--electric-blue);
+  }
+
+/* History */
+.table {
+    width: 100%;
+    margin-top: 1rem;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid var(--retro-purple);
+}
+
+.table thead th {
+    background: var(--electric-blue);
+    color: var(--white);
+}
+
+.table tbody td.win {
+    color: var(--neon-green);
+}
+
+.table tbody td.loss {
+    color: var(--arcade-red);
+}
+
+/* fFriends */
+
+.friends-section {
+    margin-top: 2rem;
+    padding: 1rem;
+	background-color: transparent;
+    border-radius: 8px;
+}
+
+.section-title {
+    color: var(--electric-blue);
+    margin-bottom: 1rem;
+}
+
+.friends-list {
+    margin-bottom: 1rem;
+}
+
+.toggle-button {
+	background: var(--index-red);
+	color: var(--white);
+	border: none;
+	padding: 10px;
+	margin-top: 20px;
+	cursor: pointer;
+	font-size: 1em;
+	border-radius: 2vh;
+}
+
+.toggle-button:hover {
+    background-color: var(--electric-blue);
+}
+
+.add-friend-form input {
+	border: none;
+	padding: 10px;
+	margin-top: 20px;
+	cursor: pointer;
+	font-size: 1em;
+	border-radius: 2vh;
+}
+
+.add-friend-form button {
+	background: var(--index-red);
+	color: var(--white);
+	border: none;
+	padding: 10px;
+	margin-top: 20px;
+	cursor: pointer;
+	font-size: 1em;
+	border-radius: 2vh;
+}
+
+.add-friend-form button:hover {
+    background-color: var(--electric-blue);
+}
+
+.friend-entry {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.friend-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.friend-username {
+    color: var(--white);
+    font-weight: bold;
+}

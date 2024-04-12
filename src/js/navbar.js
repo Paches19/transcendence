@@ -6,22 +6,30 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 17:23:01 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/10 17:43:41 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/12 12:48:11 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { isLoggedIn } from './auth.js';
 
-function updateNavbar() {
+function updateNavbar()
+{
     const navBarDiv = document.getElementById('login-navbar');
 
-    if (isLoggedIn()) {
+    const mockUser =
+    {
+        username: "user1",
+        avatar: "./images/avatar/author_1.png" // Sustituir con el path real al avatar del usuario
+    };
+    
+    if (isLoggedIn())
+    {
         // Usuario logueado, mostrar información del usuario
         navBarDiv.innerHTML = `
             <div class="user-info" id="user-info">
-                <a href="#" class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <img src="path_to_default_avatar.jpg" id="user-avatar" class="rounded-circle" alt="User Avatar">
-                    <span id="username">Username</span>
+                <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <img src="${mockUser.avatar}" id="user-avatar" class="rounded-circle" alt="User Avatar">
+                    <span id="username">${mockUser.username}</span>
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <li><a class="dropdown-item" href="#profile">Profile</a></li>
@@ -31,7 +39,9 @@ function updateNavbar() {
                 </ul>
             </div>
         `;
-    } else {
+    }
+    else
+    {
         // Usuario no logueado, mostrar botones de Log in y Register
         navBarDiv.innerHTML = `
             <a class="btn btn-outline-success me-2" href="#login">Log in</a>
