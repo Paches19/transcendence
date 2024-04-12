@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:18 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/12 13:50:15 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/12 16:40:55 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,8 @@ const mockFriends =
 [
     { username: "ArcadeMaster", avatar: "./images/avatar/author_2.png" },
     { username: "PongChamp", avatar: "./images/avatar/author_3.png" },
-    { username: "RetroGamer42", avatar: "./images/avatar/author_3.png" }
+    { username: "RetroGamer42", avatar: "./images/avatar/author_3.png" },
+	{ username: "Jutrera", avatar: "./images/avatar/author_2.png" }
 ];
   
 function loadProfile()
@@ -67,39 +68,38 @@ function loadProfile()
 	const profileHTML = `
 		<div class="profile-container">
 			<div class="profile-header">
-			<img src="${mockUser.avatar}" class="profile-avatar" alt="Avatar del usuario">
-			<h2 class="profile-username">${mockUser.username}</h2>
+				<img src="${mockUser.avatar}" class="profile-avatar" alt="Avatar del usuario">
+				<h2 class="profile-username">${mockUser.username}</h2>
 			</div>
 			<div class="profile-stats">
-			<button class="stats-toggler">Stats</button>
-			<div class="stats-content">
-				<p>Matches Played: ${mockUser.gamesPlayed}</p>
-				<p>Matches Won: ${mockUser.gamesWon}</p>
-				<p>Matches Lost: ${mockUser.gamesLost}</p>
-				<p>Points Scored: ${mockUser.pointsFor}</p>
-				<p>Points Against: ${mockUser.pointsAgainst}</p>
-				<p>Tournaments Played: ${mockUser.tournamentsPlayed}</p>
-				<p>Tournaments Won: ${mockUser.tournamentsWon}</p>
-			</div>
+				<button class="stats-toggler">Stats</button>
+				<div class="stats-content">
+					<p>Matches Played: ${mockUser.gamesPlayed}</p>
+					<p>Matches Won: ${mockUser.gamesWon}</p>
+					<p>Matches Lost: ${mockUser.gamesLost}</p>
+					<p>Points Scored: ${mockUser.pointsFor}</p>
+					<p>Points Against: ${mockUser.pointsAgainst}</p>
+					<p>Tournaments Played: ${mockUser.tournamentsPlayed}</p>
+					<p>Tournaments Won: ${mockUser.tournamentsWon}</p>
+				</div>
 			</div>
 			<div class="profile-history">
-			<button class="history-toggler">Match history</button>
-			<div class="history-content" style="display: none;">
-				${renderMatchHistory(mockUser.matchHistory)}
+				<button class="history-toggler">Match history</button>
+				<div class="history-content" style="display: none;">
+					${renderMatchHistory(mockUser.matchHistory)}
+				</div>
 			</div>
+			<button class="friends-button" id="friends-button">Friends</button>
+			<div class="friends-section" id="friends-section" style="display: none;">
+				<div id="friends-list" class="friends-list">
+					
+				</div>
+				<button class="toggle-button" id="toggle-friend-form">Add a New Friend</button>
+				<div id="add-friend-form" class="add-friend-form" style="display: none;">
+					<input type="text" id="new-friend-name" placeholder="Enter friend's username" />
+					<button id="sendRequestBtn">Send Friend Request</button>
+				</div>
 			</div>
-			<div class="friends-section">
-			<h3 class="section-title">Friends</h3>
-			<div id="friends-list" class="friends-list">
-				
-			</div>
-	
-			<button class="toggle-button" id="toggle-friend-form">Add a New Friend</button>
-			<div id="add-friend-form" class="add-friend-form" style="display: none;">
-				<input type="text" id="new-friend-name" placeholder="Enter friend's username" />
-				<button id="sendRequestBtn">Send Friend Request</button>
-			</div>
-		</div>
 		</div>
 		`;
 
@@ -139,17 +139,30 @@ function loadProfile()
 		mockFriends.forEach(friend => {
 			const friendEntry = document.createElement('div');
 			friendEntry.classList.add('friend-entry');
-			friendEntry.innerHTML = `
+			const link = document.createElement('a');
+			link.href = `#${friend.username}`;
+			link.innerHTML = `
 				<img src="${friend.avatar}" alt="${friend.username}'s Avatar" class="friend-avatar">
 				<span class="friend-username">${friend.username}</span>
 			`;
+			link.addEventListener('click', (e) => {
+				e.preventDefault();
+				loadFriendProfile(friend.username);
+			});
+			friendEntry.appendChild(link);
 			friendsList.appendChild(friendEntry);
 		});
+	}
+	
+	function loadFriendProfile(username) {
+		alert(`Load profile for ${username}`);
+		// router.route('profile', username); 
 	}
 	
 	function addEventListeners() {
 		document.querySelector('.stats-toggler').addEventListener('click', toggleStats);
 		document.querySelector('.history-toggler').addEventListener('click', toggleHistory);
+		document.getElementById('friends-button').addEventListener('click', toggleFriendSection);
 		document.getElementById('toggle-friend-form').addEventListener('click', toggleFriendForm);
 		document.getElementById('sendRequestBtn').addEventListener('click', sendFriendRequest);
 	}
@@ -164,6 +177,11 @@ function loadProfile()
 		historyContent.style.display = historyContent.style.display === 'none' ? 'block' : 'none';
 	}
 	
+	function toggleFriendSection() {
+		const section = document.getElementById('friends-section');
+		section.style.display = section.style.display === 'none' ? 'block' : 'none';
+	}
+
 	function toggleFriendForm() {
 		const form = document.getElementById('add-friend-form');
 		form.style.display = form.style.display === 'none' ? 'block' : 'none';
@@ -171,10 +189,18 @@ function loadProfile()
 	
 	function sendFriendRequest()
 	{
-		const friendUsername = document.getElementById('new-friend-name').value;
-		if (friendUsername) {
+		const friendUsernameInput = document.getElementById('new-friend-name');
+		const friendUsername = friendUsernameInput.value.trim();
+		if (friendUsername)
+		{
 			console.log(`Sending friend request to ${friendUsername}`);
 			updateFriendsList(friendUsername);
+			friendUsernameInput.value = "";
+			showNotification(`Friend request sent to ${friendUsername}`);
+		}
+		else
+		{
+			alert("Please enter a friend's username.");
 		}
 	}
 	
@@ -184,6 +210,24 @@ function loadProfile()
 		const friendEntry = document.createElement('div');
 		friendEntry.innerText = friendUsername;
 		friendsList.appendChild(friendEntry);
+	}
+
+	function showNotification(message) {
+		let notification = document.getElementById('notification');
+		if (!notification)
+		{
+			notification = document.createElement('div');
+			notification.id = 'notification';
+			notification.className = 'notification';
+			document.body.appendChild(notification);
+		}
+		notification.textContent = message;
+		
+		notification.classList.add('show');
+		setTimeout(() =>
+		{
+			notification.classList.remove('show');
+		}, 4000);
 	}
 }
 
