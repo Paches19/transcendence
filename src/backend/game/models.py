@@ -18,9 +18,9 @@ from django.db import models
 class Match(models.Model):
     matchID = models.AutoField(primary_key=True)
     user1 = models.ForeignKey(
-        'User', related_name='user1', on_delete=models.CASCADE)
+        'User', related_name='user1_match', on_delete=models.CASCADE)
     user2 = models.ForeignKey(
-        'User', related_name='user2', on_delete=models.CASCADE)
+        'User', related_name='user2_match', on_delete=models.CASCADE)
     pointsUser1 = models.IntegerField(default=0)
     pointsUser2 = models.IntegerField(default=0)
     date = models.DateField()
@@ -42,8 +42,7 @@ class User(models.Model):
 
 class Friend(models.Model):
     friendID = models.AutoField(primary_key=True)
-    user1 = models.ForeignKey(
-        'User', related_name='user1', on_delete=models.CASCADE)
+    user1 = models.ForeignKey('User', related_name='user1', on_delete=models.CASCADE)
     user2 = models.ForeignKey(
         'User', related_name='user2', on_delete=models.CASCADE)
     status = models.BooleanField(default=False)
