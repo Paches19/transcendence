@@ -6,13 +6,17 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 17:16:34 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/12 12:43:44 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/15 14:03:06 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 /* Navbar */
 .navbar {
 	background-color: rgba(0, 0, 0, 0.2);
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .navbar-nav{
@@ -162,4 +166,54 @@
 #link-logout:hover {
     background-color: var(--index-red); 
     color: var(--black);
+}
+
+.tournament-navbar {
+    background-color: #225588;
+    border-bottom: 3px solid gold;
+}
+
+.tournament-navbar a {
+    color: gold;
+}
+
+.tournament-navbar .logo {
+    transform: scale(1.1);
+}
+
+
+@media (max-width: 1023px) {
+    .navbar-nav .nav-link, .btn-outline-success, .btn-outline-danger {
+        font-size: 1.25vh;
+    }
+
+    .btn-primary{
+        font-size: 1.25vh;
+    }
+
+    .btn-outline-success {
+        background-color: var(--electric-blue);
+        border-color: var(--electric-blue);
+        color: white;
+    }
+    
+    .btn-outline-success:hover {
+        background-color: var(--neon-green);
+        border-color: var(--electric-blue);
+        color: var(--black);
+    }
+    
+    .btn-outline-danger {
+        background-color: var(--retro-purple);
+        border-color: var(--retro-purple);
+        color: white;
+        margin-top: 1vh;
+    }
+    
+    .btn-outline-danger:hover {
+        background-color: var(--neon-green);
+        border-color: var(--retro-purple);
+        color: var(--black);
+    }
+
 }

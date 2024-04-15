@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:21:53 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/12 12:48:38 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/15 11:42:02 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,10 +51,6 @@ function loadLogin()
 			document.getElementById('login-msg').innerText = 'Hmm, that username and password don´t seem to match. Are you sure you´re not trying to log into your ex´s account?';
 		}
 	});
-
-	document.getElementById('include-content').innerHTML = `
-		<link rel="stylesheet" href="css/login.css">
-	`;
 }
 
 export default loadLogin;
