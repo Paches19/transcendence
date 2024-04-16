@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:24:45 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/15 14:07:29 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/16 17:27:55 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@ import setupRegisterForm from './register.js';
 import loadPageNotFound from './pageNotFound.js';
 import loadInitialContent from './init.js'
 import { logout } from './auth.js';
-import { updateTournamentNavbar, restoreOriginalNavbar } from './navbar.js';
 import updateNavbar from './navbar.js';
 
 const router = new Router();
@@ -43,14 +42,6 @@ document.addEventListener('DOMContentLoaded', () =>
 		{
 			e.preventDefault();
 			const path = target.getAttribute('href').substring(1);
-			if (path === 'tournaments')
-			{
-				updateTournamentNavbar();
-			}
-			else if (path !== 'tournaments')
-			{
-				restoreOriginalNavbar();
-			}
 			router.route(path);
 		}
 		

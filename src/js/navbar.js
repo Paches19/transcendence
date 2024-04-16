@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 17:23:01 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/15 14:04:12 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/16 17:27:26 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,9 @@ function updateNavbar()
 					<li><a class="dropdown-item" href="#" id="link-logout">Log out</a></li>
 				</ul>
 			</div>
+			<div id="tournament-nav-items" style="display: none;">
+				
+			</div>
 		`;
 	}
 	else
@@ -44,18 +47,12 @@ function updateNavbar()
 		navBarDiv.innerHTML = `
 			<a class="btn btn-outline-success me-2" href="#login">Log in</a>
 			<a class="btn btn-outline-danger" href="#register">Register</a>
+			<div id="tournament-nav-items" style="display: none;">
+				
+			</div>
 		`;
 	}
 }
 
-export function updateTournamentNavbar() {
-    const navBarDiv = document.getElementById('login-navbar');
-    navBarDiv.classList.add('tournament-navbar');
-}
-
-export function restoreOriginalNavbar() {
-    const navBarDiv = document.getElementById('login-navbar');
-    navBarDiv.classList.remove('tournament-navbar');
-}
 
 export default updateNavbar;

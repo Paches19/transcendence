@@ -1,0 +1,80 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   tournamentDetails.css                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/16 18:11:45 by adpachec          #+#    #+#             */
+/*   Updated: 2024/04/16 19:03:19 by adpachec         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+
+/* Estilos para la página de detalles del torneo */
+
+/* General container styles */
+.container {
+    margin-top: 5vh;
+    padding-bottom: 5vh;
+	width: 100%;
+}
+
+/* Header styling */
+.tournament-header {
+    text-align: center;
+    margin-bottom: 3vh;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0px 0px 10px var(--neon-green);
+    color: var(--electric-blue);
+    background-color: var(--dark-arcade-red);
+}
+
+/* Custom card styles */
+.custom-card {
+    background-color: var(--black);
+    color: var(--white);
+}
+
+.custom-card-header {
+    background-color: var(--retro-purple);
+    color: var(--white);
+}
+
+/* Custom list group item */
+.custom-list-group .custom-list-item {
+    background-color: var(--dark-arcade-red);
+    color: var(--white);
+}
+
+/* Custom table styles */
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--arcade-red);
+}
+
+.custom-table th, .custom-table td {
+    border: 1px solid var(--retro-purple);
+    padding: 0.5rem;
+    color: var(--white);
+}
+
+.custom-table thead th {
+    background-color: var(--electric-blue);
+}
+
+/* Row hover effect */
+.custom-table tbody tr:hover {
+    background-color: var(--neon-green);
+    color: var(--black);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .col-lg-6 {
+        flex-basis: 100%;
+        max-width: 100%;
+    }
+}
