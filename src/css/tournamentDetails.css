@@ -6,75 +6,142 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 18:11:45 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/16 19:03:19 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/17 13:38:50 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
-/* Estilos para la página de detalles del torneo */
-
-/* General container styles */
-.container {
-    margin-top: 5vh;
-    padding-bottom: 5vh;
-	width: 100%;
-}
-
-/* Header styling */
-.tournament-header {
-    text-align: center;
-    margin-bottom: 3vh;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    box-shadow: 0px 0px 10px var(--neon-green);
-    color: var(--electric-blue);
-    background-color: var(--dark-arcade-red);
-}
-
-/* Custom card styles */
-.custom-card {
+.tournament-details-container {
+    display: flex;
+    flex-wrap: wrap;    
+    justify-content: space-between;
+    margin: 5vh auto;
+    padding: 20px;
     background-color: var(--black);
+    border-radius: 2vh;
+    opacity: 0.98;
+}
+
+/* Header de la sección, título del torneo */
+.tournament-header {
+    width: 100%;
+    color: var(--electric-blue);
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Estilo de las cards */
+.custom-card {
+    background: rgba(0, 0, 0, 0.8);
     color: var(--white);
+    border-radius: 10px;
+    box-shadow: 0 0 10px var(--retro-purple);
+    margin-bottom: 20px;
+    text-align: center;
 }
 
 .custom-card-header {
-    background-color: var(--retro-purple);
+    background: var(--electric-blue);
     color: var(--white);
+    padding: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 
-/* Custom list group item */
-.custom-list-group .custom-list-item {
-    background-color: var(--dark-arcade-red);
-    color: var(--white);
+/* Lista de próximos partidos y resultados anteriores */
+
+.custom-list-group {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-/* Custom table styles */
+.custom-list-item {
+    padding: 10px;
+    border-bottom: 1px solid var(--retro-purple);
+    text-align: center; /* Centra el texto para el nombre del partido */
+}
+
+.custom-list-item:not(:last-child) {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--retro-purple);
+}
+
+.match-title {
+    margin-bottom: 5px;
+}
+
+.match-result {
+    display: block;
+}
+
+/* Estilos de la tabla */
+
 .custom-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: var(--arcade-red);
+    margin-top: 1rem;
+    border-radius: 5px;
+    vertical-align: middle;
 }
 
 .custom-table th, .custom-table td {
-    border: 1px solid var(--retro-purple);
-    padding: 0.5rem;
-    color: var(--white);
+    text-align: center;
+    justify-content: center;
+    align-items: center;
 }
 
 .custom-table thead th {
-    background-color: var(--electric-blue);
+    color: var(--white);
+    font-weight: 100;
 }
 
-/* Row hover effect */
-.custom-table tbody tr:hover {
-    background-color: var(--neon-green);
+.custom-table tbody td {
     color: var(--black);
+    text-align: center;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
-    .col-lg-6 {
-        flex-basis: 100%;
+    .tournament-details-container {
+        flex-direction: column;
         max-width: 100%;
+        margin-top: 3vh;
+        padding: 10px;
+        overflow-x: hidden; 
     }
+
+    .tournament-header {
+        font-size: 1.5em;
+    }
+
+    .custom-card {
+        margin-bottom: 10px;
+        overflow-x: auto;
+        font-size: 1.5vh;
+    }
+
+    .custom-card-header {
+        padding: 4px;
+    }
+
+    .custom-list-group, .custom-list-item {
+        padding: 4px;
+    }
+
+    .custom-table {
+        font-size: 0.8em;
+    }
+
+    .custom-table th, .custom-table td {
+        padding: 4px;
+    }
+}
+
+@media (max-width: 425px) {
+    
+    .custom-card {
+        margin-bottom: 10px;
+        overflow-x: auto;
+        font-size: 1vh;
+    }
+
 }

@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/16 18:20:02 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/17 13:16:51 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,11 +57,13 @@ const sampleTournament = {
         { match: "Match 1", players: "Player A vs Player B", date: "2024-08-15" },
         { match: "Match 2", players: "Player C vs Player D", date: "2024-08-16" }
     ],
-    matchResults: [
+    previousMatches: [
         { match: "Match 1", result: "Player A 21 - 18 Player B" },
         { match: "Match 2", result: "Player D 21 - 15 Player C" }
     ],
     standings: [
+        { team: "Player A", played: 2, won: 1, lost: 1, pointsFor: 42, pointsAgainst: 39 },
+        { team: "Player B", played: 2, won: 1, lost: 1, pointsFor: 39, pointsAgainst: 42 },
         { team: "Player A", played: 2, won: 1, lost: 1, pointsFor: 42, pointsAgainst: 39 },
         { team: "Player B", played: 2, won: 1, lost: 1, pointsFor: 39, pointsAgainst: 42 }
     ]
@@ -134,7 +136,5 @@ function joinTournament()
 {
     console.log('Joining a tournament...');
 }
-
-document.addEventListener('DOMContentLoaded', loadTournaments);
 
 export { loadTournaments, createTournament, joinTournament, viewTournaments};
