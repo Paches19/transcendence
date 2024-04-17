@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/17 13:16:51 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/17 13:55:21 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,15 +88,14 @@ function updateTournamentHTML() {
 }
 
 function attachEventListeners() {
-    document.getElementById('createTournamentBtn').addEventListener('click', createTournament);
+    document.getElementById('createTournamentBtn').addEventListener('click', showCreateTournamentModal);
     document.getElementById('joinTournamentBtn').addEventListener('click', joinTournament);
 
-	document.addEventListener('click', function(e) {
-		if (e.target.classList.contains('view-tournament-btn')) {
-			//const tournamentName = e.target.closest('.tournament-entry').querySelector('.tournament-name').textContent;
-			loadTournamentDetails(sampleTournament);
-		}
-	});
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('view-tournament-btn')) {
+            loadTournamentDetails(sampleTournament);
+        }
+    });
 
     const tournamentEntries = document.querySelectorAll('.tournament-entry');
     tournamentEntries.forEach(entry => {
@@ -127,9 +126,55 @@ function viewTournaments() {
     `).join('');
 }
 
-function createTournament()
-{
-    console.log('Creating a new tournament...');
+function showCreateTournamentModal() {
+    const modal = document.getElementById('createTournamentModal');
+    if (!modal) {
+        createTournament();
+    }
+    document.getElementById('createTournamentModal').style.display = 'block';
+}
+
+function createTournament() {
+    const formHTML = `
+    <div id="createTournamentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">×</span>
+            <form id="createTournamentForm" class="tournament-form">
+                <div class="form-group">
+                    <label for="tournamentName">Tournament Name:</label>
+                    <input type="text" id="tournamentName" name="tournamentName" required>
+                </div>
+                <div class="form-group">
+                    <label for="numPlayers">Number of Players:</label>
+                    <input type="number" id="numPlayers" name="numPlayers" required>
+                </div>
+                <button type="submit" class="button" id="create-tournament">Create Tournament</button>
+            </form>
+        </div>
+    </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', formHTML);
+    addModalEventListeners();
+}
+ 
+function addModalEventListeners() {
+    document.querySelector('.close-button').addEventListener('click', function() {
+        document.getElementById('createTournamentModal').style.display = 'none';
+    });
+
+    window.addEventListener('click', function(event) {
+        if (event.target == document.getElementById('createTournamentModal')) {
+            document.getElementById('createTournamentModal').style.display = 'none';
+        }
+    });
+
+    document.getElementById('createTournamentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const tournamentName = document.getElementById('tournamentName').value;
+        const numPlayers = document.getElementById('numPlayers').value;
+        console.log(`Creating tournament: ${tournamentName} with ${numPlayers} players`);
+        document.getElementById('createTournamentModal').style.display = 'none';
+    });
 }
 
 function joinTournament()

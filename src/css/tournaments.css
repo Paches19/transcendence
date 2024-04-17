@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 17:08:21 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/17 10:59:09 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/17 14:05:01 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,90 @@
     margin-top: 10px;
 }
 
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+    background-color: rgba(0, 0, 0, 0.98);
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #7200DA;
+    width: 30%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Sombra para un efecto elevado */
+    border-radius: 10px; /* Bordes redondeados */
+    transition: transform 0.3s ease-out; /* Transición suave al abrir */
+    text-align: center;
+}
+
+.close-button {
+    color: #7200DA;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: right;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #a62543; /* Cambio de color al pasar el ratón o enfocar */
+    text-decoration: none;
+}
+
+.modal-content {
+    animation: modalFadeIn 0.3s; /* Animación de entrada */
+}
+
+.tournament-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    width: 100%;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#create-tournament{
+    margin-top: 2vh;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes modalFadeIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
 @media (max-width: 768px) {
     
     .tournament-container, .btn-group {
@@ -158,5 +242,54 @@
 
     .participants-title {
         font-size: 1.75vh;
+    }
+    
+    .modal-content {
+        margin-top: 30vh;
+        width: 70%;
+    }
+
+    .tournament-form {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+        width: 100%;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    .form-group input {
+        width: 100%;
+        padding: 8px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    
+    .close-button {
+        color: #7200DA;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        text-align: right;
+    }
+    
+    .close-button:hover,
+    .close-button:focus {
+        color: #a62543; 
+        text-decoration: none;
+    }
+    
+    #create-tournament{
+        margin-top: 2vh;
+        align-items: center;
+        justify-content: center;
     }
 }
