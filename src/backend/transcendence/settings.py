@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-	'game'
+    'game'
 ]
 
 MIDDLEWARE = [
@@ -85,8 +85,8 @@ DATABASES = {
         'NAME': os.environ.get("POSTGRES_DB"),
         'USER': os.environ.get("POSTGRES_USER"),
         'PASSWORD': os.environ.get("POSTGRES_PASSWORD"),
-        'HOST': 'localhost',
-                'PORT': '5432',
+        'HOST': os.environ.get("POSTGRES_HOST"),
+        'PORT': '5432',
     }
 }
 
