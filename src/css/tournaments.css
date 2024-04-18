@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 17:08:21 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/17 14:05:01 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/18 11:40:47 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,15 @@
     cursor: pointer;
 	font-size: 2vh;
 	width: 40vh;
+}
+
+.tournament-filter {
+    width: 40vh;
+    padding: 1.5vh 1.5vh;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    justify-content: center;
+    align-items: center;
 }
 
 .button:hover {
@@ -82,6 +91,8 @@
 .tournament-details {
     display: none;
 	transition: max-height 0.3s ease-out;
+    padding: 10px;
+    border-top: 1px solid #ccc;
 }
 
 .tournament-entry:hover .tournament-details {
@@ -91,6 +102,7 @@
 .participants-container {
     text-align: center;
     margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .participants-title {
@@ -110,8 +122,24 @@
     border-radius: 4px;
 }
 
-.view-tournament-btn {
+.tournament-details div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 10px 0;
+    gap: 2vh;
+}
+
+.view-tournament-btn, .join-tournament-btn {
     margin-top: 10px;
+    font-size: 1.5vh;
+    flex-grow: 1;
+    margin: 0 5px;
+    padding: 8px 16px;
+    text-align: center;
+    font-size: calc(10px + 0.5vw);
+    
 }
 
 .modal {
@@ -132,9 +160,9 @@
     padding: 20px;
     border: 1px solid #7200DA;
     width: 30%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Sombra para un efecto elevado */
-    border-radius: 10px; /* Bordes redondeados */
-    transition: transform 0.3s ease-out; /* Transición suave al abrir */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    transition: transform 0.3s ease-out;
     text-align: center;
 }
 
@@ -148,12 +176,12 @@
 
 .close-button:hover,
 .close-button:focus {
-    color: #a62543; /* Cambio de color al pasar el ratón o enfocar */
+    color: #a62543;
     text-decoration: none;
 }
 
 .modal-content {
-    animation: modalFadeIn 0.3s; /* Animación de entrada */
+    animation: modalFadeIn 0.3s;
 }
 
 .tournament-form {
@@ -213,6 +241,10 @@
     .tournament-entry {
         margin: 10px auto;
         flex: none;
+    }
+    
+    .tournament-details div {
+        flex-direction: column;
     }
 
     .btn-group {

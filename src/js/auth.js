@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/12 12:48:26 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/18 11:57:18 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,4 +46,12 @@ function logout()
 	router.route('home');
 }
 
-export { login, isLoggedIn, logout };
+function getUsernameFromToken() {
+    const token = localStorage.getItem('userToken');
+    if (!token) return null;
+
+    const decoded = atob(token);
+    return decoded.split(':')[0];
+}
+
+export { login, isLoggedIn, logout, getUsernameFromToken };

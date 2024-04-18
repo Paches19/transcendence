@@ -6,11 +6,12 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/17 13:55:21 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/18 12:06:03 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import loadTournamentDetails from "./tournamentDetails.js";
+import { getUsernameFromToken } from "./auth.js";
 
 const mockTournaments = [
     {
@@ -47,7 +48,7 @@ const mockTournaments = [
         id: 6,
         name: 'Summer Pong Fest',
         participants: ['Player4', 'Player5', 'Player6'],
-        status: 'In Progress'
+        status: 'Ended'
     }
 ];
 
@@ -73,13 +74,13 @@ function loadTournaments() {
     updateTournamentHTML();
     attachEventListeners();
 }
+
 function updateTournamentHTML() {
     const tournamentsHTML = `
         <div class="tournament-container">
             <h1 class="tournament-title">Tournaments</h1>
             <div class="btn-group" role="group" aria-label="Tournament Actions">
                 <button class="button" id="createTournamentBtn">Create Tournament</button>
-                <button class="button" id="joinTournamentBtn">Join Tournament</button>
             </div>
             <div id="tournament-list" class="tournament-list">${viewTournaments()}</div>
         </div>
@@ -89,13 +90,6 @@ function updateTournamentHTML() {
 
 function attachEventListeners() {
     document.getElementById('createTournamentBtn').addEventListener('click', showCreateTournamentModal);
-    document.getElementById('joinTournamentBtn').addEventListener('click', joinTournament);
-
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('view-tournament-btn')) {
-            loadTournamentDetails(sampleTournament);
-        }
-    });
 
     const tournamentEntries = document.querySelectorAll('.tournament-entry');
     tournamentEntries.forEach(entry => {
@@ -103,6 +97,15 @@ function attachEventListeners() {
             const details = entry.querySelector('.tournament-details');
             details.style.display = details.style.display === 'none' ? 'block' : 'none';
         });
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('view-tournament-btn')) {
+            loadTournamentDetails(sampleTournament);
+        } else if (e.target.classList.contains('join-tournament-btn')) {
+            const tournamentName = e.target.getAttribute('data-name');
+            joinTournament(tournamentName);
+        }
     });
 }
 
@@ -120,7 +123,10 @@ function viewTournaments() {
                         `).join('')}
                     </div>
                 </div>
-                <button class="button view-tournament-btn">View Tournament</button>
+                <div>
+                    <button class="button view-tournament-btn">View Tournament</button>
+                    ${tournament.status !== 'In Progress' ? `<button class="button join-tournament-btn" id="join-tournament-btn" data-name="${tournament.name}">Join Tournament</button>` : ''}
+                </div>
             </div>
         </div>
     `).join('');
@@ -177,9 +183,15 @@ function addModalEventListeners() {
     });
 }
 
-function joinTournament()
-{
-    console.log('Joining a tournament...');
+function joinTournament(tournament) {
+    const username = getUsernameFromToken();
+    if (username) {
+        console.log(`${username} logged in. Joining tournament with name: ${tournament}`);
+        alert(`Joined tournament: ${tournament} successfully!`);
+    } else {
+        console.log('User not logged in. Please log in to join a tournament.');
+        alert('Please log in to join a tournament.');
+    }
 }
 
 export { loadTournaments, createTournament, joinTournament, viewTournaments};
