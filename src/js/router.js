@@ -6,38 +6,45 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:51:47 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/18 12:46:40 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/18 18:19:19 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 export default class Router {
-	constructor()
-	{
-		this.routes = {};
-		this.defaultRoute = () => console.error("Esta ruta no existe.");
-	}
+    constructor() {
+        this.routes = {};
+        this.defaultRoute = () => console.error("No route found.");
+        window.addEventListener('popstate', () => this.route(window.location.pathname, false));
+    }
 
-	addRoute(path, action)
-	{
-		this.routes[path] = action;
-	}
+    addRoute(path, action) {
+        this.routes[path] = action;
+    }
 
-	setDefaultRoute(action)
-	{
-		this.defaultRoute = action;
-	}
+    setDefaultRoute(action) {
+        this.defaultRoute = action;
+    }
 
-	route(path)
-	{
-		if (path in this.routes)
-		{
-			this.routes[path]();
-		}
-		else
-		{
-			this.defaultRoute();
-		}
-	}
+    resolveCurrentPath() {
+        const path = window.location.pathname || '/';
+        this.route(path, false);
+    }
+
+    route(path, updateHistory = true) {
+        const matchedRoute = Object.keys(this.routes).find(route => 
+            new RegExp(`^${route.replace(/:\w+/g, '(.+)')}$`).test(path)
+        );
+
+        if (matchedRoute) {
+            const action = this.routes[matchedRoute];
+            const matches = path.match(new RegExp(matchedRoute.replace(/:\w+/g, '(.+)')));
+            action.apply(null, matches.slice(1));
+        } else {
+            this.defaultRoute();
+        }
+
+        if (updateHistory && window.location.pathname !== path) {
+            window.history.pushState({}, '', path);
+        }
+    }
 }
-
-

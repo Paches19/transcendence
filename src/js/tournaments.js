@@ -6,11 +6,11 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/18 12:06:03 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/18 17:37:50 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import loadTournamentDetails from "./tournamentDetails.js";
+import router from "./main.js"
 import { getUsernameFromToken } from "./auth.js";
 
 const mockTournaments = [
@@ -52,24 +52,6 @@ const mockTournaments = [
     }
 ];
 
-const sampleTournament = {
-    name: "Summer Pong Fest",
-    upcomingMatches: [
-        { match: "Match 1", players: "Player A vs Player B", date: "2024-08-15" },
-        { match: "Match 2", players: "Player C vs Player D", date: "2024-08-16" }
-    ],
-    previousMatches: [
-        { match: "Match 1", result: "Player A 21 - 18 Player B" },
-        { match: "Match 2", result: "Player D 21 - 15 Player C" }
-    ],
-    standings: [
-        { team: "Player A", played: 2, won: 1, lost: 1, pointsFor: 42, pointsAgainst: 39 },
-        { team: "Player B", played: 2, won: 1, lost: 1, pointsFor: 39, pointsAgainst: 42 },
-        { team: "Player A", played: 2, won: 1, lost: 1, pointsFor: 42, pointsAgainst: 39 },
-        { team: "Player B", played: 2, won: 1, lost: 1, pointsFor: 39, pointsAgainst: 42 }
-    ]
-};
-
 function loadTournaments() {
     updateTournamentHTML();
     attachEventListeners();
@@ -100,11 +82,14 @@ function attachEventListeners() {
     });
     
     document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('view-tournament-btn')) {
-            loadTournamentDetails(sampleTournament);
+        const viewBtn = e.target.closest('.view-tournament-btn');
+        if (viewBtn) {
+            e.preventDefault();
+            const tournamentId = viewBtn.getAttribute('data-id');
+            router.route(`/tournaments/${tournamentId}`);
         } else if (e.target.classList.contains('join-tournament-btn')) {
             const tournamentName = e.target.getAttribute('data-name');
-            joinTournament(tournamentName);
+            joinTournament(tournamentName); 
         }
     });
 }
@@ -124,7 +109,7 @@ function viewTournaments() {
                     </div>
                 </div>
                 <div>
-                    <button class="button view-tournament-btn">View Tournament</button>
+                <button class="button view-tournament-btn" data-id="${tournament.id}">View Tournament</button>
                     ${tournament.status !== 'In Progress' ? `<button class="button join-tournament-btn" id="join-tournament-btn" data-name="${tournament.name}">Join Tournament</button>` : ''}
                 </div>
             </div>

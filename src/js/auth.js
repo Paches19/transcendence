@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/18 11:57:18 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/18 15:41:59 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ function isLoggedIn()
 function logout()
 {
     localStorage.removeItem('userToken');
-	router.route('home');
+	router.route('/home');
 }
 
 function getUsernameFromToken() {

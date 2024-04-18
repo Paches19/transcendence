@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 17:23:01 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/16 17:27:26 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/18 15:43:43 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,10 +31,9 @@ function updateNavbar()
 					<span id="username">${mockUser.username}</span>
 				</a>
 				<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-					<li><a class="dropdown-item" href="#profile">Profile</a></li>
-					<li><a class="dropdown-item" href="#friends">Friends</a></li>
+					<li><a class="dropdown-item" data-route="/profile">Profile</a></li>
 					<li><hr class="dropdown-divider"></li>
-					<li><a class="dropdown-item" href="#" id="link-logout">Log out</a></li>
+					<li><a class="dropdown-item" data-route="/" id="link-logout">Log out</a></li>
 				</ul>
 			</div>
 			<div id="tournament-nav-items" style="display: none;">
@@ -45,8 +44,8 @@ function updateNavbar()
 	else
 	{
 		navBarDiv.innerHTML = `
-			<a class="btn btn-outline-success me-2" href="#login">Log in</a>
-			<a class="btn btn-outline-danger" href="#register">Register</a>
+			<a class="btn btn-outline-success me-2" data-route="/login">Log in</a>
+			<a class="btn btn-outline-danger" data-route="/register">Register</a>
 			<div id="tournament-nav-items" style="display: none;">
 				
 			</div>

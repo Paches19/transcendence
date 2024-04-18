@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:18 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/12 16:40:55 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/18 15:41:36 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ function loadProfile()
 	
 	if (!isLoggedIn())
 	{
-		router.route('login');
+		router.route('/login');
 		return;
 	}
 	
@@ -140,7 +140,7 @@ function loadProfile()
 			const friendEntry = document.createElement('div');
 			friendEntry.classList.add('friend-entry');
 			const link = document.createElement('a');
-			link.href = `#${friend.username}`;
+			link.href = `/${friend.username}`;
 			link.innerHTML = `
 				<img src="${friend.avatar}" alt="${friend.username}'s Avatar" class="friend-avatar">
 				<span class="friend-username">${friend.username}</span>

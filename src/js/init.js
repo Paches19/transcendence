@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 13:02:06 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/08 13:05:18 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/18 15:40:13 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@ function loadInitialContent()
 		<div class="hero-text-container">
 			<h1>Welcome to Trascendence</h1>
 			<p>The return of the iconic game that will end everything</p>
-			<a href="#play" class="btn btn-primary btn-lg">PLAY NOW</a>
+			<a data-route="/play" class="btn btn-primary btn-lg">PLAY NOW</a>
 		</div>
 	</div>
 

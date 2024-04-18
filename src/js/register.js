@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:22:20 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/15 12:07:56 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/18 15:42:27 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ function handleRegisterSubmit(event)
         console.log('Registering', username, password);
         alert('Registration successful for ' + username);
         
-        router.route('home');
+        router.route('/home');
     }
 }
 

@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:21:53 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/15 11:42:02 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/18 15:42:10 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ function loadLogin()
 			updateNavbar();
 			document.getElementById('login-msg').innerText = 'You have ponged in!. Ready to rack up some pong-tastic points?';
 			setTimeout(() => {
-				router.route('profile');
+				router.route('/profile');
 			}, 1500);
 		}
 		else
