@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 17:08:21 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/19 12:09:31 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:31:34 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -217,14 +217,19 @@
 
 .notification {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    width: 40%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     padding: 10px 20px;
     color: #ffffff;
     border-radius: 5px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     z-index: 1000;
     animation: fadeOut 5s forwards;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .notification.success {

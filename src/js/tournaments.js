@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/19 12:08:04 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/19 13:34:13 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,12 +172,11 @@ function showNotification(message, isSuccess = true) {
     if (!notification)
     {
         notification = document.createElement('div');
-        notification.id = 'notification';
-        notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
-        document.body.appendChild(notification);
     }
+    notification.id = 'notification';
     notification.textContent = message;
-    
+    notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+    document.body.appendChild(notification);
     notification.classList.add('show');
     setTimeout(() =>
     {
@@ -189,7 +188,7 @@ function joinTournament(tournament) {
     const username = getUsernameFromToken();
     if (username) {
         console.log(`${username} logged in. Joining tournament with name: ${tournament}`);
-        showNotification(`${username} joined tournament: ${tournament} successfully!`, true);
+        showNotification(`${username} joined tournament "${tournament}" successfully!`, true);
     } else {
         console.log('User not logged in. Please log in to join a tournament.');
         showNotification('Please log in to join a tournament.', false);
