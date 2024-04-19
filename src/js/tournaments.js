@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/18 17:37:50 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/19 12:08:04 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ function attachEventListeners() {
             router.route(`/tournaments/${tournamentId}`);
         } else if (e.target.classList.contains('join-tournament-btn')) {
             const tournamentName = e.target.getAttribute('data-name');
-            joinTournament(tournamentName); 
+            joinTournament(tournamentName);
         }
     });
 }
@@ -163,19 +163,36 @@ function addModalEventListeners() {
         e.preventDefault();
         const tournamentName = document.getElementById('tournamentName').value;
         const numPlayers = document.getElementById('numPlayers').value;
-        console.log(`Creating tournament: ${tournamentName} with ${numPlayers} players`);
         document.getElementById('createTournamentModal').style.display = 'none';
     });
+}
+
+function showNotification(message, isSuccess = true) {
+    let notification = document.getElementById('notification');
+    if (!notification)
+    {
+        notification = document.createElement('div');
+        notification.id = 'notification';
+        notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+        document.body.appendChild(notification);
+    }
+    notification.textContent = message;
+    
+    notification.classList.add('show');
+    setTimeout(() =>
+    {
+        notification.classList.remove('show');
+    }, 5000);
 }
 
 function joinTournament(tournament) {
     const username = getUsernameFromToken();
     if (username) {
         console.log(`${username} logged in. Joining tournament with name: ${tournament}`);
-        alert(`Joined tournament: ${tournament} successfully!`);
+        showNotification(`${username} joined tournament: ${tournament} successfully!`, true);
     } else {
         console.log('User not logged in. Please log in to join a tournament.');
-        alert('Please log in to join a tournament.');
+        showNotification('Please log in to join a tournament.', false);
     }
 }
 

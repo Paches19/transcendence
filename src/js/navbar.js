@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 17:23:01 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/18 15:43:43 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/19 12:14:34 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ function updateNavbar()
 				<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
 					<li><a class="dropdown-item" data-route="/profile">Profile</a></li>
 					<li><hr class="dropdown-divider"></li>
-					<li><a class="dropdown-item" data-route="/" id="link-logout">Log out</a></li>
+					<li><a class="dropdown-item" id="link-logout">Log out</a></li>
 				</ul>
 			</div>
 			<div id="tournament-nav-items" style="display: none;">

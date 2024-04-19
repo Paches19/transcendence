@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:24:45 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/18 18:00:44 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/19 12:21:22 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,24 +85,23 @@ document.addEventListener('DOMContentLoaded', () =>
 {
 	router.resolveCurrentPath();
 	
-	document.body.addEventListener('click', event => {
+	document.body.addEventListener('click', function(event) {
 		const target = event.target.closest('[data-route]');
 		if (target) {
 			event.preventDefault();
 			const path = target.dataset.route;
 			router.route(path);
 		}
+        
+        if (event.target.closest('#link-logout')) {
+            event.preventDefault();
+            logout();
+            updateNavbar();
+            router.route('/home');
+        }
 	});
 	
-	const logoutLink = document.getElementById('link-logout');
-	if (logoutLink) {
-		logoutLink.addEventListener('click', event => {
-			event.preventDefault();
-			logout();
-			updateNavbar();
-			router.route('/home');
-		});
-	}
+    
 	
 	const userInfo = document.getElementById('user-info');
 	if (userInfo)
