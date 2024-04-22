@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:51:47 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/18 18:19:19 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/22 12:17:06 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ export default class Router {
         const matchedRoute = Object.keys(this.routes).find(route => 
             new RegExp(`^${route.replace(/:\w+/g, '(.+)')}$`).test(path)
         );
-
         if (matchedRoute) {
             const action = this.routes[matchedRoute];
             const matches = path.match(new RegExp(matchedRoute.replace(/:\w+/g, '(.+)')));

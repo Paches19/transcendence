@@ -6,13 +6,13 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:24:45 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/19 13:27:35 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/22 12:59:32 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import Router from './router.js';
 import loadProfile from './profile.js';
-import play from './play.js';
+import initPlayPage from './play.js';
 import { loadTournaments } from './tournaments.js';
 import loadTournamentDetails from './tournamentDetails.js';
 import login from './login.js';
@@ -66,13 +66,13 @@ const router = new Router();
 router.addRoute('/', loadInitialContent);
 router.addRoute('/home', loadInitialContent);
 router.addRoute('/profile', loadProfile);
-router.addRoute('/play', play);
+router.addRoute('/play', initPlayPage);
 router.addRoute('/tournaments', loadTournaments);
 router.addRoute('/login', login);
 router.addRoute('/register', setupRegisterForm);
 router.addRoute('/tournaments/:id', id => {
-	console.log("idMain: "+ id);
     const tournament = mockTournaments.find(t => t.id === parseInt(id));
+    
     if (tournament) {
         loadTournamentDetails(tournament);
     } else {

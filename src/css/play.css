@@ -1,0 +1,100 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   play.css                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/22 13:06:21 by adpachec          #+#    #+#             */
+/*   Updated: 2024/04/22 13:54:55 by adpachec         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+.play-options-container {
+	position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+	margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    background: var(--black);
+    border-radius: 2vh;
+    opacity: 0.98;
+	justify-content: center;
+	max-width: 960px;
+}
+
+.play-title{
+	font-size: 3vh;
+	color: var(--electric-blue);
+    margin-bottom: 3vh;
+}
+
+.game-options {
+	margin-top: 5vh;
+    margin-bottom: 5vh;
+    justify-content: center;
+    display: flex;
+    gap: 5vh;
+}
+
+.game-option-button {
+    background-color: var(--index-red);
+    color: white;
+    border: none;
+    padding: 1.5vh 1.5vh;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 2vh;
+    width: fit-content;
+}
+
+.game-option-button:hover {
+    background-color: var(--electric-blue);
+    transform: scale(1.1);
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.game-controls button {
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+
+	.play-options-container{
+		transform: translate(0%, 10%);
+	}
+
+    .play-options-container, .game-options {
+		position: static;
+		margin: 0 auto;
+        width: fit-content;
+        padding: 20px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+    }
+
+    .play-title {
+        font-size: 2.5vh;
+		width: fit-content;
+    }
+
+    .game-option-button {
+        width: fit-content;
+        font-size: 1.5vh;
+        padding: 2vh 2vh;
+    }
+}

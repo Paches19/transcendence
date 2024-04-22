@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:18 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/18 15:41:36 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/22 14:14:46 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,8 +61,9 @@ function loadProfile()
 	
 	if (!isLoggedIn())
 	{
+		localStorage.setItem('loginRedirect', 'true');
 		router.route('/login');
-		return;
+		return ;
 	}
 	
 	const profileHTML = `
