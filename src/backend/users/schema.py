@@ -10,7 +10,7 @@
 #                                                                              #
 # ******************************************************************************#
 
-from ninja import ModelSchema
+from ninja import ModelSchema, Schema
 from game.models import User
 
 
@@ -18,3 +18,8 @@ class UserSchema(ModelSchema):
     class Meta:
         model = User
         fields = '__all__'
+
+
+class UserCreateSchema(Schema):
+    name: str
+    password: str
