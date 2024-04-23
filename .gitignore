@@ -1,6 +1,8 @@
 .DS_Store
 .env
 .vscode/
+request.http
+avatars/
 
 ### Django ###
 *.log
