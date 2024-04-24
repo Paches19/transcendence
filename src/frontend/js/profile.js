@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:18 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/22 14:14:46 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/24 13:16:28 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,7 +74,7 @@ function loadProfile()
 			</div>
 			<div class="profile-stats">
 				<button class="stats-toggler">Stats</button>
-				<div class="stats-content">
+				<div class="stats-content" style="display: none;>
 					<p>Matches Played: ${mockUser.gamesPlayed}</p>
 					<p>Matches Won: ${mockUser.gamesWon}</p>
 					<p>Matches Lost: ${mockUser.gamesLost}</p>

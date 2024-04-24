@@ -4,13 +4,13 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-COPY . ./app
+COPY ./backend ./app
 
-RUN chmod +x ./app/setup.sh
+COPY ./docker/django/setup.sh /app/setup.sh
+RUN chmod +x /app/setup.sh
 
-WORKDIR ./app/backend
+WORKDIR /app
 
 RUN pip install -r requirements.txt
 
-
-CMD ["../setup.sh"]
+CMD ["/app/setup.sh"]
