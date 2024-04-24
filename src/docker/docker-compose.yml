@@ -27,6 +27,15 @@ services:
             - transcendence_net
         depends_on:
             - postgres
+    nginx:
+        container_name: nginx
+        build: ./src
+        ports:
+            - "8080:8080"
+        networks:
+            - transcendence_net
+        restart: always
+
 
 networks:
     transcendence_net:
