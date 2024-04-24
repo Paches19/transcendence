@@ -6,9 +6,16 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/22 13:06:21 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/22 13:54:55 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/22 17:56:19 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+:root {
+    --pong-dark: #212529;
+    --pong-light: #f8f9fa;
+    --pong-accent: #0d6efd;
+    --font-family-pong: 'Press Start 2P', monospace;
+}
 
 .play-options-container {
 	position: absolute;
@@ -50,24 +57,28 @@
     width: fit-content;
 }
 
-.game-option-button:hover {
-    background-color: var(--electric-blue);
-    transform: scale(1.1);
+.game-container .bg-dark {
+    background-color: #212529;
+    border: 2px solid #fff;
 }
 
-.game-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+#pong-game {
+    border: 1px solid #ffffff;
 }
 
-.game-controls button {
+.game-info h2, .game-info h3 {
+    font-family: 'Press Start 2P', cursive;
+}
+
+.btn-success, .btn-danger {
+    font-weight: bold;
     padding: 10px 20px;
-    margin: 10px;
-    font-size: 1rem;
-    cursor: pointer;
+    margin: 0 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.btn-success:hover, .btn-danger:hover {
+    transform: scale(1.05);
 }
 
 @media (max-width: 768px) {
@@ -96,5 +107,13 @@
         width: fit-content;
         font-size: 1.5vh;
         padding: 2vh 2vh;
+    }
+    
+    .game-container .row {
+        flex-direction: column-reverse;
+    }
+
+    .game-container canvas {
+        max-height: 200px;
     }
 }

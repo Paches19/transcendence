@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:24:45 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/22 12:59:32 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/22 18:08:37 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,6 @@ router.addRoute('/login', login);
 router.addRoute('/register', setupRegisterForm);
 router.addRoute('/tournaments/:id', id => {
     const tournament = mockTournaments.find(t => t.id === parseInt(id));
-    
     if (tournament) {
         loadTournamentDetails(tournament);
     } else {

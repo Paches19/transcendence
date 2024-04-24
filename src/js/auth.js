@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/19 12:22:30 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/22 18:14:03 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ const users = [
 function login(username, password)
 {
     const user = users.find(user => user.username === username && user.password === password);
-	const navBarDiv = document.getElementById('login-navbar');
     if (user)
     {
         const token = btoa(username + ':' + password);

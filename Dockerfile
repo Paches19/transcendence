@@ -5,6 +5,3 @@ FROM nginx:alpine
 COPY ./src /usr/share/nginx/html
 COPY ./node_modules /usr/share/nginx/html/node_modules
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-
-# Exponer puerto 8080docker build -t servidor-nginx .
-EXPOSE 8080
