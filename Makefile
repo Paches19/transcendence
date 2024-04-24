@@ -42,6 +42,15 @@ re:			clean
 			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) up -d --build
 			@printf "$(BLUE)==> $(CYAN)Transcendence rebuilt 🔄\n$(RESET)"
 			@printf "\n$(BLUE)==> $(CYAN)Transcendence is running ✅\n$(RESET)"
-			@printf "$(BLUE)==> $(BLUE)Accessible on: \n\t$(YELLOW)https://localhost\n$(RESET)"
+			@printf "$(BLUE)==> $(BLUE)Accessible on: \n\t$(YELLOW)https://localhost/$(PORT)\n$(RESET)"
+
+re-postgres:
+			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) up -d --no-deps --build postgres
+
+re-django:
+			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) up -d --no-deps --build django
+
+re-nginx:
+			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) up -d --no-deps --build nginx
 
 .PHONY:		all stop clean fclean re
