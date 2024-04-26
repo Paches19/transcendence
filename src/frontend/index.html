@@ -1,0 +1,27 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pong Game</title>
+</head>
+<body>
+    <div id="status"></div>
+    <script>
+        const socket = new WebSocket('ws://localhost:8000/ws/game/'); // URL del servidor WebSocket
+
+        socket.onopen = function() {
+            document.getElementById('status').innerHTML = 'Conectado al servidor WebSocket';
+        };
+
+        socket.onmessage = function(event) {
+            const message = JSON.parse(event.data);
+            console.log('Mensaje del servidor:', message);
+            // Manejar el mensaje del servidor según sea necesario
+        };
+
+        socket.onclose = function() {
+            document.getElementById('status').innerHTML = 'Desconectado del servidor WebSocket';
+        };
+    </script>
+</body>
+</html>

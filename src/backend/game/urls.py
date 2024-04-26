@@ -1,12 +1,7 @@
 from django.urls import path
-from . import views
+from game.views import *
 
 urlpatterns = [
-    #path("", views.hello),
-    path('about/', views.about),
-	
-	path('', views.home, name='home'),  # Página de inicio
-	path('player_selection/', views.player_selection, name='player_selection'),
-	path('add_player/', views.add_player, name='add_player'),
-    path('delete_player/<int:player_id>/', views.delete_player, name='delete_player'),
+	path('', index),  # Página de inicio
+	path('game/<int:id>/<str:name>/', game),  # Página del juego
 ]

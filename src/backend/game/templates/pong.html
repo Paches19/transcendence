@@ -1,0 +1,85 @@
+{% load static %}  <!-- Load the static template tag library -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="{% static 'styles.css' %}">
+    <title>Match  {{ match.id }} | Pong</title>
+</head>
+<body>
+    <!-- Contenido del juego Pong -->
+	<div class="wrapper">		
+		<h3>
+			<span class="opponent-left">{{ name }}</span>
+			<span class="opponent-right">Waiting to join</span>
+		</h3>
+    	<div class="container">
+			<canvas id="pongGame" width="640px" height="400px"></canvas>
+		</div>
+	</div>
+	
+	<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+   	<script>		
+		const socket = new WebSocket("ws://" + window.location.host + "/ws/game/{{match.id}}/");
+		var canvas = document.getElementById('pongGame');
+		let x = 10;
+		let y = canvas.height / 2 - 40;
+		let width = 15;
+		let height = 80;
+		let color = 'white';
+		let v = 4;
+		let score = 0;
+			
+		const ctx = canvas.getContext('2d');
+	
+		drawElements();
+
+		function drawElements() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.fillStyle = color;
+			ctx.fillRect(x, y, width, height);
+			
+			ctx.fillStyle = 'white';
+			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);
+		}
+
+		// Define sendPlayerInput function outside of the DOMContentLoaded event listener
+		
+		const sendPlayerInput = (input) => {
+			const data = { key: input };
+			socket.send(JSON.stringify(data));
+		};
+		
+		socket.onopen = e => {
+			console.log(e)
+		};
+		
+		socket.onmessage = e => {
+			console.log(e)
+			const data = JSON.parse(e.data)
+			if(data.event == "show_error"){
+				Swal.fire({
+					icon: "error",
+					title: data.error,
+				}).then(e => window.location.href = "/")
+			}
+		}
+
+		document.addEventListener('keydown', function(e) {
+			const key = e.key;
+			console.log("Key pressed:", key); // Log the pressed key
+			if ((key === 'ArrowUp' && y > 0) || 
+				(key === 'ArrowDown' && y + height < canvas.height - 5))
+				console.log("Sending player input:", key); // Log the key being sent   
+				sendPlayerInput(key);
+		});	
+
+	</script>
+
+</body>
+
+</html>
+

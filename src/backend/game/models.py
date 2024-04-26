@@ -6,7 +6,7 @@
 #    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/15 12:03:07 by alaparic          #+#    #+#              #
-#    Updated: 2024/04/15 19:45:22 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/04/24 23:16:17 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,49 +14,48 @@ from django.db import models
 
 # Create your models here.
 
-
 class Match(models.Model):
-    matchID = models.AutoField(primary_key=True)
-    user1 = models.ForeignKey(
-        'User', related_name='user1_match', on_delete=models.CASCADE)
-    user2 = models.ForeignKey(
-        'User', related_name='user2_match', on_delete=models.CASCADE)
-    pointsUser1 = models.IntegerField(default=0)
-    pointsUser2 = models.IntegerField(default=0)
-    date = models.DateField()
-    tournamentId = models.ForeignKey(
-        'Tournament', on_delete=models.CASCADE, null=True, blank=True)
-
+#     id = models.AutoField(primary_key=True)
+#     user1 = models.ForeignKey(
+#         'User', related_name='user1_match', on_delete=models.CASCADE)
+#     user2 = models.ForeignKey(
+#         'User', related_name='user2_match', on_delete=models.CASCADE)
+#     date = models.DateField()
+#     tournamentId = models.ForeignKey(
+#         'Tournament', on_delete=models.CASCADE, null=True, blank=True)
+#     ball = models.ForeignKey('Ball', on_delete=models.CASCADE, null=True)
+     def __str__(self) -> str:
+#          return f"{self.id} {self.user1} {self.user2} {self.tournamentId} {self.ball}"
+           return f"{self.id}"
 
 class User(models.Model):
-    userID = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     profilePicture = models.ImageField(
         upload_to='profile_pictures/', null=True)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, default="Unknown")
     password = models.CharField(max_length=50)
-    totalPoints = models.IntegerField(default=0)
+    score = models.IntegerField(default=0)
     status = models.BooleanField(default=True)
     matchesTotal = models.IntegerField(default=0)
     matchesWon = models.IntegerField(default=0)
     matchesLost = models.IntegerField(default=0)
-    matchesDraw = models.IntegerField(default=0)
-
+    paddle = models.ForeignKey('Paddle', on_delete=models.CASCADE, null=True)
+    def __str__(self) -> str:
+        return f"{self.id} {self.name} {self.score} {self.status} {self.matchesTotal} {self.matchesWon} {self.matchesLost} {self.paddle}"
 
 class Friend(models.Model):
-    friendID = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     user1 = models.ForeignKey(
         'User', related_name='user1', on_delete=models.CASCADE)
     user2 = models.ForeignKey(
         'User', related_name='user2', on_delete=models.CASCADE)
     status = models.BooleanField(default=False)
 
-
 class Tournament(models.Model):
-    tournamentID = models.AutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     startDate = models.DateField()
     endDate = models.DateField()
-
 
 class UserTournament(models.Model):
     userTournamentID = models.AutoField(primary_key=True)
@@ -64,32 +63,26 @@ class UserTournament(models.Model):
         'User', related_name='user', on_delete=models.CASCADE)
     tournament = models.ForeignKey(
         'Tournament', related_name='tournament', on_delete=models.CASCADE)
-
-#########################  jutrera- ######################################
-
-class Player(models.Model):
-    name = models.CharField(max_length=100)
-    x = models.IntegerField(default=0)
-    y = models.IntegerField(null=True, blank=True)  # Si no se proporciona, se calculará en la vista
-    width = models.IntegerField(default=15)
-    height = models.IntegerField(default=80)
-    color = models.CharField(max_length=50, default='white')
-    vx = models.IntegerField(default=4)
-    vy = models.IntegerField(default=4)
-    score = models.IntegerField(default=0)
-    IA = models.BooleanField(default=False)
-    won = models.IntegerField(default=0)
-    lost = models.IntegerField(default=0)
-    def __str__(self):
-        return f'Player'	
-
+     
+class Paddle(models.Model):
+    x = models.FloatField(default=0)
+    y = models.FloatField(default=0)
+    width = models.FloatField(default=10)
+    height = models.FloatField(default=10)
+    color = models.CharField(max_length=50, default="white")
+    def __str__(self) -> str:
+	    return f"{self.x} {self.y} {self.width} {self.height} {self.color}"
+    
 class Ball(models.Model):
-	x = models.IntegerField()
-	y = models.IntegerField()
-	width = models.IntegerField(default=15)
-	height = models.IntegerField(default=15)
-	color = models.CharField(max_length=50, default='white')
-	vx = models.IntegerField(default=4)
-	vy = models.IntegerField(default=4)
-	def __str__(self):
-		return f'Ball'
+    x = models.FloatField(default=0)
+    y = models.FloatField(default=0)
+    width = models.FloatField(default=10)
+    height = models.FloatField(default=10)
+    color = models.CharField(max_length=50, default="white")
+    vx = models.FloatField(default=1)
+    vy = models.FloatField(default=1)
+    color = models.CharField(max_length=50, default="white")
+    state = models.CharField(max_length=50, default="stopped")
+    def __str__(self) -> str:
+	    return f"{self.x} {self.y} {self.width} {self.height} {self.color} {self.vx} {self.vy} {self.color} {self.state}"
+    
