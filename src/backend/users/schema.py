@@ -8,18 +8,6 @@ class UserSchema(ModelSchema):
         fields = '__all__'
 
 
-class UserCreateSchema(Schema):
-    name: str
-    password: str
-    profilePicture: str = ""
-    totalPoints: int = 0
-    status: bool = 0
-    matchesTotal: int = 0
-    matchesWon: int = 0
-    matchesLost: int = 0
-    matchesDraw: int = 0
-
-
 class UserUpdateSchema(Schema):
     password: str = None
     profilePicture: str = None
