@@ -1,5 +1,5 @@
 from ninja import ModelSchema, Schema
-from game.models import User
+from .models import User
 
 
 """ User schemas """

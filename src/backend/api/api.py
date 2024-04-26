@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
-from game.models import User
+from .models import User
 from .schema import UserSchema, ErrorSchema, UserUpdateSchema, UserRegisterSchema, LoginSchema
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
