@@ -1,6 +1,8 @@
 .DS_Store
 .env
 .vscode/
+request.http
+avatars/
 
 ### Django ###
 *.log
@@ -12,3 +14,5 @@ db.sqlite3
 db.sqlite3-journal
 media
 build/
+
+node_modules

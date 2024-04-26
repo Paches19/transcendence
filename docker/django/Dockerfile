@@ -1,15 +1,16 @@
-FROM python:3.8
+FROM python:3.11.7-alpine
 
+ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-WORKDIR /usr/src/app
+COPY ./backend ./app
 
-COPY requirements.txt /usr/src/app/
+COPY ./docker/django/setup.sh /app/setup.sh
+RUN chmod +x /app/setup.sh
 
-RUN pip install --no-cache-dir -r requirements.txt
+WORKDIR /app
 
-RUN mkdir -p /usr/src/app/
-COPY src /usr/share/app
+RUN pip install -r requirements.txt
 
-CMD ["daphne", "-u", "/usr/src/app/daphne.sock", "transcendence.asgi:application"]
+CMD ["/app/setup.sh"]
