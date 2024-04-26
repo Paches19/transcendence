@@ -4,11 +4,55 @@ from django.contrib.auth import authenticate, login, logout
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
 from .models import User
-from .schema import UserSchema, ErrorSchema, UserUpdateSchema, UserRegisterSchema, LoginSchema
+from .middleware import require_auth
+from .schema import (UserSchema, ErrorSchema, UserUpdateSchema,
+                     UserRegisterSchema, LoginSchema, UserUpdatePassSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
-app = NinjaAPI()
+app = NinjaAPI(
+    title="ft_transcendence API",
+    version="1.0",
+    description="API for the ft_transcendence project made with the django-ninja library.",
+)
+
+""" Auth """
+
+
+@app.post("auth/register", response={200: UserSchema, 400: ErrorSchema})
+def create_user(request, user_in: UserRegisterSchema):
+    if User.objects.filter(name=user_in.name).exists():
+        return 400, {"msg": "User already exists"}
+
+    user_data = user_in.model_dump()
+    user_model = User.objects.create(**user_data)
+    return user_model
+
+
+@app.post("auth/login")
+def login_user(request, login_in: LoginSchema):
+    user = authenticate(request, username=login_in.username,
+                        password=login_in.password)
+    if user is not None:
+        login(request, user)
+        return {"msg": "Login successful"}
+    else:
+        return {"msg": "Login failed"}
+
+
+@app.get("auth/logout")
+def logout_user(request):
+    logout(request)
+    return {"msg": "Logout successful"}
+
+
+@app.get("auth/password/change", response={200: UserSchema, 400: ErrorSchema})
+def change_password(request, user_id: int, pass_in: UserUpdatePassSchema):
+    user = get_object_or_404(User, userID=user_id)
+    if not user.check_password(pass_in.password):
+        return 400, {"msg": "Incorrect password"}
+    user.set_password(pass_in.new_password)
+    user.save()
 
 
 """ Users """
@@ -43,6 +87,8 @@ def update_avatar(request, user_id: int, file: UploadedFile = File(...)):
     # Check image size
     if len(avatar_data) > MAX_IMAGE_SIZE:
         return 400, {"msg": "Image size too large"}
+    if len(avatar_data) == 0:
+        return 400, {"msg": "Empty image"}
 
     # Check image format
     if file.content_type not in ["image/jpeg", "image/png", "image/gif"]:
@@ -59,33 +105,3 @@ def update_avatar(request, user_id: int, file: UploadedFile = File(...)):
     user = get_object_or_404(User, userID=user_id)
     user.profilePicture = file_route
     return user
-
-
-""" Auth """
-
-
-@app.post("auth/register", response={200: UserSchema, 400: ErrorSchema})
-def create_user(request, user_in: UserRegisterSchema):
-    if User.objects.filter(name=user_in.name).exists():
-        return 400, {"msg": "User already exists"}
-
-    user_data = user_in.model_dump()
-    user_model = User.objects.create(**user_data)
-    return user_model
-
-
-@app.post('auth/login')
-def login_user(request, login_in: LoginSchema):
-    user = authenticate(request, username=login_in.username,
-                        password=login_in.password)
-    if user is not None:
-        login(request, user)
-        return {"msg": "Login successful"}
-    else:
-        return {"msg": "Login failed"}
-
-
-@app.get("auth/logout")
-def logout_user(request):
-    logout(request)
-    return {"msg": "Logout successful"}

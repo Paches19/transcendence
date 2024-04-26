@@ -2,26 +2,6 @@ from ninja import ModelSchema, Schema
 from .models import User
 
 
-""" User schemas """
-
-
-class UserSchema(ModelSchema):
-    class Meta:
-        model = User
-        fields = '__all__'
-
-
-class UserUpdateSchema(Schema):
-    password: str = None
-    profilePicture: str = None
-    totalPoints: int = None
-    status: bool = None
-    matchesTotal: int = None
-    matchesWon: int = None
-    matchesLost: int = None
-    matchesDraw: int = None
-
-
 """ Auth schemas """
 
 
@@ -40,6 +20,30 @@ class UserRegisterSchema(Schema):
 class LoginSchema(Schema):
     username: str
     password: str
+
+
+class UserUpdatePassSchema(Schema):
+    password: str
+    new_password: str
+
+
+""" User schemas """
+
+
+class UserSchema(ModelSchema):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+
+class UserUpdateSchema(Schema):
+    profilePicture: str = None
+    totalPoints: int = None
+    status: bool = None
+    matchesTotal: int = None
+    matchesWon: int = None
+    matchesLost: int = None
+    matchesDraw: int = None
 
 
 """ General schemas """
