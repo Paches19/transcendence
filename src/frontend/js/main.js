@@ -6,12 +6,13 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:24:45 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/22 18:08:37 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/27 13:44:33 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import Router from './router.js';
 import loadProfile from './profile.js';
+import loadEditProfile from './editProfile.js';
 import initPlayPage from './play.js';
 import { loadTournaments } from './tournaments.js';
 import loadTournamentDetails from './tournamentDetails.js';
@@ -66,6 +67,7 @@ const router = new Router();
 router.addRoute('/', loadInitialContent);
 router.addRoute('/home', loadInitialContent);
 router.addRoute('/profile', loadProfile);
+router.addRoute('/edit-profile', loadEditProfile);
 router.addRoute('/play', initPlayPage);
 router.addRoute('/tournaments', loadTournaments);
 router.addRoute('/login', login);

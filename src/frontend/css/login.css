@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:35:31 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/15 12:30:35 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/27 13:17:56 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,6 +130,7 @@
 	font-weight: 600;
 	color: var(--font-color);
 	cursor: pointer;
+  padding: 10px;
   }
 
 .flip-card__btn:hover {
@@ -155,15 +156,20 @@
 		
     }
 
-	.flip-card__input, .flip-card__btn{
-		font-size: 3vw;
-	}
-	
-    .title {
-        font-size: calc(12px + 1.5vw); /* Tamaño de fuente más grande en pantallas pequeñas */
+    .title{
+      font-size: 2.5vh;
+    }
+
+    .flip-card__input{
+        font-size: 2vh;
+    }
+
+    .flip-card__btn{
+        font-size: 1.5vh;
+        padding: 10px;
     }
 
   #login-msg{
-    font-size: 3vw;
+    font-size: 2vh;
   }
 }

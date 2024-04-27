@@ -12,7 +12,6 @@ RUN apk add --update nodejs npm
 WORKDIR /usr/share/nginx/html
 
 # Limpiar la caché de npm y usar npm ci para instalación limpia
-RUN npm cache clean --force
 RUN npm ci
 
 CMD ["nginx", "-g", "daemon off;"]
