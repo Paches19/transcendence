@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 13:04:35 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/27 13:53:06 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/27 16:43:32 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,12 +56,14 @@ function loadEditProfile() {
 					<label for="profile-name">Name</label>
 					<input type="text" class="form-control" id="profile-name" value="${currentUser.username}" required>
 					<label for="profile-name">Password</label>
-					<input type="text" class="form-control" id="profile-password" value="${currentUser.password}" required>
-				</div>
+					<input type="password" class="form-control" id="profile-password" value="${currentUser.password}" required>
+				  </div>
 				  <div class="form-group">
 					<label for="profile-picture">Profile Picture URL</label>
-					<input type="text" class="form-control" id="profile-picture" value="${currentUser.avatar}" required>
+					<input type="file" class="form-control-file" id="profile-picture-upload" accept="image/*">
+					<img id="profile-picture-preview" src="${currentUser.avatar}" alt="Profile Picture Preview" class="img-thumbnail" style="margin-top: 10px; max-width: 200px;">
 				  </div>
+				  <button type="button" class="btn btn-secondary" id="upload-picture">Upload Picture</button>
 				  <button type="button" class="btn btn-primary" id="save-profile">Save</button>
 				</form>
 			  </div>
@@ -92,6 +94,33 @@ function loadEditProfile() {
 	  // Suponiendo que se tenga una función 'updateUserProfile' para actualizar los datos del perfil.
 	  updateUserProfile(name, password, pictureUrl);
 	});
+
+	document.getElementById('profile-picture-upload').addEventListener('change', function() {
+		const file = this.files[0];
+		if (file) {
+		  const reader = new FileReader();
+		  reader.onload = function(e) {
+			const preview = document.getElementById('profile-picture-preview');
+			preview.src = e.target.result;
+			preview.alt = 'Selected Profile Picture';
+		  };
+		  reader.readAsDataURL(file);
+		}
+	  });
+	  
+	  document.getElementById('upload-picture').addEventListener('click', function() {
+		// Aquí implementarías la carga al servidor
+		const fileInput = document.getElementById('profile-picture-upload');
+		const file = fileInput.files[0];
+		if (file) {
+		  console.log('Uploading picture...');
+		  showNotification("Photo uploaded");
+		  // Aquí va el código para cargar la imagen al servidor
+		  // Puedes utilizar FormData y un XMLHttpRequest o fetch para esto
+		} else {
+		  alert('Please select a picture first.');
+		}
+	  });
   }
 
   function showNotification(message) {

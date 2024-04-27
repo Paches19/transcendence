@@ -6,17 +6,33 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 13:53:56 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/27 14:00:26 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/27 16:46:10 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 .card {
     background: var(--black);
 	opacity: 0.98;
-    box-shadow: 5px 5px 5px 10px var(--electric-blue);
+    box-shadow: 0 0px 10px var(--electric-blue) !important;
 	color: white;
 }
 
 .edit-profile-form{
-	gap: 1opx;
+	gap: 10px;
 }
+
+.card-header{
+	text-align: center !important;
+	margin-bottom: 3vh !important;
+	font-size: 4vh !important;
+}
+
+.img-thumbnail {
+	border-radius: 4px;
+	padding: 0.25rem;
+	background-color: transparent;
+	border: 4px solid #dee2e6;
+	height: 200px;
+	overflow: visible;
+  }
+  
