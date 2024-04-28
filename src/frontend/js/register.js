@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:22:20 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/18 15:42:27 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/04/28 10:02:37 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,52 @@ function handleRegisterSubmit(event)
         router.route('/home');
     }
 }
+
+// async function handleRegisterSubmit(event) {
+//     event.preventDefault();
+//     const username = document.getElementById('register-username').value;
+//     const password = document.getElementById('register-password').value;
+    
+//     const errorMessage = validateInputs(username, password);
+//     if (errorMessage) {
+//         displayError(errorMessage);
+//         return;
+//     }
+
+//     const userData = {
+//         name: username,
+//         password: password,
+//         profilePicture: "",
+//         totalPoints: 0,
+//         status: 0,
+//         matchesTotal: 0,
+//         matchesWon: 0,
+//         matchesLost: 0,
+//         matchesDraw: 0
+//     };
+
+//     try {
+//         const response = await fetch('api/auth/register', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify(userData)
+//         });
+//         if (response.ok) {
+//             const data = await response.json();
+//             console.log('Registration successful for', username);
+//             alert('Registration successful for ' + username);
+//             router.route('/home');
+//         } else {
+//             const errorData = await response.json();
+//             displayError(errorData.message || 'Failed to register. Please try again.');
+//         }
+//     } catch (error) {
+//         console.error('An error occurred during registration:', error);
+//         displayError('An error occurred during registration. Please try again.');
+//     }
+// }
 
 function validateInputs(username, password)
 {
