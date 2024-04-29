@@ -3,10 +3,10 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
-from .models import User
+from .models import User, Friend
 from .middleware import require_auth
 from .schema import (UserSchema, ErrorSchema, UserUpdateSchema,
-                     UserRegisterSchema, LoginSchema, UserUpdatePassSchema)
+                     UserRegisterSchema, LoginSchema, UserUpdatePassSchema, AddFriendSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -105,3 +105,47 @@ def update_avatar(request, user_id: int, file: UploadedFile = File(...)):
     user = get_object_or_404(User, userID=user_id)
     user.profilePicture = file_route
     return user
+
+
+@app.post("users/{user_id}/friends/add", response={200: UserSchema, 400: ErrorSchema})
+def add_friend(request, user_id: int, friend_in: AddFriendSchema):
+
+    user = get_object_or_404(User, userID=user_id)
+    friend = get_object_or_404(User, userID=friend_in.friend_id)
+
+    friend_data = {
+        "user1": user,
+        "user2": friend
+    }
+
+    Friend.objects.create(**friend_data)
+    return 200, {"msg": "Friend request sent"}
+
+
+@app.post("users/{user_id}/friends/accept", response={200: UserSchema, 400: ErrorSchema})
+def accept_friend(request, user_id: int, friend_in: AddFriendSchema):
+    user = get_object_or_404(User, userID=user_id)
+    friend = get_object_or_404(User, userID=friend_in.friend_id)
+
+    if not Friend.objects.filter(user1=user, user2=friend, status=False).exists():
+        return 400, {"msg": "Friend request not found"}
+
+    friendship = get_object_or_404(Friend, user1=user, user2=friend)
+    friendship.status = True
+    friendship.save()
+    return 200, {"msg": "Friend request accepted"}
+
+
+@app.post("users/{user_id}/friends/remove", response={200: UserSchema, 400: ErrorSchema})
+def remove_friend(request, user_id: int, friend_in: AddFriendSchema):
+    user = get_object_or_404(User, userID=user_id)
+    friend = get_object_or_404(User, userID=friend_in.friend_id)
+
+    if not Friend.objects.filter(user1=user, user2=friend).exists() and not Friend.objects.filter(user1=friend, user2=user).exists():
+        return 400, {"msg": "Friend not found"}
+
+    user.friends.remove(friend)
+    return user
+
+
+""" Game """

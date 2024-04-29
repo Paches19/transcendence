@@ -46,6 +46,9 @@ class UserUpdateSchema(Schema):
     matchesDraw: int = None
 
 
+class AddFriendSchema(Schema):
+    friend_id: int
+
 """ General schemas """
 
 
