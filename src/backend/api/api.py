@@ -20,7 +20,7 @@ app = NinjaAPI(
 """ Auth """
 
 
-@app.post("auth/register", response={200: UserSchema, 400: ErrorSchema})
+@app.post("auth/register", response={200: UserSchema, 400: ErrorSchema}, tags=['Auth'])
 def create_user(request, user_in: UserRegisterSchema):
     if User.objects.filter(name=user_in.name).exists():
         return 400, {"msg": "User already exists"}
@@ -30,7 +30,7 @@ def create_user(request, user_in: UserRegisterSchema):
     return user_model
 
 
-@app.post("auth/login")
+@app.post("auth/login", tags=['Auth'])
 def login_user(request, login_in: LoginSchema):
     user = authenticate(request, username=login_in.username,
                         password=login_in.password)
@@ -41,13 +41,13 @@ def login_user(request, login_in: LoginSchema):
         return {"msg": "Login failed"}
 
 
-@app.get("auth/logout")
+@app.get("auth/logout", tags=['Auth'])
 def logout_user(request):
     logout(request)
     return {"msg": "Logout successful"}
 
 
-@app.get("auth/password/change", response={200: UserSchema, 400: ErrorSchema})
+@app.get("auth/password/change", response={200: UserSchema, 400: ErrorSchema}, tags=['Auth'])
 def change_password(request, user_id: int, pass_in: UserUpdatePassSchema):
     user = get_object_or_404(User, userID=user_id)
     if not user.check_password(pass_in.password):
@@ -59,18 +59,18 @@ def change_password(request, user_id: int, pass_in: UserUpdatePassSchema):
 """ Users """
 
 
-@app.get("users", response=list[UserSchema])
+@app.get("users", response=list[UserSchema], tags=['Users'])
 def get_users(request):
     return User.objects.all()
 
 
-@app.get("users/{user_id}", response=UserSchema)
+@app.get("users/{user_id}", response=UserSchema, tags=['Users'])
 def get_user(request, user_id: int):
     user = get_object_or_404(User, userID=user_id)
     return user
 
 
-@app.post("users/{user_id}/update", response={200: UserSchema, 400: ErrorSchema})
+@app.post("users/{user_id}/update", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
 def update_user(request, user_id: int, user_in: UserUpdateSchema):
     user = get_object_or_404(User, userID=user_id)
     user_data = user_in.dict()
@@ -81,7 +81,7 @@ def update_user(request, user_id: int, user_in: UserUpdateSchema):
     return user
 
 
-@app.post("users/{user_id}/avatar", response={200: UserSchema, 400: ErrorSchema})
+@app.post("users/{user_id}/avatar", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
 def update_avatar(request, user_id: int, file: UploadedFile = File(...)):
     avatar_data = file.read()
 
@@ -108,7 +108,7 @@ def update_avatar(request, user_id: int, file: UploadedFile = File(...)):
     return user
 
 
-@app.post("users/{user_id}/friends/add", response={200: UserSchema, 400: ErrorSchema})
+@app.post("users/{user_id}/friends/add", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
 def add_friend(request, user_id: int, friend_in: AddFriendSchema):
 
     user = get_object_or_404(User, userID=user_id)
@@ -123,7 +123,7 @@ def add_friend(request, user_id: int, friend_in: AddFriendSchema):
     return 200, {"msg": "Friend request sent"}
 
 
-@app.post("users/{user_id}/friends/accept", response={200: UserSchema, 400: ErrorSchema})
+@app.post("users/{user_id}/friends/accept", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
 def accept_friend(request, user_id: int, friend_in: AddFriendSchema):
     user = get_object_or_404(User, userID=user_id)
     friend = get_object_or_404(User, userID=friend_in.friend_id)
@@ -137,7 +137,7 @@ def accept_friend(request, user_id: int, friend_in: AddFriendSchema):
     return 200, {"msg": "Friend request accepted"}
 
 
-@app.post("users/{user_id}/friends/remove", response={200: UserSchema, 400: ErrorSchema})
+@app.post("users/{user_id}/friends/remove", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
 def remove_friend(request, user_id: int, friend_in: AddFriendSchema):
     user = get_object_or_404(User, userID=user_id)
     friend = get_object_or_404(User, userID=friend_in.friend_id)
@@ -152,25 +152,25 @@ def remove_friend(request, user_id: int, friend_in: AddFriendSchema):
 """ Tournaments """
 
 
-@app.post("tournaments/create", response={200: UserSchema, 400: ErrorSchema})
+@app.post("tournaments/create", response={200: UserSchema, 400: ErrorSchema}, tags=['Tournaments'])
 def create_tournament(request, tournament_in: TournamentSchema):
     tournament_data = tournament_in.dict()
     tournament = Tournament.objects.create(**tournament_data)
     return tournament
 
 
-@app.get("tournaments", response=list[TournamentSchema])
+@app.get("tournaments", response=list[TournamentSchema], tags=['Tournaments'])
 def get_tournaments(request):
     return Tournament.objects.all()
 
 
-@app.get("tournaments/{tournament_id}", response=TournamentSchema)
+@app.get("tournaments/{tournament_id}", response=TournamentSchema, tags=['Tournaments'])
 def get_tournament(request, tournament_id: int):
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
     return tournament
 
 
-@app.post("tournaments/{tournament_id}/join", response={200: UserSchema, 400: ErrorSchema})
+@app.post("tournaments/{tournament_id}/join", response={200: UserSchema, 400: ErrorSchema}, tags=['Tournaments'])
 def join_tournament(request, user_id: int, tournament_id: int):
     user = get_object_or_404(User, userID=user_id)
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
@@ -184,7 +184,7 @@ def join_tournament(request, user_id: int, tournament_id: int):
     return 200, {"msg": "User joined tournament"}
 
 
-@app.post("tournaments/{tournament_id}/leave", response={200: UserSchema, 400: ErrorSchema})
+@app.post("tournaments/{tournament_id}/leave", response={200: UserSchema, 400: ErrorSchema}, tags=['Tournaments'])
 def leave_tournament(request, user_id: int, tournament_id: int):
     user = get_object_or_404(User, userID=user_id)
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
@@ -198,17 +198,18 @@ def leave_tournament(request, user_id: int, tournament_id: int):
     return 200, {"msg": "User left tournament"}
 
 
-@app.get("tournaments/{tournament_id}/users", response=list[UserSchema])
+@app.get("tournaments/{tournament_id}/users", response=list[UserSchema], tags=['Tournaments'])
 def get_tournament_users(request, tournament_id: int):
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
     users = UserTournament.objects.filter(tournament=tournament)
     return [user.user for user in users]
 
 
-@app.get("tournaments/{tournament_id}/matches", response=list[UserSchema])
+@app.get("tournaments/{tournament_id}/matches", response=list[UserSchema], tags=['Tournaments'])
 def get_tournament_matches(request, tournament_id: int):
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
     matches = Match.objects.filter(tournamentId=tournament)
     return matches
+
 
 """  """
