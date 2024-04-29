@@ -47,7 +47,7 @@ def logout_user(request):
     return {"msg": "Logout successful"}
 
 
-@app.get("auth/password/change", response={200: UserSchema, 400: ErrorSchema}, tags=['Auth'])
+@app.post("auth/password/change", response={200: UserSchema, 400: ErrorSchema}, tags=['Auth'])
 def change_password(request, user_id: int, pass_in: UserUpdatePassSchema):
     user = get_object_or_404(User, userID=user_id)
     if not user.check_password(pass_in.password):
@@ -182,6 +182,8 @@ def join_tournament(request, user_id: int, tournament_id: int):
 
     UserTournament.objects.create(**user_tournament_data)
     return 200, {"msg": "User joined tournament"}
+
+# TODO -> Missing update tournament values
 
 
 @app.post("tournaments/{tournament_id}/leave", response={200: UserSchema, 400: ErrorSchema}, tags=['Tournaments'])
