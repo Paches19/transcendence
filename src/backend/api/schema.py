@@ -55,7 +55,7 @@ class AddFriendSchema(Schema):
 
 class TournamentSchema(Schema):
     name: str
-    startDate: str = datetime.now().isoformat()
+    startDate: str = datetime.date.today().isoformat()
     status: str
 
 
