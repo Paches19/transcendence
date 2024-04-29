@@ -49,6 +49,13 @@ class UserUpdateSchema(Schema):
 class AddFriendSchema(Schema):
     friend_id: int
 
+""" Tournaments schemas """
+
+class TournamentSchema(Schema):
+    name: str
+    startDate: str
+    
+
 """ General schemas """
 
 

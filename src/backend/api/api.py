@@ -3,10 +3,11 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
-from .models import User, Friend
+from .models import User, Friend, Tournament, UserTournament, Match
 from .middleware import require_auth
 from .schema import (UserSchema, ErrorSchema, UserUpdateSchema,
-                     UserRegisterSchema, LoginSchema, UserUpdatePassSchema, AddFriendSchema)
+                     UserRegisterSchema, LoginSchema, UserUpdatePassSchema,
+                     AddFriendSchema, TournamentSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -148,4 +149,66 @@ def remove_friend(request, user_id: int, friend_in: AddFriendSchema):
     return user
 
 
-""" Game """
+""" Tournaments """
+
+
+@app.post("tournaments/create", response={200: UserSchema, 400: ErrorSchema})
+def create_tournament(request, tournament_in: TournamentSchema):
+    tournament_data = tournament_in.dict()
+    tournament = Tournament.objects.create(**tournament_data)
+    return tournament
+
+
+@app.get("tournaments", response=list[TournamentSchema])
+def get_tournaments(request):
+    return Tournament.objects.all()
+
+
+@app.get("tournaments/{tournament_id}", response=TournamentSchema)
+def get_tournament(request, tournament_id: int):
+    tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
+    return tournament
+
+
+@app.post("tournaments/{tournament_id}/join", response={200: UserSchema, 400: ErrorSchema})
+def join_tournament(request, user_id: int, tournament_id: int):
+    user = get_object_or_404(User, userID=user_id)
+    tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
+
+    user_tournament_data = {
+        "user": user,
+        "tournament": tournament
+    }
+
+    UserTournament.objects.create(**user_tournament_data)
+    return 200, {"msg": "User joined tournament"}
+
+
+@app.post("tournaments/{tournament_id}/leave", response={200: UserSchema, 400: ErrorSchema})
+def leave_tournament(request, user_id: int, tournament_id: int):
+    user = get_object_or_404(User, userID=user_id)
+    tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
+
+    if not UserTournament.objects.filter(user=user, tournament=tournament).exists():
+        return 400, {"msg": "User not in tournament"}
+
+    user_tournament = get_object_or_404(
+        UserTournament, user=user, tournament=tournament)
+    user_tournament.delete()
+    return 200, {"msg": "User left tournament"}
+
+
+@app.get("tournaments/{tournament_id}/users", response=list[UserSchema])
+def get_tournament_users(request, tournament_id: int):
+    tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
+    users = UserTournament.objects.filter(tournament=tournament)
+    return [user.user for user in users]
+
+
+@app.get("tournaments/{tournament_id}/matches", response=list[UserSchema])
+def get_tournament_matches(request, tournament_id: int):
+    tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
+    matches = Match.objects.filter(tournamentId=tournament)
+    return matches
+
+"""  """
