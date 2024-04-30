@@ -1,6 +1,6 @@
 from ninja import ModelSchema, Schema
 from .models import User
-
+import datetime
 
 """ Auth schemas """
 
@@ -44,6 +44,19 @@ class UserUpdateSchema(Schema):
     matchesWon: int = None
     matchesLost: int = None
     matchesDraw: int = None
+
+
+class AddFriendSchema(Schema):
+    friend_id: int
+
+
+""" Tournaments schemas """
+
+
+class TournamentSchema(Schema):
+    name: str
+    startDate: str = datetime.date.today().isoformat()
+    status: str
 
 
 """ General schemas """
