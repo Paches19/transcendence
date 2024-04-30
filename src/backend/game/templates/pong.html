@@ -12,8 +12,8 @@
     <!-- Contenido del juego Pong -->
 	<div class="wrapper">		
 		<h3>
-			<span class="opponent-left">{{ name }}</span>
-			<span class="opponent-right">Waiting to join</span>
+			<p id="player1-name">{{ name }}</p>
+			<p id="player2-name">Waiting</p>
 		</h3>
     	<div class="container">
 			<canvas id="pongGame" width="640px" height="400px"></canvas>
@@ -23,39 +23,75 @@
 	<script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
    	<script>		
-		const socket = new WebSocket("ws://" + window.location.host + "/ws/game/{{match.id}}/");
-		var canvas = document.getElementById('pongGame');
-		let x = 10;
-		let y = canvas.height / 2 - 40;
-		let width = 15;
-		let height = 80;
-		let color = 'white';
-		let v = 4;
-		let score = 0;
-			
-		const ctx = canvas.getContext('2d');
-	
-		drawElements();
+		const socket = new WebSocket("ws://" + window.location.host + "/ws/game/{{match.id}}/")
+		
+		let canvas = document.getElementById('pongGame')
+		let stateMatch = {
+			'ball': {
+				'x': canvas.width / 2- 5,
+				'y': canvas.height / 2 - 5,
+			},
+			'player1': {
+				'x': 10,
+				'y': canvas.height / 2 - 40,
+				'score': 0,
+				'name': ""
+			},
+			'player2': {
+				'x': canvas.width - 25,
+				'y': canvas.height / 2 - 40,
+				'score': 0,
+				'name': "",
+			},
+		}
+		let v = 4
+		let color = 'white'
+		let ballWidth = 10
+		let ballHeight = 10
+		let playerWidth = 15
+		let playerHeight = 80
+		let y = canvas.height / 2 - 40
+		let player = ""
+		const playerName = document.getElementById(`player1-name`).innerHTML
 
-		function drawElements() {
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			ctx.fillStyle = color;
-			ctx.fillRect(x, y, width, height);
-			
-			ctx.fillStyle = 'white';
-			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);
+		const ctx = canvas.getContext('2d')
+
+		function drawPaddles(){
+			ctx.fillRect(stateMatch.player1.x, stateMatch.player1.y, playerWidth, playerHeight)
+			ctx.fillRect(stateMatch.player2.x, stateMatch.player2.y, playerWidth, playerHeight)
 		}
 
-		// Define sendPlayerInput function outside of the DOMContentLoaded event listener
-		
-		const sendPlayerInput = (input) => {
-			const data = { key: input };
-			socket.send(JSON.stringify(data));
-		};
+		function drawBall(){
+			ctx.fillRect(stateMatch.ball.x, stateMatch.ball.y, ballWidth, ballHeight)
+		}
+
+		function drawNet(){
+			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height)
+		}
+
+		function drawScores(){
+			if (document.fonts.check('1em PressStart2P')) {
+				ctx.font = '50px PressStart2P';
+				ctx.fillText(stateMatch.player1.score, canvas.width / 2 - 70, 70)
+				ctx.fillText(stateMatch.player2.score, canvas.width / 2 + 25, 70)
+			}
+			else {
+				setTimeout(drawScore, 100);
+			}
+		}
+
+		function drawElements() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height)
+			ctx.fillStyle = 'white'
+			drawBall()
+			drawNet()
+			drawPaddles()
+			drawScores()
+		}
 		
 		socket.onopen = e => {
 			console.log(e)
-		};
+		}
 		
 		socket.onmessage = e => {
 			console.log(e)
@@ -66,16 +102,47 @@
 					title: data.error,
 				}).then(e => window.location.href = "/")
 			}
+			else if(data.event == "game_start"){
+				player = data.player
+				if (player == "1"){
+					stateMatch.player1.name = playerName
+					document.getElementById("player1-name").innerHTML = playerName
+					document.getElementById("player2-name").innerHTML = "Joined"
+				}else{
+					stateMatch.player2.name = playerName
+					document.getElementById("player2-name").innerHTML = playerName
+					document.getElementById("player1-name").innerHTML = "Joined"
+				}
+				drawElements()
+			}
+			else if(data.event == "game_update"){
+				stateMatch = data.stateMatch
+				drawElements()
+			}
 		}
 
 		document.addEventListener('keydown', function(e) {
 			const key = e.key;
-			console.log("Key pressed:", key); // Log the pressed key
-			if ((key === 'ArrowUp' && y > 0) || 
-				(key === 'ArrowDown' && y + height < canvas.height - 5))
-				console.log("Sending player input:", key); // Log the key being sent   
-				sendPlayerInput(key);
-		});	
+			if (player == "1"){
+				y = stateMatch.player1.y
+			}
+			else{
+				y = stateMatch.player2.y
+			}
+
+			if ((key === 'ArrowUp' && y - v > 0) || 
+				(key === 'ArrowDown' && y + playerHeight + v < canvas.height))
+				y += key === 'ArrowUp' ? -v : v
+				if(player == "1"){
+					stateMatch.player1.y = y
+				}else{
+					stateMatch.player2.y = y
+				}
+				socket.send(JSON.stringify({
+					"event": 'game_update',
+					"stateMatch": stateMatch,
+				}))
+		})
 
 	</script>
 

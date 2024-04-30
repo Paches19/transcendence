@@ -3,12 +3,6 @@
 	src: url(PressStart2P.ttf) format('truetype');
 }
 
-@keyframes blink {
-	0% { opacity: 1; }
-	50% { opacity: 0; }
-	100% { opacity: 1; }
-}
-
 body {
     margin: 0;
     padding: 0;
@@ -46,15 +40,14 @@ canvas {
     text-align: center;
 }
 
-.opponent-left {
+.player1-name {
 	flex: 1;
     text-align: left;
 }
 
-.opponent-right {
+.player2-name {
 	flex: 1;
     text-align: right;
-	animation: blink 1s infinite;
 }
 
 #menu ul {

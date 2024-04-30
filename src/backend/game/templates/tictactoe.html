@@ -3,7 +3,6 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -128,20 +127,52 @@
 	<!-- Load your JavaScript file -->
 	<script> 
 		const ws = new WebSocket("ws://" + window.location.host + "/ws/game/{{room.id}}/")
+		
+		let board = {
+			0: '', 1: '', 2: '',
+			3: '', 4: '', 5: '',
+			6: '', 7: '', 8: '',
+		}
 		let playerLetter = "X"
+		let myTurn = false
+		const turnElm = document.getElementById("turn")
+		const opponentTxt = document.getElementById("opponent-txt")
 		const boxes = document.getElementsByClassName("box")
-		Array.from(boxes).forEach(elm => {
+		Array.from(boxes).forEach((elm, i) => {
 			elm.addEventListener("click", e => {
-				addPlayerLetter(elm)
+				if (myTurn){
+					board[i] = playerLetter
+					ws.send(JSON.stringify({
+						"event": 'boardData_send',
+						"board": board,
+					}))
+					addPlayerLetter(elm, playerLetter)
+					myTurn = false;
+				}
 			})            
 		})
 
-		function addPlayerLetter(element) {
-			element.innerHTML = `<p class="player-letter" >${playerLetter}</p>`
-			element.setAttribute("player", playerLetter)
+		function addPlayerLetter(element, symbol) {
+			element.innerHTML = `<p class="player-letter" >${symbol}</p>`
+			element.setAttribute("player", symbol)
 			setTimeout(() => {
 				element.children[0].classList.add("active")
 			}, 1);
+		}
+
+		function resetBoard() {
+			Array.from(boxes).forEach(elm => {
+				elm.innerHTML = ''
+				elm.setAttribute("player", "")
+			})
+		}
+		
+		function updateBoard(boardData) {
+			Array.from(boxes).forEach((elm, i) => {
+				if(boardData[i] != "" && !elm.getAttribute("player")){
+					addPlayerLetter(elm, boardData[i])
+				}
+			})
 		}
 
 		ws.onopen = e => {
@@ -156,6 +187,21 @@
 					icon: "error",
 					title: data.error,
 				}).then(e => window.location.href = "/")
+			}
+			else if(data.event == "game_start"){
+				board = data.board
+				myTurn = data.turn
+				playerLetter = data.symbol
+				resetBoard()
+				turnElm.innerHTML = data.turn ? "Your Turn" : "Opponent's Turn"
+				opponentTxt.innerHTML = "Opponent joined"
+			}
+			else if(data.event == "boardData_send"){
+				board = data.board
+				myTurn = data.turn
+				updateBoard(board)
+				turnElm.innerHTML = data.turn ? "Your Turn" : "Opponent's Turn"
+				opponentTxt.innerHTML = "Opponent joined"
 			}
 		}
 	

@@ -25,7 +25,7 @@ def game(request, id=None, name=None):
 	try:
 		match = Match.objects.get(id=id)
 		return render(request, "pong.html", {"match": match, "name": name})
-	    #return render(request, "tictactoe.html", {"room": room, "name": name})
+		#return render(request, "tictactoe.html", {"room": match, "name": name})
 	except Match.DoesNotExist:
 		messages.error(request, "Match does not exist.")
 		return redirect("/")

@@ -6,7 +6,7 @@
 #    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/15 12:03:07 by alaparic          #+#    #+#              #
-#    Updated: 2024/04/26 09:11:08 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/04/28 19:34:14 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -43,26 +43,11 @@ class User(models.Model):
     def __str__(self) -> str:
         return f"{self.id} {self.name} {self.score} {self.status} {self.matchesTotal} {self.matchesWon} {self.matchesLost} {self.paddle}"
 
-class Friend(models.Model):
-    id = models.AutoField(primary_key=True)
-    user1 = models.ForeignKey(
-        'User', related_name='user1', on_delete=models.CASCADE)
-    user2 = models.ForeignKey(
-        'User', related_name='user2', on_delete=models.CASCADE)
-    status = models.BooleanField(default=False)
-
 class Tournament(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=50)
     startDate = models.DateField()
     endDate = models.DateField()
-
-class UserTournament(models.Model):
-    userTournamentID = models.AutoField(primary_key=True)
-    user = models.ForeignKey(
-        'User', related_name='user', on_delete=models.CASCADE)
-    tournament = models.ForeignKey(
-        'Tournament', related_name='tournament', on_delete=models.CASCADE)
      
 class Paddle(models.Model):
     x = models.FloatField(default=0)
