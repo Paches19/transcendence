@@ -54,6 +54,7 @@ class PongConsumer(AsyncJsonWebsocketConsumer):
 						"winner": content['winner'],
 					}
 				})
+
         elif(content['event'] == "write_names"):
             for channel_name in self.channel_layer.groups[self.group_name]:
                 await self.channel_layer.send(channel_name, {

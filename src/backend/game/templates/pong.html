@@ -38,12 +38,14 @@
 				'y': canvas.height / 2 - 40,
 				'score': 0,
 				'name': "",
+				'AI': false,
 			},
 			'player2': {
 				'x': canvas.width - 25,
 				'y': canvas.height / 2 - 40,
 				'score': 0,
 				'name': "",
+				'AI': false,
 			},
 			'state': 'waiting',
 		}
@@ -55,7 +57,11 @@
 		let playerHeight = 80
 		let y = canvas.height / 2 - 40
 		let player = ""
+		let finalScore = 1
 		const playerName = document.getElementById(`player1-name`).innerHTML
+		const currentUrl = window.location.href
+		const currentNames = currentUrl.split("/")
+		const currentName = currentNames[currentNames.length - 2]
 
 		const ctx = canvas.getContext('2d')
 
@@ -65,7 +71,7 @@
 					'x': canvas.width / 2- 5,
 					'y': canvas.height / 2 - 5,
 					'vx': 4,
-					'vy': 4,
+					'vy': 2,
 				},
 				'player1': {
 					'x': 10,
@@ -138,7 +144,7 @@
 			}
 			else if(stateMatch.ball.x + stateMatch.ball.vx <= stateMatch.player1.x){
 				stateMatch.player2.score++;
-				if (stateMatch.player2.score == 5){
+				if (stateMatch.player2.score == finalScore){
 					stateMatch.player2.winner = true
 					socket.send(JSON.stringify({
 						"event": 'game_over',
@@ -149,7 +155,7 @@
 			}
 			else if(stateMatch.ball.x + stateMatch.ball.vx >= stateMatch.player2.x + playerWidth){
 				stateMatch.player1.score++;
-				if (stateMatch.player1.score == 5){
+				if (stateMatch.player1.score == finalScore){
 					stateMatch.player1.winner = true
 					socket.send(JSON.stringify({
 						"event": 'game_over',
@@ -207,6 +213,38 @@
 			drawScores()
 		}
 		
+		function player2IA() {
+    		let level = Math.floor(Math.random() * 3) + 3;
+     		if (stateMatch.ball.y > stateMatch.player2.y + playerHeight / 2 &&
+			 	stateMatch.ball.x > canvas.width / 2 &&
+         		stateMatch.player2.y + playerHeight + v < canvas.height) {
+					stateMatch.player2.y += v / level;
+     		} else if (stateMatch.player2.y - v > 0 && stateMatch.ball.x > canvas.width / 2)
+			 	stateMatch.player2.y -= v / level;
+
+		 	if (stateMatch.state === 'ended'){
+ 				return;
+ 			}
+ 			drawPaddles()
+     		requestAnimationFrame(player2IA);
+		}
+
+		function player1IA() {
+    		let level = Math.floor(Math.random() * 3) + 3;
+     		if (stateMatch.ball.y > stateMatch.player1.y + playerHeight / 2 &&
+			 	stateMatch.ball.x > canvas.width / 2 &&
+         		stateMatch.player1.y + playerHeight + v < canvas.height) {
+					stateMatch.player1.y += v / level;
+     		} else if (stateMatch.player1.y - v > 0 && stateMatch.ball.x > canvas.width / 2)
+			 	stateMatch.player1.y -= v / level;
+
+		 	if (stateMatch.state === 'ended') {
+ 				return;
+ 			}
+ 			drawPaddles()
+     		requestAnimationFrame(player1IA);
+		}
+
 		socket.onopen = e => {
 			console.log(e)
 		}
@@ -235,6 +273,7 @@
 				player = data.player
 				if (player == "1"){
 					stateMatch.player1.name = playerName
+					stateMatch.player1.AI = playerName == "AI"
 					socket.send(JSON.stringify({
 						"event": 'write_names',
 						"name1": playerName,
@@ -242,14 +281,20 @@
 					}))
 				}else{
 					stateMatch.player2.name = playerName
+					stateMatch.player2.AI = playerName == "AI"
 					socket.send(JSON.stringify({
 						"event": 'write_names',
 						"name1": "",
 						"name2": playerName,
 					}))
 				}
-
 				drawElements()
+				if (stateMatch.player1.AI){
+					player1IA()
+				}
+				if (stateMatch.player2.AI){
+					player2IA()
+				}
 				loop()
 				setTimeout(waitMatch,3000)
 			}
@@ -260,28 +305,29 @@
 			}
 			
 			else if(data.event == "opponent_left"){
-				stateMatch.state = 'ended'
-                if (player=="1"){
-					document.getElementById("player2-name").innerHTML = "Opponent Left"
-				}else{
-					document.getElementById("player1-name").innerHTML = "Opponent Left"
+				if (stateMatch.state != 'ended'){
+					stateMatch.state = 'ended'
+    		        setTimeout(() => {
+            	        Swal.fire({
+                        	icon:  "info",
+                        	title:  "Opponent Left",
+                        	confirmButtonText: "Ok",
+                    	}).then(e => window.location.href = "/")
+                	}, 400)
 				}
-                setTimeout(() => {
-                    Swal.fire({
-                        icon:  "info",
-                        title:  "Opponent Left",
-                        confirmButtonText: "Ok"
-                    }).then(e => window.location.href = "/")
-                }, 400)
             }
 			
 			else if (data.event == "game_over"){
 				winner = data.winner
-				console.log(winner)
 				stateMatch.state = 'ended'
 				Swal.fire({
-					icon: "success",
-					title: winner == stateMatch.player1.name ? "You win!" : "You lose!",
+					icon: winner == currentName ?'success': "error",
+					title: winner == currentName ? "You win!" : "You lose!",
+					confirmButtonText: "Ok",
+				}).then((result) => {
+					if (result.isConfirmed) {
+						window.location.href = "/";
+					}
 				})
 			}
 		}
