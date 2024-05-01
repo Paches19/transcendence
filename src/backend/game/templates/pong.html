@@ -30,12 +30,14 @@
 			'ball': {
 				'x': canvas.width / 2- 5,
 				'y': canvas.height / 2 - 5,
+				'vx': 4,
+				'vy': 4,
 			},
 			'player1': {
 				'x': 10,
 				'y': canvas.height / 2 - 40,
 				'score': 0,
-				'name': ""
+				'name': "",
 			},
 			'player2': {
 				'x': canvas.width - 25,
@@ -43,6 +45,7 @@
 				'score': 0,
 				'name': "",
 			},
+			'state': 'waiting',
 		}
 		let v = 4
 		let color = 'white'
@@ -55,6 +58,121 @@
 		const playerName = document.getElementById(`player1-name`).innerHTML
 
 		const ctx = canvas.getContext('2d')
+
+		function initGame(){
+			stateMatch = {
+				'ball': {
+					'x': canvas.width / 2- 5,
+					'y': canvas.height / 2 - 5,
+					'vx': 4,
+					'vy': 4,
+				},
+				'player1': {
+					'x': 10,
+					'y': canvas.height / 2 - 40,
+					'score': 0,
+					'winner': false,
+				},
+				'player2': {
+					'x': canvas.width - 25,
+					'y': canvas.height / 2 - 40,
+					'score': 0,
+					'winner': false,
+				},
+				'state': 'waiting',
+			}
+			drawElements()
+		}
+
+		function loop() {	
+			if (stateMatch.state == 'ended')
+				return
+			else if (stateMatch.state == 'playing'){
+				ballBounce()
+				drawBall()
+			}
+			requestAnimationFrame(loop)
+		}
+
+		function waitMatch(){
+			stateMatch.state = 'playing';
+		}
+
+		function resetBall(){
+			stateMatch.ball.x = canvas.width / 2 - 5
+			stateMatch.ball.y = canvas.height / 2 - 5
+			stateMatch.ball.vx = 4
+			stateMatch.ball.vy = 4
+			stateMatch.state = 'waiting'
+			stateMatch.player1.winner = false
+			stateMatch.player2.winner = false
+			drawElements()
+			setTimeout(waitMatch,3000)
+		}
+
+		function ballWallCollision(){
+			if(	( stateMatch.ball.y + stateMatch.ball.vy <= stateMatch.player2.y + playerHeight &&
+			      stateMatch.ball.y + stateMatch.ball.vy >= stateMatch.player2.y &&
+				  stateMatch.ball.x + ballWidth + stateMatch.ball.vx > stateMatch.player2.x ) ||
+				( stateMatch.ball.y + stateMatch.ball.vy <= stateMatch.player1.y + playerHeight &&
+				  stateMatch.ball.y + stateMatch.ball.vy >= stateMatch.player1.y &&
+				  stateMatch.ball.x + stateMatch.ball.vx < stateMatch.player1.x + playerWidth)){
+					stateMatch.ball.vx = -stateMatch.ball.vx;
+					if ( stateMatch.ball.x > stateMatch.player1.x && 
+					 	 stateMatch.ball.x < stateMatch.player1.x + playerWidth)
+							stateMatch.ball.x = stateMatch.player1.x + ballWidth;
+				
+					if( stateMatch.ball.x > stateMatch.player2.x && 
+					    stateMatch.ball.x < stateMatch.player2.x + playerWidth)
+							stateMatch.ball.x = stateMatch.player2.x - ballWidth;
+					
+					if (stateMatch.ball.vy === 0) 
+						stateMatch.ball.vy = 1;
+					
+					if ((stateMatch.ball.y > stateMatch.player1.y + playerHeight/2 ||
+						 stateMatch.ball.y > stateMatch.player2.y + playerHeight/2) && stateMatch.ball.vy < 0)
+							stateMatch.ball.vy = -stateMatch.ball.vy;
+					else if ((stateMatch.ball.y < stateMatch.player1.y + playerHeight/2 ||
+							  stateMatch.ball.y < stateMatch.player2.y + playerHeight/2) && stateMatch.ball.vy > 0)
+								stateMatch.ball.vy = -stateMatch.ball.vy;
+			}
+			else if(stateMatch.ball.x + stateMatch.ball.vx <= stateMatch.player1.x){
+				stateMatch.player2.score++;
+				if (stateMatch.player2.score == 5){
+					stateMatch.player2.winner = true
+					socket.send(JSON.stringify({
+						"event": 'game_over',
+						"winner": stateMatch.player2.name,
+					}))
+				}
+				resetBall();
+			}
+			else if(stateMatch.ball.x + stateMatch.ball.vx >= stateMatch.player2.x + playerWidth){
+				stateMatch.player1.score++;
+				if (stateMatch.player1.score == 5){
+					stateMatch.player1.winner = true
+					socket.send(JSON.stringify({
+						"event": 'game_over',
+						"winner": stateMatch.player1.name,
+					}))
+				}
+				resetBall();
+			}
+		}
+
+		function ballBounce() {
+			ctx.clearRect(stateMatch.ball.x, stateMatch.ball.y, ballWidth, ballHeight)
+			drawNet()
+			if (stateMatch.ball.y + stateMatch.ball.vy <= 0 || stateMatch.ball.y + stateMatch.ball.vy >= canvas.height) {
+				stateMatch.ball.vy = -stateMatch.ball.vy
+				stateMatch.ball.y += stateMatch.ball.vy
+				stateMatch.ball.x += stateMatch.ball.vx
+			} else {
+				stateMatch.ball.y += stateMatch.ball.vy
+				stateMatch.ball.x += stateMatch.ball.vx
+			}
+			ballWallCollision()
+		}
 
 		function drawPaddles(){
 			ctx.fillRect(stateMatch.player1.x, stateMatch.player1.y, playerWidth, playerHeight)
@@ -96,28 +214,75 @@
 		socket.onmessage = e => {
 			console.log(e)
 			const data = JSON.parse(e.data)
+
 			if(data.event == "show_error"){
 				Swal.fire({
 					icon: "error",
 					title: data.error,
 				}).then(e => window.location.href = "/")
 			}
+
+			else if(data.event == "write_names"){
+				if (stateMatch.player1.name == "" || stateMatch.player1.name == "Waiting...") 
+					stateMatch.player1.name = data.name1
+				if (stateMatch.player2.name == "" || stateMatch.player2.name == "Waiting...")
+					stateMatch.player2.name = data.name2
+				document.getElementById("player1-name").innerHTML = stateMatch.player1.name
+				document.getElementById("player2-name").innerHTML = stateMatch.player2.name
+			}
+
 			else if(data.event == "game_start"){
 				player = data.player
 				if (player == "1"){
 					stateMatch.player1.name = playerName
-					document.getElementById("player1-name").innerHTML = playerName
-					document.getElementById("player2-name").innerHTML = "Joined"
+					socket.send(JSON.stringify({
+						"event": 'write_names',
+						"name1": playerName,
+						"name2": "Waiting...",
+					}))
 				}else{
 					stateMatch.player2.name = playerName
-					document.getElementById("player2-name").innerHTML = playerName
-					document.getElementById("player1-name").innerHTML = "Joined"
+					socket.send(JSON.stringify({
+						"event": 'write_names',
+						"name1": "",
+						"name2": playerName,
+					}))
 				}
+
 				drawElements()
+				loop()
+				setTimeout(waitMatch,3000)
 			}
+			
 			else if(data.event == "game_update"){
 				stateMatch = data.stateMatch
 				drawElements()
+			}
+			
+			else if(data.event == "opponent_left"){
+				stateMatch.state = 'ended'
+                if (player=="1"){
+					document.getElementById("player2-name").innerHTML = "Opponent Left"
+				}else{
+					document.getElementById("player1-name").innerHTML = "Opponent Left"
+				}
+                setTimeout(() => {
+                    Swal.fire({
+                        icon:  "info",
+                        title:  "Opponent Left",
+                        confirmButtonText: "Ok"
+                    }).then(e => window.location.href = "/")
+                }, 400)
+            }
+			
+			else if (data.event == "game_over"){
+				winner = data.winner
+				console.log(winner)
+				stateMatch.state = 'ended'
+				Swal.fire({
+					icon: "success",
+					title: winner == stateMatch.player1.name ? "You win!" : "You lose!",
+				})
 			}
 		}
 
@@ -129,21 +294,19 @@
 			else{
 				y = stateMatch.player2.y
 			}
-
 			if ((key === 'ArrowUp' && y - v > 0) || 
 				(key === 'ArrowDown' && y + playerHeight + v < canvas.height))
-				y += key === 'ArrowUp' ? -v : v
-				if(player == "1"){
-					stateMatch.player1.y = y
-				}else{
-					stateMatch.player2.y = y
-				}
-				socket.send(JSON.stringify({
-					"event": 'game_update',
-					"stateMatch": stateMatch,
-				}))
+					y += key === 'ArrowUp' ? -v : v
+			if(player == "1"){
+				stateMatch.player1.y = y
+			}else{
+				stateMatch.player2.y = y
+			}
+			socket.send(JSON.stringify({
+				"event": 'game_update',
+				"stateMatch": stateMatch,
+			}))
 		})
-
 	</script>
 
 </body>
