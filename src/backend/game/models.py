@@ -6,7 +6,7 @@
 #    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/04/15 12:03:07 by alaparic          #+#    #+#              #
-#    Updated: 2024/04/28 19:34:14 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/05/01 14:33:11 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ from django.db import models
 # Create your models here.
 
 class Match(models.Model):
-#     id = models.AutoField(primary_key=True)
+     id = models.AutoField(primary_key=True)
 #     user1 = models.ForeignKey(
 #         'User', related_name='user1_match', on_delete=models.CASCADE)
 #     user2 = models.ForeignKey(
