@@ -35,7 +35,7 @@ class PongConsumer(AsyncJsonWebsocketConsumer):
 				})
 
     async def receive_json(self, content, **kwargs):
-        print(content)
+        #print(content)
         if (content['event'] == "game_update"):
             for channel_name in self.channel_layer.groups[self.group_name]:
                 await self.channel_layer.send(channel_name, {
@@ -63,6 +63,7 @@ class PongConsumer(AsyncJsonWebsocketConsumer):
 						"event": "write_names",
 						"name1": content['name1'],
 						"name2": content['name2'],
+                        "ballvy": content['ballvy'],
 					}
 				})
 
@@ -125,7 +126,7 @@ class TicTacToeConsumer(AsyncJsonWebsocketConsumer):
 				})
 
     async def receive_json(self, content, **kwargs):
-        print(content)
+        #print(content)
         if (content['event'] == "boardData_send"):
             winner = checkWin(content['board'])
             if(winner):
