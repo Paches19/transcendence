@@ -6,7 +6,7 @@ import datetime
 
 
 class UserRegisterSchema(Schema):
-    name: str
+    username: str
     password: str
     profilePicture: str = ""
     totalPoints: int = 0

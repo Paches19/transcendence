@@ -22,11 +22,11 @@ app = NinjaAPI(
 
 @app.post("auth/register", response={200: UserSchema, 400: ErrorSchema}, tags=['Auth'])
 def create_user(request, user_in: UserRegisterSchema):
-    if User.objects.filter(name=user_in.name).exists():
+    if User.objects.filter(username=user_in.username).exists():
         return 400, {"msg": "User already exists"}
 
     user_data = user_in.model_dump()
-    user_model = User.objects.create(**user_data)
+    user_model = User.objects.create_user(**user_data)
     return user_model
 
 

@@ -6,7 +6,7 @@ from django.db import migrations
 def generate_users_data(apps, schema_editor):
     User = apps.get_model("api", "User")
     for i in range(10):
-        User.objects.create(name=f"user{i+1}", password=f"pass123")
+        User.objects.create_user(username=f"user{i+1}", password=f"pass123")
 
 
 class Migration(migrations.Migration):
