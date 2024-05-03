@@ -18,6 +18,7 @@ class Match(models.Model):
 
 
 # User inherits from AbstractUser, which is a built-in Django model
+# this allows us to use the built-in Django authentication system
 class User(AbstractUser):
     profilePicture = models.ImageField(
         upload_to='profile_pictures/', null=True)

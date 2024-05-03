@@ -27,6 +27,11 @@ class UserUpdatePassSchema(Schema):
     new_password: str
 
 
+class BasicUserSchema(Schema):
+    username: str
+    profilePicture: str | None
+
+
 """ User schemas """
 
 
@@ -34,6 +39,8 @@ class UserSchema(ModelSchema):
     class Meta:
         model = User
         fields = '__all__'
+        exclude = ['first_name', 'last_name', 'email', "user_permissions", "groups",
+                   "is_staff", "is_active", "is_superuser", "last_login", "date_joined"]
 
 
 class UserUpdateSchema(Schema):

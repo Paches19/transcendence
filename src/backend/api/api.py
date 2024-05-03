@@ -5,9 +5,10 @@ from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
 from .models import User, Friend, Tournament, UserTournament, Match
 from .middleware import require_auth
+from .middleware import login_required
 from .schema import (UserSchema, ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema, UserUpdatePassSchema,
-                     AddFriendSchema, TournamentSchema)
+                     AddFriendSchema, TournamentSchema, BasicUserSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -47,13 +48,15 @@ def logout_user(request):
     return {"msg": "Logout successful"}
 
 
-@app.post("auth/password/change", response={200: UserSchema, 400: ErrorSchema}, tags=['Auth'])
-def change_password(request, user_id: int, pass_in: UserUpdatePassSchema):
-    user = get_object_or_404(User, userID=user_id)
+@app.post("auth/password/change", tags=['Auth'], response={200: BasicUserSchema, 400: ErrorSchema})
+@login_required
+def change_password(request, pass_in: UserUpdatePassSchema):
+    user = request.user
     if not user.check_password(pass_in.password):
         return 400, {"msg": "Incorrect password"}
     user.set_password(pass_in.new_password)
     user.save()
+    return {"username": user.username, "profilePicture": user.profilePicture}
 
 
 """ Users """
