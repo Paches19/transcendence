@@ -50,6 +50,7 @@ class Tournament(models.Model):
     name = models.CharField(max_length=50)
     startDate = models.DateField()
     endDate = models.DateField()
+    number_participants = models.IntegerField()
     status = models.CharField(
         max_length=11, choices=TOURNAMENT_STATUS_CHOICES, default='Upcoming')
 

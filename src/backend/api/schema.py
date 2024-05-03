@@ -32,6 +32,10 @@ class BasicUserSchema(Schema):
     profilePicture: str | None
 
 
+class UserNameSchema(Schema):
+    username: str
+
+
 """ User schemas """
 
 
@@ -63,7 +67,20 @@ class AddFriendSchema(Schema):
 class TournamentSchema(Schema):
     name: str
     startDate: str = datetime.date.today().isoformat()
+    number_participants: int
     status: str
+
+
+""" Match schemas """
+
+
+class MatchSchema(Schema):
+    user1: int
+    user2: int
+    pointsUser1: int = 0
+    pointsUser2: int = 0
+    date: str = datetime.date.today().isoformat()
+    tournamentId: int = None
 
 
 """ General schemas """

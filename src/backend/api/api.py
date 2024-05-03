@@ -4,11 +4,11 @@ from django.contrib.auth import authenticate, login, logout
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
 from .models import User, Friend, Tournament, UserTournament, Match
-from .middleware import require_auth
 from .middleware import login_required
 from .schema import (UserSchema, ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema, UserUpdatePassSchema,
-                     AddFriendSchema, TournamentSchema, BasicUserSchema)
+                     AddFriendSchema, TournamentSchema, BasicUserSchema,
+                     UserNameSchema, MatchSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -48,7 +48,7 @@ def logout_user(request):
     return {"msg": "Logout successful"}
 
 
-@app.post("auth/password/change", tags=['Auth'], response={200: BasicUserSchema, 400: ErrorSchema})
+@app.post("auth/password/change", tags=['Auth'], response={200: UserNameSchema, 400: ErrorSchema})
 @login_required
 def change_password(request, pass_in: UserUpdatePassSchema):
     user = request.user
@@ -56,7 +56,7 @@ def change_password(request, pass_in: UserUpdatePassSchema):
         return 400, {"msg": "Incorrect password"}
     user.set_password(pass_in.new_password)
     user.save()
-    return {"username": user.username, "profilePicture": user.profilePicture}
+    return {"username": user.username}
 
 
 """ Users """
@@ -186,8 +186,6 @@ def join_tournament(request, user_id: int, tournament_id: int):
     UserTournament.objects.create(**user_tournament_data)
     return 200, {"msg": "User joined tournament"}
 
-# TODO -> Missing update tournament values
-
 
 @app.post("tournaments/{tournament_id}/leave", response={200: UserSchema, 400: ErrorSchema}, tags=['Tournaments'])
 def leave_tournament(request, user_id: int, tournament_id: int):
@@ -203,18 +201,18 @@ def leave_tournament(request, user_id: int, tournament_id: int):
     return 200, {"msg": "User left tournament"}
 
 
-@app.get("tournaments/{tournament_id}/users", response=list[UserSchema], tags=['Tournaments'])
+@app.get("tournaments/{tournament_id}/users", response=list[UserNameSchema], tags=['Tournaments'])
 def get_tournament_users(request, tournament_id: int):
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
     users = UserTournament.objects.filter(tournament=tournament)
-    return [user.user for user in users]
+    return [user.user.username for user in users]
 
 
-@app.get("tournaments/{tournament_id}/matches", response=list[UserSchema], tags=['Tournaments'])
+@app.get("tournaments/{tournament_id}/matches", response=list[MatchSchema], tags=['Tournaments'])
 def get_tournament_matches(request, tournament_id: int):
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
     matches = Match.objects.filter(tournamentId=tournament)
     return matches
 
 
-"""  """
+""" Match """
