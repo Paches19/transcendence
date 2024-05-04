@@ -6,7 +6,7 @@ from ninja.files import UploadedFile
 from .models import User, Friend, Tournament, UserTournament, Match
 from .middleware import login_required
 from .schema import (UserSchema, ErrorSchema, UserUpdateSchema,
-                     UserRegisterSchema, LoginSchema, UserUpdatePassSchema,
+                     UserRegisterSchema, LoginSchema,
                      AddFriendSchema, TournamentSchema, BasicUserSchema,
                      UserNameSchema, MatchSchema)
 
@@ -48,17 +48,6 @@ def logout_user(request):
     return {"msg": "Logout successful"}
 
 
-@app.post("auth/password/change", tags=['Auth'], response={200: UserNameSchema, 400: ErrorSchema})
-@login_required
-def change_password(request, pass_in: UserUpdatePassSchema):
-    user = request.user
-    if not user.check_password(pass_in.password):
-        return 400, {"msg": "Incorrect password"}
-    user.set_password(pass_in.new_password)
-    user.save()
-    return {"username": user.username}
-
-
 """ Users """
 
 
@@ -73,20 +62,27 @@ def get_user(request, user_id: int):
     return user
 
 
-@app.post("users/{user_id}/update", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
-def update_user(request, user_id: int, user_in: UserUpdateSchema):
-    user = get_object_or_404(User, userID=user_id)
+@app.post("users/update", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
+@login_required
+def update_user(request, user_in: UserUpdateSchema):
+    user = request.user
     user_data = user_in.dict()
+
     for key, value in user_data.items():
-        if value is not None:
+        if value is not None and key != "password":
             setattr(user, key, value)
+
+    if user_in.password is not None:
+        user.set_password(user_in.password)
     user.save()
-    return user
+    return {"username": user.username}
 
 
-@app.post("users/{user_id}/avatar", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
-def update_avatar(request, user_id: int, file: UploadedFile = File(...)):
+@app.post("users/avatar", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
+@login_required
+def update_avatar(request, file: UploadedFile = File(...)):
     avatar_data = file.read()
+    user_id = request.user.userID
 
     # Check image size
     if len(avatar_data) > MAX_IMAGE_SIZE:
@@ -111,9 +107,10 @@ def update_avatar(request, user_id: int, file: UploadedFile = File(...)):
     return user
 
 
-@app.post("users/{user_id}/friends/add", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
-def add_friend(request, user_id: int, friend_in: AddFriendSchema):
-
+@app.post("users/friends/add", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
+@login_required
+def add_friend(request, friend_in: AddFriendSchema):
+    user_id = request.user.userID
     user = get_object_or_404(User, userID=user_id)
     friend = get_object_or_404(User, userID=friend_in.friend_id)
 
@@ -126,9 +123,10 @@ def add_friend(request, user_id: int, friend_in: AddFriendSchema):
     return 200, {"msg": "Friend request sent"}
 
 
-@app.post("users/{user_id}/friends/accept", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
-def accept_friend(request, user_id: int, friend_in: AddFriendSchema):
-    user = get_object_or_404(User, userID=user_id)
+@app.post("users/friends/accept", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
+@login_required
+def accept_friend(request, friend_in: AddFriendSchema):
+    user = request.user
     friend = get_object_or_404(User, userID=friend_in.friend_id)
 
     if not Friend.objects.filter(user1=user, user2=friend, status=False).exists():
@@ -141,8 +139,9 @@ def accept_friend(request, user_id: int, friend_in: AddFriendSchema):
 
 
 @app.post("users/{user_id}/friends/remove", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
-def remove_friend(request, user_id: int, friend_in: AddFriendSchema):
-    user = get_object_or_404(User, userID=user_id)
+@login_required
+def remove_friend(request, friend_in: AddFriendSchema):
+    user = request.user
     friend = get_object_or_404(User, userID=friend_in.friend_id)
 
     if not Friend.objects.filter(user1=user, user2=friend).exists() and not Friend.objects.filter(user1=friend, user2=user).exists():

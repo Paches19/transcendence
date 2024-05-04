@@ -22,11 +22,6 @@ class LoginSchema(Schema):
     password: str
 
 
-class UserUpdatePassSchema(Schema):
-    password: str
-    new_password: str
-
-
 class BasicUserSchema(Schema):
     username: str
     profilePicture: str | None
@@ -48,7 +43,7 @@ class UserSchema(ModelSchema):
 
 
 class UserUpdateSchema(Schema):
-    profilePicture: str = None
+    password: str = None
     totalPoints: int = None
     status: bool = None
     matchesTotal: int = None
