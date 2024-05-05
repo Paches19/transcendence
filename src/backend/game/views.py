@@ -1,15 +1,27 @@
+from django.http import HttpResponse
+
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from game.models import *
+
+# Create your views here.
+
+
+def hello(req):
+    return HttpResponse("<h1>Hello, World!</h1>")
+
+
+def about(req):
+    return HttpResponse("<h1>About</h1>")
+
+#########################  jutrera- ######################################
 
 def index(request):
 	if request.method == "GET":
 		return render(request, "index.html")
 	elif request.method == 'POST':
 		matchId = request.POST.get("match-id", None)
-		userName = request.POST.get("user-name", None)
-		if not userName:
-			userName = "AI"
+
 		if(matchId):
 			try:
 				match = Match.objects.get(id=matchId)
@@ -29,4 +41,3 @@ def game(request, id=None, name=None):
 	except Match.DoesNotExist:
 		messages.error(request, "Match does not exist.")
 		return redirect("/")
-	
