@@ -13,11 +13,11 @@
 import router from "./main.js";
 import updateNavbar from "./navbar.js";
 
-const users = [
-    { username: 'user1', password: 'pass1' },
-    { username: 'user2', password: 'pass2' },
-    { username: 'user3', password: 'pass3' }
-];
+// const users = [
+//     { username: 'user1', password: 'pass1' },
+//     { username: 'user2', password: 'pass2' },
+//     { username: 'user3', password: 'pass3' }
+// ];
 
 // function login(username, password)
 // {
@@ -71,7 +71,6 @@ function isLoggedIn()
 }
 
 // function logout()
-
 // {
 //     localStorage.removeItem('userToken');
 //     updateNavbar();
