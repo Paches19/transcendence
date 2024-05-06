@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/06 18:11:01 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/06 18:34:45 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ async function login(username, password) {
             router.route('/profile');
             return true;
         } else {
-            throw new Error('Login failed');
+            return false;
         }
     } catch (error) {
         console.error('An error occurred during login:', error);
