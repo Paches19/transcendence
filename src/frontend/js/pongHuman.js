@@ -11,7 +11,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-import {initPlayPage, pauseGame, resetTime} from "./play.js";
+import {initPlayPage, resetTime} from "./play.js";
 
 let canvas;
 let stateMatch = {
@@ -55,16 +55,20 @@ function loop() {
 	requestAnimationFrame(loop);
 }
 
-function waitMatch(){
+function playHuman(){
 	stateMatch.state = 'playing';
 }
 
-function quitGameHuman(){
+function quitHuman(){
 	stateMatch.state = 'gameover';
 }
 
+function pauseHuman(){
+	stateMatch.state = 'waiting';
+}
+
 function gameOver(){
-	pauseGame();
+	pauseHuman();
 	stateMatch.state = 'gameover';
 	let texto;
 	if (stateMatch.player1.score == finalScore)
@@ -129,7 +133,7 @@ function initGameHuman(){
 	if (stateMatch.ball.vy == 0)
 		stateMatch.ball.vy = 4
 	loop();
-	setTimeout(waitMatch,3000);
+	setTimeout(playHuman,3000);
 }
 
 function resetBall(){
@@ -143,7 +147,7 @@ function resetBall(){
 		stateMatch.ball.vy = 4
 	stateMatch.state = 'waiting';
 	drawElements();
-	setTimeout(waitMatch,3000);
+	setTimeout(playHuman,3000);
 }
 
 function ballBounce() {
@@ -242,4 +246,4 @@ function handleKeyDown(e) {
 	drawElements();
 }
 
-export {initGameHuman, quitGameHuman};	
+export {initGameHuman, playHuman, quitHuman, pauseHuman};	

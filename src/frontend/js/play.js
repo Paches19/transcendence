@@ -6,14 +6,14 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/05 21:43:55 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/05/06 13:01:32 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { isLoggedIn, getUsernameFromToken } from "./auth.js";
 import router from "./main.js";
-import { initGameAI, quitGameAI } from "./pongAI.js";
-import { initGameHuman, quitGameHuman } from "./pongHuman.js";
+import { initGameAI, quitAI, pauseAI, playAI } from "./pongAI.js";
+import { initGameHuman, quitHuman, pauseHuman, playHuman } from "./pongHuman.js";
 
 let mode = '';
 let isPaused = true;
@@ -101,7 +101,7 @@ function showGameAIScreen() {
         </div>
         <div class="row mt-3">
             <div class="col-12 text-center">
-                <button class="btn btn-success btn-lg mx-2" id="restart-game">Restart</button>
+                <button class="btn btn-success btn-lg mx-2" id="restart-game">Pause</button>
                 <button class="btn btn-danger btn-lg mx-2" id="quit-game">Quit</button>
             </div>
         </div>
@@ -130,7 +130,7 @@ function showGameHumanScreen() {
         </div>
         <div class="row mt-3">
             <div class="col-12 text-center">
-                <button class="btn btn-success btn-lg mx-2" id="restart-game">Restart</button>
+                <button class="btn btn-success btn-lg mx-2" id="restart-game">Pause</button>
                 <button class="btn btn-danger btn-lg mx-2" id="quit-game">Quit</button>
             </div>
         </div>
@@ -176,22 +176,23 @@ function resetTime(){
 }
 
 function restartGame() {
-	resetTime();
-    startTimer();
-    console.log("Game restarted.");
-    // Aquí se implementaría la lógica para resetear el juego.
-	if (mode == 'solo'){
-		quitGameAI();
-		initGameAI();
+	let textButton = document.getElementById("restart-game");
+	if (textButton.textContent == "Pause"){
+		textButton.textContent = "Restart";
+		isPaused = true;
+		if (mode == 'solo')
+			pauseAI();
+		else if (mode == 'local')
+			pauseHuman();
 	}
-	else if (mode == 'local'){
-		quitGameHuman();
-		initGameHuman();
+	else{
+		textButton.textContent = "Pause";
+		isPaused = false;
+		if (mode == 'solo')
+			playAI();
+		else if (mode == 'local')
+			playHuman();
 	}
-}
-
-function pauseGame(){
-	isPaused = true;
 }
 
 function quitGame() {
@@ -199,9 +200,9 @@ function quitGame() {
     console.log("Game quit.");
     // Aquí se implementaría la lógica para salir del juego.
 	if (mode == 'solo')
-		quitGameAI();
+		quitAI();
 	else if (mode == 'local')
-		quitGameHuman();
+		quitHuman();
 	mode = '';
 	initPlayPage();
 }
@@ -230,4 +231,4 @@ function attachGameControlEventListeners() {
 }
 
 export default initPlayPage;
-export {initPlayPage, pauseGame, resetTime};
+export {initPlayPage, resetTime};
