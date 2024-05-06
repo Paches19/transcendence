@@ -6,7 +6,7 @@ import datetime
 
 
 class UserRegisterSchema(Schema):
-    name: str
+    username: str
     password: str
     profilePicture: str = ""
     totalPoints: int = 0
@@ -22,9 +22,13 @@ class LoginSchema(Schema):
     password: str
 
 
-class UserUpdatePassSchema(Schema):
-    password: str
-    new_password: str
+class BasicUserSchema(Schema):
+    username: str
+    profilePicture: str | None
+
+
+class UserNameSchema(Schema):
+    username: str
 
 
 """ User schemas """
@@ -34,10 +38,12 @@ class UserSchema(ModelSchema):
     class Meta:
         model = User
         fields = '__all__'
+        exclude = ['first_name', 'last_name', 'email', "user_permissions", "groups",
+                   "is_staff", "is_active", "is_superuser", "last_login", "date_joined"]
 
 
 class UserUpdateSchema(Schema):
-    profilePicture: str = None
+    password: str = None
     totalPoints: int = None
     status: bool = None
     matchesTotal: int = None
@@ -56,7 +62,20 @@ class AddFriendSchema(Schema):
 class TournamentSchema(Schema):
     name: str
     startDate: str = datetime.date.today().isoformat()
+    number_participants: int
     status: str
+
+
+""" Match schemas """
+
+
+class MatchSchema(Schema):
+    user1: int
+    user2: int
+    pointsUser1: int = 0
+    pointsUser2: int = 0
+    date: str = datetime.date.today().isoformat()
+    tournamentId: int = None
 
 
 """ General schemas """

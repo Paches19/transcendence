@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
@@ -16,12 +17,11 @@ class Match(models.Model):
         'Tournament', on_delete=models.CASCADE, null=True, blank=True)
 
 
-class User(models.Model):
-    userID = models.AutoField(primary_key=True)
+# User inherits from AbstractUser, which is a built-in Django model
+# this allows us to use the built-in Django authentication system
+class User(AbstractUser):
     profilePicture = models.ImageField(
         upload_to='profile_pictures/', null=True)
-    name = models.CharField(max_length=50)
-    password = models.CharField(max_length=50)
     totalPoints = models.IntegerField(default=0)
     status = models.BooleanField(default=True)  # online or offline
     matchesTotal = models.IntegerField(default=0)
@@ -50,6 +50,7 @@ class Tournament(models.Model):
     name = models.CharField(max_length=50)
     startDate = models.DateField()
     endDate = models.DateField()
+    number_participants = models.IntegerField()
     status = models.CharField(
         max_length=11, choices=TOURNAMENT_STATUS_CHOICES, default='Upcoming')
 
