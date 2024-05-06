@@ -9,7 +9,7 @@ from .middleware import login_required
 from .schema import (UserSchema, ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema,
                      AddFriendSchema, TournamentSchema, BasicUserSchema,
-                     UserNameSchema, MatchSchema)
+                     UserNameSchema, MatchSchema, UserFriendSchema, FriendSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -52,11 +52,18 @@ def logout_user(request):
 """ Users """
 
 
-@app.get("users", response=list[UserSchema], tags=['Users'])
+@app.get("users", response=list[UserFriendSchema], tags=['Users'])
 def get_users(request, user_id: int = Query(None)):
     if user_id:
-        return [get_object_or_404(User, id=user_id)]
-    return User.objects.all()
+        user = get_object_or_404(User, id=user_id)
+        resp = UserFriendSchema(user).dict()
+    else:
+        resp = []
+        users = User.objects.all()
+        for user in users:
+            resp.append(UserFriendSchema(user).dict())
+
+    return resp
 
 
 @app.post("users/update", response={200: UserNameSchema, 400: ErrorSchema}, tags=['Users'])
