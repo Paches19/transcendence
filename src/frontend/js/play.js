@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/06 14:59:20 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/05/06 23:56:32 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@ import { isLoggedIn, getUsernameFromToken } from "./auth.js";
 import router from "./main.js";
 import { initGameAI, quitAI, pauseAI, playAI } from "./pongAI.js";
 import { initGameHuman, quitHuman, pauseHuman, playHuman } from "./pongHuman.js";
+import { initGameRemote, quitRemote, pauseRemote, playRemote } from "./pongRemote.js";
 
 let mode = '';
 let isPaused = true;
@@ -50,8 +51,7 @@ function startGame(m) {
 		   startLocalVsHuman()
 		   break;
 		case 'remote':
-			console.log("Starting game: Remote vs Human");
-					
+			startRemoteVsHuman()
 			break;
        default:
            console.log(`Sorry ${m} not configured`);
@@ -82,6 +82,15 @@ function startLocalVsHuman() {
     } else {
         router.route("/login");
     }
+}
+
+function startRemoteVsHuman() {
+	if (isLoggedIn()) {
+		console.log("Starting game: Remote vs Human");
+		showGameRemoteScreen();
+	} else {
+		router.route("/login");
+	}
 }
 
 function showGameAIScreen() {
@@ -142,6 +151,35 @@ function showGameHumanScreen() {
     attachGameControlEventListeners();
 }
 
+function showGameRemoteScreen() {
+	const mainContent = document.getElementById('main-content');
+	const username = getUsernameFromToken();
+	mainContent.innerHTML = `
+    <div class="container mt-5 game-container">
+        <div class="row align-items-center">
+            <div class="col-12 col-lg-8 mx-auto">
+                <div class="bg-dark text-white p-3 rounded-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <h2 id="game-score" class="mb-0">${username} 0 - 0 Opponent</h2>
+                        <h3 id="game-timer" class="mb-0">00:00</h3>
+                    </div>
+                    <canvas id="pong-game" class="w-100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12 text-center">
+                <button class="btn btn-success btn-lg mx-2" id="restart-game">Pause</button>
+                <button class="btn btn-danger btn-lg mx-2" id="quit-game">Quit</button>
+            </div>
+        </div>
+    </div>
+    `;
+    initializeGame();
+	initGameRemote();
+    attachGameControlEventListeners();
+}
+
 function initializeGame() {
     const canvas = document.getElementById("pong-game");
     if (canvas) {
@@ -179,12 +217,14 @@ function resetTime(){
 function restartGame() {
 	let textButton = document.getElementById("restart-game");
 	if (textButton.textContent == "Pause"){
-		textButton.textContent = "Restart";
+		textButton.textContent = "Resume";
 		isPaused = true;
 		if (mode == 'solo')
 			pauseAI();
 		else if (mode == 'local')
 			pauseHuman();
+		else if (mode == 'remote')
+			pauseRemote();
 	}
 	else{
 		textButton.textContent = "Pause";
@@ -193,6 +233,8 @@ function restartGame() {
 			playAI();
 		else if (mode == 'local')
 			playHuman();
+		else if (mode == 'remote')
+			playRemote();
 	}
 }
 
@@ -204,6 +246,8 @@ function quitGame() {
 		quitAI();
 	else if (mode == 'local')
 		quitHuman();
+	else if (mode == 'remote')
+		quitRemote();
 	mode = '';
 	initPlayPage();
 }

@@ -11,6 +11,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+const socket = new WebSocket("ws://localhost:8080/ws/game/{{match.id}}/");
+
 let canvas;
 let stateMatch = {
 	'ball': {
