@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/06 13:01:32 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/05/06 14:59:20 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,8 @@ function startGame(m) {
 		   startLocalVsHuman()
 		   break;
 		case 'remote':
-			window.location.href = '../../backend/game/templates/index.html';
+			console.log("Starting game: Remote vs Human");
+					
 			break;
        default:
            console.log(`Sorry ${m} not configured`);

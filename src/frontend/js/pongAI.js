@@ -94,9 +94,13 @@ function gameOver(){
 	else
 		texto = "YOU LOSE";
 
-	Swal.fire(texto).then((result) => {	
+	Swal.fire({
+		title: texto,
+		confirmButtonColor: '#32B974',
+	}).then((result) => {	
 		if (result.isConfirmed){
 			Swal.fire({
+				confirmButtonColor: '#32B974',
 				title: "Play again ?",
 				showDenyButton: true,
 				showCancelButton: false,
