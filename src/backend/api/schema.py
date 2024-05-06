@@ -1,6 +1,9 @@
 from ninja import ModelSchema, Schema
+from typing import List
 from .models import User
 import datetime
+from pydantic import BaseModel, ValidationError, model_validator
+
 
 """ Auth schemas """
 
@@ -40,6 +43,35 @@ class UserSchema(ModelSchema):
         fields = '__all__'
         exclude = ['first_name', 'last_name', 'email', "user_permissions", "groups",
                    "is_staff", "is_active", "is_superuser", "last_login", "date_joined"]
+
+
+class FriendSchema(Schema):
+    name: str
+    profilePicture: str
+    status: bool
+
+
+class UserFriendSchema(Schema):
+    username: str
+    profilePicture: str
+    password: str
+    friends: List[FriendSchema]
+
+    def __init__(self, user, **data):
+        super().__init__(**data)
+        self.user = user
+
+    @model_validator(mode='before')
+    def populate_fields(self, values):  # Add the self parameter
+        user = self.user
+        if user:
+            values['username'] = user.username
+            values['password'] = user.password
+            values['profilePicture'] = user.profile_picture.url if user.profile_picture else None
+            values['friends'] = [FriendSchema.from_orm(friend) for friend in user.user1.all()] + \
+                                [FriendSchema.from_orm(friend)
+                                 for friend in user.user2.all()]
+        return values
 
 
 class UserUpdateSchema(Schema):
