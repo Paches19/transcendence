@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/06 18:11:01 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/06 19:01:51 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,14 +49,18 @@ async function login(username, password) {
             }),
         });
         
-        if (response.ok) {
+        const data = await response.json();
+        
+        if (response.ok && data.msg === "Login successful") {
             const token = username;
             localStorage.setItem('userToken', token);
+            console.log("token: " + token);
             updateNavbar();
             router.route('/profile');
             return true;
         } else {
-            throw new Error('Login failed');
+            console.log("response KO");
+            return false;
         }
     } catch (error) {
         console.error('An error occurred during login:', error);
@@ -81,10 +85,9 @@ async function logout() {
     const logoutEndpoint = 'http://localhost:8000/api/auth/logout';
     try {
         const response = await fetch(logoutEndpoint, {
-            method: 'POST',
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('userToken')}`
             },
         });
 
@@ -93,8 +96,6 @@ async function logout() {
             updateNavbar();
             router.route('/home');
             console.log('Logged out successfully.');
-        } else {
-            throw new Error('Logout failed');
         }
     } catch (error) {
         console.error('An error occurred during logout:', error);

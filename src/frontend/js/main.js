@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:24:45 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/27 13:44:33 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/06 19:00:19 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () =>
 {
 	router.resolveCurrentPath();
 	
-	document.body.addEventListener('click', function(event) {
+	document.body.addEventListener('click', async function(event) {
 		const target = event.target.closest('[data-route]');
 		if (target) {
 			event.preventDefault();
@@ -96,9 +96,13 @@ document.addEventListener('DOMContentLoaded', () =>
         
         if (event.target.closest('#link-logout')) {
             event.preventDefault();
-            logout();
-            updateNavbar();
-            router.route('/home');
+            try {
+                await logout();
+                updateNavbar();
+                router.route('/home');
+            } catch (error) {
+                console.error('Failed to log out:', error);
+            }
         }
 	});
 	
