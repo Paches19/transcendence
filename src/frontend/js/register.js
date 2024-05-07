@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:22:20 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/28 10:02:37 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/07 10:02:33 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ function setupRegisterForm()
                 <button type="submit" class="btn btn-primary">Register</button>
             </form>
             <div id="error-message" display: none;"></div>
+            <div class="text" id="register-msg"> </div>
         </div>
     `;
     
@@ -30,71 +31,56 @@ function setupRegisterForm()
     registerForm.addEventListener('submit', handleRegisterSubmit);
 }
 
-function handleRegisterSubmit(event)
-{
+async function handleRegisterSubmit(event) {
     event.preventDefault();
     const username = document.getElementById('register-username').value;
     const password = document.getElementById('register-password').value;
-
+    
     const errorMessage = validateInputs(username, password);
-    if (errorMessage)
-	{
+    if (errorMessage) {
         displayError(errorMessage);
+        return;
     }
-	else
-	{
-        console.log('Registering', username, password);
-        alert('Registration successful for ' + username);
-        
-        router.route('/home');
+
+    const userData = {
+        username: username,
+        password: password,
+        profilePicture: "",
+        totalPoints: 0,
+        status: 0,
+        matchesTotal: 0,
+        matchesWon: 0,
+        matchesLost: 0,
+        matchesDraw: 0
+    };
+
+    try {
+        const response = await fetch('http://localhost:8000/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        });
+        if (response.ok) {
+            const data = await response.json();
+            console.log('Registration successful for', username);
+            const registerMsg = document.getElementById('register-msg');
+            if (registerMsg) {
+                registerMsg.innerText = username + ' has been succesfully register!!';
+            }
+            setTimeout(() => {
+                router.route('/home');
+            }, 2500);
+        } else {
+            const errorData = await response.json();
+            displayError(errorData.message || 'Failed to register. Please try again.');
+        }
+    } catch (error) {
+        console.error('An error occurred during registration:', error);
+        displayError('An error occurred during registration. Please try again.');
     }
 }
-
-// async function handleRegisterSubmit(event) {
-//     event.preventDefault();
-//     const username = document.getElementById('register-username').value;
-//     const password = document.getElementById('register-password').value;
-    
-//     const errorMessage = validateInputs(username, password);
-//     if (errorMessage) {
-//         displayError(errorMessage);
-//         return;
-//     }
-
-//     const userData = {
-//         name: username,
-//         password: password,
-//         profilePicture: "",
-//         totalPoints: 0,
-//         status: 0,
-//         matchesTotal: 0,
-//         matchesWon: 0,
-//         matchesLost: 0,
-//         matchesDraw: 0
-//     };
-
-//     try {
-//         const response = await fetch('api/auth/register', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify(userData)
-//         });
-//         if (response.ok) {
-//             const data = await response.json();
-//             console.log('Registration successful for', username);
-//             alert('Registration successful for ' + username);
-//             router.route('/home');
-//         } else {
-//             const errorData = await response.json();
-//             displayError(errorData.message || 'Failed to register. Please try again.');
-//         }
-//     } catch (error) {
-//         console.error('An error occurred during registration:', error);
-//         displayError('An error occurred during registration. Please try again.');
-//     }
-// }
 
 function validateInputs(username, password)
 {
