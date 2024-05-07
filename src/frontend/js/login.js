@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:21:53 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/06 19:12:08 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/07 10:10:29 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,13 +29,7 @@ function setupLoginEvent() {
                         loginMsg.innerText = 'You have logged in! Ready to rack up some points?';
                     }
                     setTimeout(() => {
-                        const shouldRedirectBack = localStorage.getItem('loginRedirect');
-                        if (!shouldRedirectBack) {
-                            window.history.back();
-                        } else {
-                            localStorage.removeItem('loginRedirect');
                             router.route('/profile');
-                        }
                     }, 1500);
                 } else {
                     const loginMsg = document.getElementById('login-msg');

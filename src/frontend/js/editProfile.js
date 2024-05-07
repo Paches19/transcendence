@@ -6,12 +6,9 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 13:04:35 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/30 16:18:37 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/07 11:22:48 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-import { isLoggedIn } from './auth.js';
-import router from './main.js';
 
 const mockUser =
 	{
@@ -34,11 +31,6 @@ const mockUser =
 	};
 
 function loadEditProfile() {
-	if (!isLoggedIn()) {
-	  localStorage.setItem('loginRedirect', 'true');
-	  router.route('/login');
-	  return;
-	}
 
 	const currentUser = mockUser;
   
@@ -54,17 +46,19 @@ function loadEditProfile() {
 				<form id="edit-profile-form">
 				  <div class="form-group">
 					<label for="profile-name">Name</label>
-					<input type="text" class="form-control" id="profile-name" value="${currentUser.username}" required>
+					<input type="text" class="form-control" id="profile-name" value="${currentUser.username}" readonly required>
 					<label for="profile-name">Password</label>
 					<input type="password" class="form-control" id="profile-password" value="${currentUser.password}" required>
 				  </div>
-				  <div class="form-group">
+				  <div class="form-group" id="picture-group">
 					<label for="profile-picture">Profile Picture URL</label>
 					<input type="file" class="form-control-file" id="profile-picture-upload" accept="image/*">
 					<img id="profile-picture-preview" src="${currentUser.avatar}" alt="Profile Picture Preview" class="img-thumbnail" style="margin-top: 10px; max-width: 200px;">
 				  </div>
-				  <button type="button" class="btn btn-secondary" id="upload-picture">Upload Picture</button>
-				  <button type="button" class="btn btn-primary" id="save-profile">Save</button>
+				  <div class="button-container">
+					<button type="button" class="btn btn-secondary" id="upload-picture"><span>Upload<br>Picture</span></button>
+					<button type="button" class="btn btn-primary" id="save-profile">Save</button>
+				  </div>
 				</form>
 			  </div>
 			</div>
@@ -80,19 +74,8 @@ function loadEditProfile() {
   
   function addEditProfileEventListeners() {
 	document.getElementById('save-profile').addEventListener('click', function() {
-	  // Aquí se recogerían los nuevos valores del formulario.
-	  const name = document.getElementById('profile-name').value;
 	  const password = document.getElementById('profile-password').value;
-	  const pictureUrl = document.getElementById('profile-picture').value;
-  
-	  // Aquí se realizaría la llamada a la API para guardar los cambios del perfil.
-	  console.log('Saving profile...');
-	  console.log('Name:', name);
-	  console.log('Password:', password);
-	  console.log('Profile Picture URL:', pictureUrl);
-  
-	  // Suponiendo que se tenga una función 'updateUserProfile' para actualizar los datos del perfil.
-	  updateUserProfile(name, password, pictureUrl);
+	  updateUserProfile(password);
 	});
 
 	document.getElementById('profile-picture-upload').addEventListener('change', function() {
@@ -109,20 +92,46 @@ function loadEditProfile() {
 	  });
 	  
 	  document.getElementById('upload-picture').addEventListener('click', function() {
-		// Aquí implementarías la carga al servidor
 		const fileInput = document.getElementById('profile-picture-upload');
 		const file = fileInput.files[0];
 		if (file) {
-		  console.log('Uploading picture...');
-		  showNotification("Photo uploaded");
-		  // Aquí va el código para cargar la imagen al servidor
-		  // Puedes utilizar FormData y un XMLHttpRequest o fetch para esto
+		  updateUserAvatar(file);
 		} else {
-		  alert('Please select a picture first.');
+			showNotification("Please select a photo first!!");
 		}
 	  });
   }
+  
+  function updateUserAvatar(file) {
+    const apiUrl = 'http://localhost:8000/api/users/avatar';
+    const formData = new FormData();
+    formData.append('file', file);
 
+    const requestOptions = {
+        method: 'POST',  
+        body: formData,
+    };
+
+    fetch(apiUrl, requestOptions)
+        .then(response => {
+            if (!response.ok) {
+				showNotification('Network response was not ok.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            console.log('Success:', data);
+            showNotification("Photo uploaded successfully.");
+        })
+        .catch((error) => {
+            console.error('Error:', error); 
+            showNotification("Error uploading photo: " + error.message);
+        });
+}
+  
   function showNotification(message) {
 	let notification = document.getElementById('notification');
 	if (!notification)
@@ -141,19 +150,33 @@ function loadEditProfile() {
 	}, 4000);
   }
   
-  function updateUserProfile(name, password, pictureUrl) {
-	console.log(`Updating profile for ${mockUser.username}`);
-	console.log(`New name: ${name}`);
-	console.log(`New password: ${password}`);
-	console.log(`New profile picture URL: ${pictureUrl}`);
-  
-	// Simular actualización de los datos del perfil.
-	mockUser.username = name;
-	mockUser.password = password;
-	mockUser.avatar = pictureUrl;
-  
-	// Mostrar alguna notificación al usuario de que el perfil se ha actualizado correctamente.
-	showNotification('Profile updated successfully.');
-  }
+  function updateUserProfile(newPassword) {
+    const apiUrl = 'http://localhost:8000/api/users/update';
+    const requestBody = {
+        password: newPassword, 
+        totalPoints: 0,        
+        status: true,          
+        matchesTotal: 0,        
+        matchesWon: 0,         
+        matchesLost: 0,         
+        matchesDraw: 0
+    };
+
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+    };
+
+    fetch(apiUrl, requestOptions)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Success:', data);
+			showNotification('Profile updated successfully.');
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+	}
   
   export default loadEditProfile;

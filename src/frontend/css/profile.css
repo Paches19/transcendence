@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/12 12:46:57 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/24 13:56:23 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/07 11:06:36 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,6 +207,8 @@
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
+    display: flex;
+    align-items: center;
 }
 
 .friend-username {
@@ -236,3 +238,48 @@
     transform: translate(-50%, -50%);
 }
 
+.btn-secondary{
+    background-color: var(--retro-purple) !important;
+}
+.btn-secondary:hover{
+    background-color: var(--border-purple) !important;
+    transform: scale(1.1);
+}
+
+.btn-secondary, .btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 200px;
+    height: 60px;
+    padding: 5px 10px;
+}
+
+.btn-secondary span {
+    white-space: normal;
+    text-align: center;
+}
+
+@media (min-width: 1024px) {
+    .button-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+@media (max-width: 1023px) {
+    .button-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn-secondary, .btn-primary {
+        margin-bottom: 10px;
+    }
+
+    .btn-secondary{
+        font-size: 2vh;
+    }
+}
