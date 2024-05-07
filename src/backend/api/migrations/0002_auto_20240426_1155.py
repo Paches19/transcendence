@@ -42,6 +42,7 @@ def generate_friends_data(apps, schema_editor):
         user2 = User.objects.get(username=f"user{i+2}")
         Friend.objects.create(user1=user1, user2=user2, status=True)
 
+
 class Migration(migrations.Migration):
 
     dependencies = [

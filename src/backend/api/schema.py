@@ -1,9 +1,8 @@
-from ninja import ModelSchema, Schema
-from typing import List
-from .models import User
-import datetime
 from pydantic import BaseModel, ValidationError, model_validator
-
+import datetime
+from .models import User
+from typing import List
+from ninja import ModelSchema, Schema
 
 """ Auth schemas """
 
@@ -50,6 +49,7 @@ class FriendSchema(Schema):
     name: str
     profilePicture: str
     status: bool
+
 
 class UserFriendSchema(Schema):
     id: int

@@ -3,15 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   play.js                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/22 18:32:11 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/06 23:56:32 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { isLoggedIn, getUsernameFromToken } from "./auth.js";
 import router from "./main.js";
+import { initGameAI, quitAI, pauseAI, playAI } from "./pongAI.js";
+import { initGameHuman, quitHuman, pauseHuman, playHuman } from "./pongHuman.js";
+import { initGameRemote, quitRemote, pauseRemote, playRemote } from "./pongRemote.js";
+
+let mode = '';
+let isPaused = true;
+let seconds = 0;
 
 function initPlayPage() {
     renderGameOptions();
@@ -33,13 +40,21 @@ function renderGameOptions() {
     `;
 }
 
-function startGame(mode) {
-    switch (mode){
+function startGame(m) {
+	console.log("mode = " + m);
+    mode = m;
+	switch (m){
        case 'solo':
            startSoloVsIA()
            break;
+	   case 'local':
+		   startLocalVsHuman()
+		   break;
+		case 'remote':
+			startRemoteVsHuman()
+			break;
        default:
-           console.log(`Sorry ${mode} not configured`);
+           console.log(`Sorry ${m} not configured`);
     }       
 }
 
@@ -48,18 +63,37 @@ function attachEventListeners() {
     document.getElementById('local-vs-human').addEventListener('click', () => startGame('local'));
     document.getElementById('remote-vs-human').addEventListener('click', () => startGame('remote'));
     document.getElementById('join-tournament').addEventListener('click', () => startGame('tournament'));
+	startGame();
 }
 
 function startSoloVsIA() {
     if (isLoggedIn()) {
         console.log("Starting game: Solo vs IA");
-        showGameScreen();
+        showGameAIScreen();
     } else {
         router.route("/login");
     }
 }
 
-function showGameScreen() {
+function startLocalVsHuman() {
+    if (isLoggedIn()) {
+        console.log("Starting game: Local vs Human");
+        showGameHumanScreen();
+    } else {
+        router.route("/login");
+    }
+}
+
+function startRemoteVsHuman() {
+	if (isLoggedIn()) {
+		console.log("Starting game: Remote vs Human");
+		showGameRemoteScreen();
+	} else {
+		router.route("/login");
+	}
+}
+
+function showGameAIScreen() {
     const mainContent = document.getElementById('main-content');
     const username = getUsernameFromToken();
     mainContent.innerHTML = `
@@ -77,13 +111,72 @@ function showGameScreen() {
         </div>
         <div class="row mt-3">
             <div class="col-12 text-center">
-                <button class="btn btn-success btn-lg mx-2" id="restart-game">Restart</button>
+                <button class="btn btn-success btn-lg mx-2" id="restart-game">Pause</button>
                 <button class="btn btn-danger btn-lg mx-2" id="quit-game">Quit</button>
             </div>
         </div>
     </div>
     `;
     initializeGame();
+	initGameAI();
+    attachGameControlEventListeners();
+}
+
+function showGameHumanScreen() {
+    const mainContent = document.getElementById('main-content');
+    const username = getUsernameFromToken();
+    mainContent.innerHTML = `
+    <div class="container mt-5 game-container">
+        <div class="row align-items-center">
+            <div class="col-12 col-lg-8 mx-auto">
+                <div class="bg-dark text-white p-3 rounded-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <h2 id="game-score" class="mb-0">${username} 0 - 0 Opponent</h2>
+                        <h3 id="game-timer" class="mb-0">00:00</h3>
+                    </div>
+                    <canvas id="pong-game" class="w-100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12 text-center">
+                <button class="btn btn-success btn-lg mx-2" id="restart-game">Pause</button>
+                <button class="btn btn-danger btn-lg mx-2" id="quit-game">Quit</button>
+            </div>
+        </div>
+    </div>
+    `;
+    initializeGame();
+	initGameHuman();
+    attachGameControlEventListeners();
+}
+
+function showGameRemoteScreen() {
+	const mainContent = document.getElementById('main-content');
+	const username = getUsernameFromToken();
+	mainContent.innerHTML = `
+    <div class="container mt-5 game-container">
+        <div class="row align-items-center">
+            <div class="col-12 col-lg-8 mx-auto">
+                <div class="bg-dark text-white p-3 rounded-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <h2 id="game-score" class="mb-0">${username} 0 - 0 Opponent</h2>
+                        <h3 id="game-timer" class="mb-0">00:00</h3>
+                    </div>
+                    <canvas id="pong-game" class="w-100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12 text-center">
+                <button class="btn btn-success btn-lg mx-2" id="restart-game">Pause</button>
+                <button class="btn btn-danger btn-lg mx-2" id="quit-game">Quit</button>
+            </div>
+        </div>
+    </div>
+    `;
+    initializeGame();
+	initGameRemote();
     attachGameControlEventListeners();
 }
 
@@ -95,8 +188,8 @@ function initializeGame() {
         const context = canvas.getContext('2d');
         context.fillStyle = '#000';
         context.fillRect(0, 0, canvas.width, canvas.height);
+		resetTime();
         startTimer();
-        console.log("Pong game initialized.");
     }
 }
 
@@ -112,33 +205,63 @@ function resizeCanvas() {
 }
 
 let gameInterval;
-let seconds = 0;
+
+function resetTime(){
+	const timerDisplay = document.getElementById("game-timer");
+	clearInterval(gameInterval);
+	seconds = 0;
+	timerDisplay.textContent = `00:00`;
+	isPaused = false;
+}
 
 function restartGame() {
-    clearInterval(gameInterval);
-    seconds = 0;
-    startTimer();
-    console.log("Game restarted.");
-    // Aquí se implementaría la lógica para pausar el juego.
+	let textButton = document.getElementById("restart-game");
+	if (textButton.textContent == "Pause"){
+		textButton.textContent = "Resume";
+		isPaused = true;
+		if (mode == 'solo')
+			pauseAI();
+		else if (mode == 'local')
+			pauseHuman();
+		else if (mode == 'remote')
+			pauseRemote();
+	}
+	else{
+		textButton.textContent = "Pause";
+		isPaused = false;
+		if (mode == 'solo')
+			playAI();
+		else if (mode == 'local')
+			playHuman();
+		else if (mode == 'remote')
+			playRemote();
+	}
 }
 
 function quitGame() {
-    const timerDisplay = document.getElementById("game-timer");
-    clearInterval(gameInterval);
-    seconds = 0;
-    timerDisplay.textContent = `00:00`;
+    resetTime();
     console.log("Game quit.");
     // Aquí se implementaría la lógica para salir del juego.
+	if (mode == 'solo')
+		quitAI();
+	else if (mode == 'local')
+		quitHuman();
+	else if (mode == 'remote')
+		quitRemote();
+	mode = '';
+	initPlayPage();
 }
 
 function startTimer() {
     const timerDisplay = document.getElementById("game-timer");
     gameInterval = setInterval(() => {
-        seconds++;
-        let minutes = Math.floor(seconds / 60);
-        let remainingSeconds = seconds % 60;
-        timerDisplay.textContent = `${pad(minutes)}:${pad(remainingSeconds)}`;
-    }, 1000);
+		if (!isPaused){
+	        seconds++;
+    	    let minutes = Math.floor(seconds / 60);
+    	    let remainingSeconds = seconds % 60;
+    	    timerDisplay.textContent = `${pad(minutes)}:${pad(remainingSeconds)}`;
+		}
+	}, 1000);
 }
 
 function pad(number) {
@@ -153,3 +276,4 @@ function attachGameControlEventListeners() {
 }
 
 export default initPlayPage;
+export {initPlayPage, resetTime};
