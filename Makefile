@@ -23,7 +23,7 @@ $(NAME):
 			@echo "Using compose file at $(COMPOSE_ROUTE)"
 			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) up -d --remove-orphans
 			@printf "\n$(BLUE)==> $(CYAN)Transcendence is running ✅\n$(RESET)"
-			@printf "$(BLUE)==> $(BLUE)Accessible on: \n\t$(YELLOW)https://localhost/$(PORT)\n$(RESET)"
+			@printf "$(BLUE)==> $(BLUE)Accessible on: \n\t$(YELLOW)http://localhost:$(PORT)\n$(RESET)"
 
 stop:
 			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) stop
@@ -42,7 +42,7 @@ re:			clean
 			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) up -d --build
 			@printf "$(BLUE)==> $(CYAN)Transcendence rebuilt 🔄\n$(RESET)"
 			@printf "\n$(BLUE)==> $(CYAN)Transcendence is running ✅\n$(RESET)"
-			@printf "$(BLUE)==> $(BLUE)Accessible on: \n\t$(YELLOW)https://localhost/$(PORT)\n$(RESET)"
+			@printf "$(BLUE)==> $(BLUE)Accessible on: \n\t$(YELLOW)http://localhost:$(PORT)\n$(RESET)"
 
 re-postgres:
 			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) up -d --no-deps --build postgres

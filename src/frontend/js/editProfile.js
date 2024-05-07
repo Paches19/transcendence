@@ -6,9 +6,13 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 13:04:35 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/07 11:22:48 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/07 16:28:01 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+
+import { isLoggedIn } from './auth.js';
+import router from './main.js';
 
 const mockUser =
 	{

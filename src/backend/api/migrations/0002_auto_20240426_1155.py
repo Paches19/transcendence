@@ -34,6 +34,15 @@ def generate_matches_data(apps, schema_editor):
                              date=datetime.date.today().isoformat())
 
 
+def generate_friends_data(apps, schema_editor):
+    Friend = apps.get_model("api", "Friend")
+    User = apps.get_model("api", "User")
+    for i in range(8):
+        user1 = User.objects.get(username=f"user{i+1}")
+        user2 = User.objects.get(username=f"user{i+2}")
+        Friend.objects.create(user1=user1, user2=user2, status=True)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -43,5 +52,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunPython(generate_users_data),
         migrations.RunPython(generate_tournaments_data),
-        migrations.RunPython(generate_matches_data)
+        migrations.RunPython(generate_matches_data),
+        migrations.RunPython(generate_friends_data),
     ]

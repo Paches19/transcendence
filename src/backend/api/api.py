@@ -5,7 +5,8 @@ from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
 from ninja.params import Query
 from .models import User, Friend, Tournament, UserTournament, Match
-from .middleware import login_required
+from .middleware import login_required, require_auth
+from typing import Optional
 from .schema import (UserSchema, ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema,
                      AddFriendSchema, TournamentSchema, BasicUserSchema,
@@ -51,18 +52,48 @@ def logout_user(request):
 
 """ Users """
 
+# aux function to add friend data to the get_users response
 
-@app.get("users", response=list[UserFriendSchema], tags=['Users'])
-def get_users(request, user_id: int = Query(None)):
+
+def populate_friends(user):
+    all_friends = Friend.objects.all()
+    friends = []
+    for friend in all_friends:
+        if friend.user1 == user.id:
+            friends.append({
+                "id": friend.user2.id,
+                "name": friend.user2.username,
+                "profilePicture": friend.user2.profilePicture,
+                "status": friend.status
+            })
+        elif friend.user2 == user.id:
+            friends.append({
+                "id": friend.user1.id,
+                "name": friend.user1.username,
+                "profilePicture": friend.user1.profilePicture,
+                "status": friend.status
+            })
+    return friends
+
+
+@app.get("users", response=UserFriendSchema, tags=['Users'])
+def get_users(request, user_id: Optional[int] = None):
     if user_id:
         user = get_object_or_404(User, id=user_id)
-        resp = UserFriendSchema(user).dict()
+        if user is None:
+            return 400, {"msg": "User not found"}
     else:
-        resp = []
-        users = User.objects.all()
-        for user in users:
-            resp.append(UserFriendSchema(user).dict())
+        auth_response = require_auth(request)
+        if auth_response is not None:
+            return auth_response
+        user = request.user
 
+    resp = {
+        "id": user.id,
+        "username": user.username,
+        "profilePicture": str(user.profilePicture),
+        "friends": populate_friends(user)
+    }
     return resp
 
 
