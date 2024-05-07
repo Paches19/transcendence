@@ -59,18 +59,18 @@ def populate_friends(user):
     all_friends = Friend.objects.all()
     friends = []
     for friend in all_friends:
-        if friend.user1 == user.id:
+        if friend.user1_id == user.id:
             friends.append({
-                "id": friend.user2.id,
-                "name": friend.user2.username,
-                "profilePicture": friend.user2.profilePicture,
+                "id": friend.user1_id,
+                "name": friend.user1.username,
+                "profilePicture": str(get_object_or_404(User, id=friend.user1_id).profilePicture),
                 "status": friend.status
             })
-        elif friend.user2 == user.id:
+        elif friend.user2_id == user.id:
             friends.append({
-                "id": friend.user1.id,
+                "id": friend.user1_id,
                 "name": friend.user1.username,
-                "profilePicture": friend.user1.profilePicture,
+                "profilePicture": str(get_object_or_404(User, id=friend.user1_id).profilePicture),
                 "status": friend.status
             })
     return friends
