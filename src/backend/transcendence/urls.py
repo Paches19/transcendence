@@ -4,6 +4,5 @@ from api.api import app as api_app
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("", include("game.urls")),
     path("api/", api_app.urls),
 ]
