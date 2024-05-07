@@ -46,32 +46,16 @@ class UserSchema(ModelSchema):
 
 
 class FriendSchema(Schema):
+    id: int
     name: str
     profilePicture: str
     status: bool
 
-
 class UserFriendSchema(Schema):
+    id: int
     username: str
     profilePicture: str
-    password: str
     friends: List[FriendSchema]
-
-    def __init__(self, user, **data):
-        super().__init__(**data)
-        self.user = user
-
-    @model_validator(mode='before')
-    def populate_fields(self, values):  # Add the self parameter
-        user = self.user
-        if user:
-            values['username'] = user.username
-            values['password'] = user.password
-            values['profilePicture'] = user.profile_picture.url if user.profile_picture else None
-            values['friends'] = [FriendSchema.from_orm(friend) for friend in user.user1.all()] + \
-                                [FriendSchema.from_orm(friend)
-                                 for friend in user.user2.all()]
-        return values
 
 
 class UserUpdateSchema(Schema):
