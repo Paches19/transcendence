@@ -15,8 +15,7 @@ def generate_tournaments_data(apps, schema_editor):
     Tournament = apps.get_model("api", "Tournament")
     for i in range(10):
         Tournament.objects.create(name=f"tournament{i+1}",
-                                  startDate=datetime.date.today().isoformat(),
-                                  endDate=datetime.date.today().isoformat(),
+                                  date=datetime.date.today().isoformat(),
                                   number_participants=random.randint(2, 16))
 
 
@@ -37,7 +36,7 @@ def generate_matches_data(apps, schema_editor):
 def generate_friends_data(apps, schema_editor):
     Friend = apps.get_model("api", "Friend")
     User = apps.get_model("api", "User")
-    for i in range(8):
+    for i in range(9):
         user1 = User.objects.get(username=f"user{i+1}")
         user2 = User.objects.get(username=f"user{i+2}")
         Friend.objects.create(user1=user1, user2=user2, status=True)

@@ -22,8 +22,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('tournamentID', models.AutoField(primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=50)),
-                ('startDate', models.DateField()),
-                ('endDate', models.DateField()),
+                ('date', models.DateField()),
                 ('number_participants', models.IntegerField()),
                 ('status', models.CharField(choices=[('upcoming', 'Upcoming'), ('in_progress', 'In Progress'), ('ended', 'Ended')], default='Upcoming', max_length=11)),
             ],
