@@ -50,7 +50,7 @@ function loadEditProfile() {
 				<form id="edit-profile-form">
 				  <div class="form-group">
 					<label for="profile-name">Name</label>
-					<input type="text" class="form-control" id="profile-name" value="${currentUser.username}" readonly required>
+					<input type="text" class="form-control" id="profile-name" value="${currentUser.username}" required>
 					<label for="profile-name">Password</label>
 					<input type="password" class="form-control" id="profile-password" value="${currentUser.password}" required>
 				  </div>
@@ -180,6 +180,7 @@ function loadEditProfile() {
         })
         .catch((error) => {
             console.error('Error:', error);
+			showNotification('Error: ' + error);
         });
 	}
   
