@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+import datetime
 
 # Create your models here.
 
@@ -46,10 +47,9 @@ class Tournament(models.Model):
         ('in_progress', 'In Progress'),
         ('ended', 'Ended'),
     ]
-    tournamentID = models.AutoField(primary_key=True)
+    tournamentID = models.AutoField(primary_key=True, unique=True)
     name = models.CharField(max_length=50)
-    startDate = models.DateField()
-    endDate = models.DateField()
+    date = models.DateField(default=datetime.date.today)
     number_participants = models.IntegerField()
     status = models.CharField(
         max_length=11, choices=TOURNAMENT_STATUS_CHOICES, default='Upcoming')

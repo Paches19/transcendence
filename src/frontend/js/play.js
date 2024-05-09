@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/06 23:56:32 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/05/08 20:41:30 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,7 +160,7 @@ function showGameRemoteScreen() {
             <div class="col-12 col-lg-8 mx-auto">
                 <div class="bg-dark text-white p-3 rounded-3">
                     <div class="d-flex justify-content-between mb-2">
-                        <h2 id="game-score" class="mb-0">${username} 0 - 0 Opponent</h2>
+                        <h2 id="game-score" class="mb-0">${username} 0 - 0 (Waiting)</h2>
                         <h3 id="game-timer" class="mb-0">00:00</h3>
                     </div>
                     <canvas id="pong-game" class="w-100"></canvas>
@@ -174,6 +174,9 @@ function showGameRemoteScreen() {
             </div>
         </div>
     </div>
+	<script>
+		const socket = new WebSocket("ws://" + window.location.host + "/ws/game/{{match.id}}/")
+	</script>
     `;
     initializeGame();
 	initGameRemote();

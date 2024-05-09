@@ -11,12 +11,6 @@ class UserRegisterSchema(Schema):
     username: str
     password: str
     profilePicture: str = ""
-    totalPoints: int = 0
-    status: bool = 0
-    matchesTotal: int = 0
-    matchesWon: int = 0
-    matchesLost: int = 0
-    matchesDraw: int = 0
 
 
 class LoginSchema(Schema):
@@ -27,10 +21,6 @@ class LoginSchema(Schema):
 class BasicUserSchema(Schema):
     username: str
     profilePicture: str | None
-
-
-class UserNameSchema(Schema):
-    username: str
 
 
 """ User schemas """
@@ -55,17 +45,22 @@ class UserFriendSchema(Schema):
     id: int
     username: str
     profilePicture: str
+    totalPoints: int
+    status: bool
+    matchesTotal: int
+    matchesWon: int
+    matchesLost: int
+    matchesDraw: int
     friends: List[FriendSchema]
 
 
 class UserUpdateSchema(Schema):
+    username: str = None
     password: str = None
-    totalPoints: int = None
-    status: bool = None
-    matchesTotal: int = None
-    matchesWon: int = None
-    matchesLost: int = None
-    matchesDraw: int = None
+
+
+class UserNameSchema(Schema):
+    username: str
 
 
 class AddFriendSchema(Schema):
@@ -75,11 +70,27 @@ class AddFriendSchema(Schema):
 """ Tournaments schemas """
 
 
+class TournamentCreateSchema(Schema):
+    name: str
+    number_participants: int
+
+
+class TournamentUserSchema(Schema):
+    user_id: int
+    username: str
+
+
 class TournamentSchema(Schema):
     name: str
-    startDate: str = datetime.date.today().isoformat()
-    number_participants: int
+    date: str = datetime.date.today().isoformat()
     status: str
+    number_participants: int
+    participants: List[TournamentUserSchema]
+
+
+class TournamentNameSchema(Schema):
+    id: int
+    name: str
 
 
 """ Match schemas """
@@ -98,4 +109,8 @@ class MatchSchema(Schema):
 
 
 class ErrorSchema(Schema):
+    error_msg: str
+
+
+class SuccessSchema(Schema):
     msg: str

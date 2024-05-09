@@ -113,7 +113,7 @@ function initGameRemote(){
 	canvas = document.getElementById('pong-game');
 	ctx = canvas.getContext('2d');
 	ctx.fillStyle = 'white';
-	socket = new WebSocket("ws://localhost:8080/ws/game/remote/1");
+	socket = new WebSocket("ws://localhost:8080/ws/game/remote");
 	document.addEventListener('keydown', handleKeyDown);
 	stateMatch = {
 		'ball': {
@@ -162,7 +162,7 @@ function resetBall(){
 		stateMatch.ball.vy = 4
 	stateMatch.state = 'waiting';
 	drawElements();
-	setTimeout(playHuman,3000);
+	setTimeout(playRemote,3000);
 }
 
 function ballBounce() {
