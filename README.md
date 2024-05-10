@@ -6,7 +6,7 @@
 ## With docker
 
 ```bash
-cp .example.env /src/docker/.env
+cp .example.env src/docker/.env
 
 #Give .env values
 vim /src/docker/.env 

@@ -42,6 +42,20 @@ def generate_friends_data(apps, schema_editor):
         Friend.objects.create(user1=user1, user2=user2, status=True)
 
 
+def generate_tournament_participants_data(apps, schema_editor):
+    Tournament = apps.get_model("api", "Tournament")
+    User = apps.get_model("api", "User")
+    UserTournament = apps.get_model("api", "UserTournament")
+    for i in range(9):
+        tournament = Tournament.objects.get(name=f"tournament{i+1}")
+        for j in range(2, 16):
+            try:
+                user = User.objects.get(username=f"user{j}")
+                UserTournament.objects.create(user=user, tournament=tournament)
+            except User.DoesNotExist:
+                pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -53,4 +67,5 @@ class Migration(migrations.Migration):
         migrations.RunPython(generate_tournaments_data),
         migrations.RunPython(generate_matches_data),
         migrations.RunPython(generate_friends_data),
+        migrations.RunPython(generate_tournament_participants_data),
     ]
