@@ -80,12 +80,12 @@ def populate_matches(user):
     all_matches = Match.objects.all()
     matches = []
     for match in all_matches:
-        if len(matches) < 10:
+        if len(matches) >= 10:
             break
         if match.user1.id == user.id or match.user2.id == user.id:
             is_user1 = match.user1 == user.id
             matches.append({
-                "date": match.date,
+                "date": str(match.date),
                 "opponent": match.user2.username if is_user1 else match.user1.username,
                 "result": match.pointsUser1 > match.pointsUser2 if is_user1 else match.pointsUser2 > match.pointsUser1,
                 "score": f"{match.pointsUser1} - {match.pointsUser2}" if is_user1 else f"{match.pointsUser2} - {match.pointsUser1}"
