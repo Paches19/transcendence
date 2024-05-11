@@ -6,9 +6,10 @@ from ninja.files import UploadedFile
 from ninja.params import Query
 from .models import User, Friend, Tournament, UserTournament, Match
 from .middleware import login_required, require_auth
+from .populate_data import *
 from typing import Optional
 from .schema import (UserSchema, ErrorSchema, UserUpdateSchema,
-                     UserRegisterSchema, LoginSchema,
+                     UserRegisterSchema, LoginSchema, SingleTournamentSchema,
                      AddFriendSchema, TournamentSchema,
                      UserNameSchema, MatchSchema, UserFriendSchema,
                      SuccessSchema, TournamentCreateSchema)
@@ -54,45 +55,6 @@ def logout_user(request):
 """ Users """
 
 
-# aux function to add friend data to the get_users response
-def populate_friends(user):
-    all_friends = Friend.objects.all()
-    friends = []
-    for friend in all_friends:
-        if friend.user1.id == user.id:
-            friends.append({
-                "id": friend.user2.id,
-                "name": friend.user2.username,
-                "profilePicture": str(friend.user2.profilePicture),
-                "status": friend.status
-            })
-        elif friend.user2.id == user.id:
-            friends.append({
-                "id": friend.user1.id,
-                "name": friend.user1.username,
-                "profilePicture": str(friend.user1.profilePicture),
-                "status": friend.status
-            })
-    return friends
-
-
-def populate_matches(user):
-    all_matches = Match.objects.all()
-    matches = []
-    for match in all_matches:
-        if len(matches) >= 10:
-            break
-        if match.user1.id == user.id or match.user2.id == user.id:
-            is_user1 = match.user1 == user.id
-            matches.append({
-                "date": str(match.date),
-                "opponent": match.user2.username if is_user1 else match.user1.username,
-                "result": match.pointsUser1 > match.pointsUser2 if is_user1 else match.pointsUser2 > match.pointsUser1,
-                "score": f"{match.pointsUser1} - {match.pointsUser2}" if is_user1 else f"{match.pointsUser2} - {match.pointsUser1}"
-            })
-    return matches
-
-
 @app.get("users", response=UserFriendSchema, tags=['Users'])
 def get_users(request, user_id: Optional[int] = None):
     if user_id:
@@ -114,7 +76,6 @@ def get_users(request, user_id: Optional[int] = None):
         "matchesTotal": user.matchesTotal,
         "matchesWon": user.matchesWon,
         "matchesLost": user.matchesLost,
-        "matchesDraw": user.matchesDraw,
         "friends": populate_friends(user),
         "matches": populate_matches(user)
     }
@@ -231,15 +192,25 @@ def get_tournaments(request):
             "date": tournament.date.isoformat(),
             "status": tournament.status,
             "number_participants": tournament.number_participants,
-            "participants": [{"user_id": user.id, "username": user.username} for user in UserTournament.objects.filter(tournament=tournament)]
+            "participants": populate_tournament_participants(tournament)
         })
     return resp
 
 
-@app.get("tournaments/{tournament_id}", response=TournamentSchema, tags=['Tournaments'])
+@app.get("tournaments/{tournament_id}", response=SingleTournamentSchema, tags=['Tournaments'])
 def get_tournament(request, tournament_id: int):
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
-    return tournament
+    resp = {
+        "id": tournament.tournamentID,
+        "name": tournament.name,
+        "date": tournament.date.isoformat(),
+        "status": tournament.status,
+        "number_participants": tournament.number_participants,
+        "participants": populate_tournament_participants(tournament),
+        "standings": populate_standings(tournament),
+        "matches": populate_tournament_matches(tournament_id)
+    }
+    return resp
 
 
 @app.post("tournaments/{tournament_id}/join", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Tournaments'])
@@ -277,4 +248,6 @@ def get_tournament_matches(request, tournament_id: int):
     return matches
 
 
-""" Matches """
+@app.get("api/tournaments/{tournament_id}/standings", tags=['Tournaments'])
+def tournaments_standings(request, tournament_id: int):
+    pass

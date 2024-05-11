@@ -57,7 +57,6 @@ class UserFriendSchema(Schema):
     matchesTotal: int
     matchesWon: int
     matchesLost: int
-    matchesDraw: int
     friends: List[FriendSchema]
     matches: List[MatchSchema]
 
@@ -86,6 +85,7 @@ class TournamentCreateSchema(Schema):
 class UserTournamentSchema(Schema):
     user_id: int
     username: str
+    profilePicture: str
 
 
 class TournamentSchema(Schema):
@@ -94,6 +94,34 @@ class TournamentSchema(Schema):
     status: str
     number_participants: int
     participants: List[UserTournamentSchema]
+
+
+class StandingsSchema(Schema):
+    username: str
+    games_played: int
+    games_won: int
+    games_lost: int
+    points_for: int
+    points_against: int
+
+
+class MatchInfoSchema(Schema):
+    player1_username: str
+    player2_username: str
+    player1_points: int
+    player2_points: int
+    played: bool
+
+
+class SingleTournamentSchema(Schema):
+    id: int
+    name: str
+    date: str
+    status: str
+    number_participants: int
+    participants: List[UserTournamentSchema]
+    standings: List[StandingsSchema]
+    matches: List[MatchInfoSchema]
 
 
 class TournamentNameSchema(Schema):

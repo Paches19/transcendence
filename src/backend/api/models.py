@@ -28,7 +28,6 @@ class User(AbstractUser):
     matchesTotal = models.IntegerField(default=0)
     matchesWon = models.IntegerField(default=0)
     matchesLost = models.IntegerField(default=0)
-    matchesDraw = models.IntegerField(default=0)
 
 
 class Friend(models.Model):
