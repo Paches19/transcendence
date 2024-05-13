@@ -11,63 +11,48 @@
 /* ************************************************************************** */
 
 import router from "./main.js"
-import { getUsernameFromToken } from "./auth.js";
 
-const mockTournaments = [
-    {
-        id: 1,
-        name: 'Spring Pong Championship',
-        participants: ['Player1', 'Player2', 'Player3'],
-        status: 'Upcoming'
-    },
-    {
-        id: 2,
-        name: 'Summer Pong Fest',
-        participants: ['Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6'],
-        status: 'In Progress'
-    },
-	{
-        id: 3,
-        name: 'Spring Pong Championship',
-        participants: ['Player1', 'Player2', 'Player3'],
-        status: 'Upcoming'
-    },
-    {
-        id: 4,
-        name: 'Summer Pong Fest',
-        participants: ['Player4', 'Player5', 'Player6'],
-        status: 'In Progress'
-    },
-	{
-        id: 5,
-        name: 'Spring Pong Championship',
-        participants: ['Player1', 'Player2', 'Player3'],
-        status: 'Upcoming'
-    },
-    {
-        id: 6,
-        name: 'Summer Pong Fest',
-        participants: ['Player4', 'Player5', 'Player6'],
-        status: 'Ended'
-    }
-];
-
-function loadTournaments() {
-    updateTournamentHTML();
-    attachEventListeners();
+async function fetchTournaments() {
+    const apiUrl = 'http://localhost:8000/api/tournaments';
+    return fetch(apiUrl, {
+        method: 'GET',
+    })
+        .then(response => {
+            if (!response.ok) {
+                showNotification('Network response was not ok');
+            }
+            return response.json();
+        })
+        .catch(error => {
+            console.error('Error fetching tournaments:', error);
+            showNotification('Error fetching tournaments:', error);
+            return [];
+        });
 }
 
-function updateTournamentHTML() {
-    const tournamentsHTML = `
+async function loadTournaments() {
+    try {
+        const tournaments = await fetchTournaments();
+        updateTournamentHTML(tournaments);
+    } catch (error) {
+        console.error('Error loading tournaments:', error);
+        showNotification('Error loading tournaments:', error);
+    }
+}
+
+function updateTournamentHTML(tournaments) {
+    const tournamentsHTML = viewTournaments(tournaments);
+    const html = `
         <div class="tournament-container">
             <h1 class="tournament-title">Tournaments</h1>
             <div class="btn-group" role="group" aria-label="Tournament Actions">
                 <button class="button" id="createTournamentBtn">Create Tournament</button>
             </div>
-            <div id="tournament-list" class="tournament-list">${viewTournaments()}</div>
+            <div id="tournament-list" class="tournament-list">${tournamentsHTML}</div>
         </div>
     `;
-    document.getElementById('main-content').innerHTML = tournamentsHTML;
+    document.getElementById('main-content').innerHTML = html;
+    attachEventListeners();
 }
 
 function attachEventListeners() {
@@ -86,32 +71,31 @@ function attachEventListeners() {
         if (viewBtn) {
             e.preventDefault();
             const tournamentId = viewBtn.getAttribute('data-id');
+            console.log("id: " + tournamentId);
             router.route(`/tournaments/${tournamentId}`);
         } else if (e.target.classList.contains('join-tournament-btn')) {
-            const tournamentName = e.target.getAttribute('data-name');
-            joinTournament(tournamentName);
+            const tournamentId = viewBtn.getAttribute('data-id');
+            const tournamentName = viewBtn.getAttribute('data-id');
+            console.log("id: " + tournamentId);
+            joinTournament(tournamentId);
         }
     });
 }
 
-function viewTournaments() {
-    return mockTournaments.map(tournament => `
+function viewTournaments(tournaments) {
+    return tournaments.map(tournament => `
         <div class="tournament-entry">
             <h3 class="tournament-name">${tournament.name}</h3>
             <div class="tournament-details" style="display: none;">
                 <p>Status: ${tournament.status}</p>
                 <div class="participants-container">
-                    <h4 class="participants-title">Participants</h4>
+                    <h4>Participants: ${tournament.number_participants}</h4>
                     <div class="participants-list">
-                        ${tournament.participants.map(participant => `
-                            <span class="participant-name">${participant}</span>
-                        `).join('')}
+                        ${tournament.participants.map(participant => `<span>${participant.username}</span>`).join(', ')}
                     </div>
                 </div>
-                <div>
-                <button class="button view-tournament-btn" data-id="${tournament.id}">View Tournament</button>
-                    ${tournament.status !== 'In Progress' ? `<button class="button join-tournament-btn" id="join-tournament-btn" data-name="${tournament.name}">Join Tournament</button>` : ''}
-                </div>
+                <button class="button view-tournament-btn" data-name="${tournament.name}" data-id="${tournament.id}">View Details</button>
+                ${tournament.status !== 'In Progress' ? `<button class="button join-tournament-btn" data-id="${tournament.id}">Join Tournament</button>` : ''}
             </div>
         </div>
     `).join('');
@@ -164,6 +148,34 @@ function addModalEventListeners() {
         const tournamentName = document.getElementById('tournamentName').value;
         const numPlayers = document.getElementById('numPlayers').value;
         document.getElementById('createTournamentModal').style.display = 'none';
+        const requestBody = {
+            name: tournamentName,
+            number_participants: numPlayers,
+        };
+
+        const apiUrl = 'http://localhost:8000/api/tournaments/create';
+        fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody)
+        })
+        .then(response => {
+            if (!response.ok) {
+                showNotification()('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Success:', data);
+            showNotification('Tournament succesfully created!');
+            loadTournaments();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error:', error)
+        });
     });
 }
 
@@ -185,7 +197,7 @@ function showNotification(message, isSuccess = true) {
 }
 
 function joinTournament(tournament) {
-    const username = getUsernameFromToken();
+    const username = localStorage.getItem('userToken');
     if (username) {
         console.log(`${username} logged in. Joining tournament with name: ${tournament}`);
         showNotification(`${username} joined tournament "${tournament}" successfully!`, true);

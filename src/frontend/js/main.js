@@ -23,45 +23,6 @@ import loadInitialContent from './init.js'
 import { logout } from './auth.js';
 import updateNavbar from './navbar.js';
 
-const mockTournaments = [
-    {
-        id: 1,
-        name: 'Spring Pong Championship',
-        participants: ['Player1', 'Player2', 'Player3'],
-        status: 'Upcoming'
-    },
-    {
-        id: 2,
-        name: 'Summer Pong Fest',
-        participants: ['Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6'],
-        status: 'In Progress'
-    },
-	{
-        id: 3,
-        name: 'Spring Pong Championship',
-        participants: ['Player1', 'Player2', 'Player3'],
-        status: 'Upcoming'
-    },
-    {
-        id: 4,
-        name: 'Summer Pong Fest',
-        participants: ['Player4', 'Player5', 'Player6'],
-        status: 'In Progress'
-    },
-	{
-        id: 5,
-        name: 'Spring Pong Championship',
-        participants: ['Player1', 'Player2', 'Player3'],
-        status: 'Upcoming'
-    },
-    {
-        id: 6,
-        name: 'Summer Pong Fest',
-        participants: ['Player4', 'Player5', 'Player6'],
-        status: 'Ended'
-    }
-];
-
 const router = new Router();
 
 router.addRoute('/', loadInitialContent);
@@ -73,7 +34,14 @@ router.addRoute('/tournaments', loadTournaments);
 router.addRoute('/login', login);
 router.addRoute('/register', setupRegisterForm);
 router.addRoute('/tournaments/:id', id => {
-    const tournament = mockTournaments.find(t => t.id === parseInt(id));
+    const tournaments = 0;
+    try {
+        tournaments = fetchTournaments();
+        updateTournamentHTML(tournaments);
+    } catch (error) {
+        console.error('Error loading tournaments:', error);
+    }
+    const tournament = tournaments.find(t => t.id === parseInt(id));
     if (tournament) {
         loadTournamentDetails(tournament);
     } else {
@@ -81,6 +49,23 @@ router.addRoute('/tournaments/:id', id => {
     }
 });
 router.setDefaultRoute(loadPageNotFound);
+
+async function fetchTournaments() {
+    const apiUrl = 'http://localhost:8000/api/tournaments';
+    return fetch(apiUrl, {
+        method: 'GET',
+    })
+        .then(response => {
+            if (!response.ok) {
+                console.error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .catch(error => {
+            console.error('Error fetching tournaments:', error);
+            return [];
+        });
+}
 
 document.addEventListener('DOMContentLoaded', () =>
 {
