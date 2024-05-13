@@ -52,6 +52,7 @@ async function loadProfile() {
         const response = await fetch(apiUrl, {
             method: 'GET',
 			headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
         });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);

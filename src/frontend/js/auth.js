@@ -26,6 +26,7 @@ async function login(username, password) {
                 username: username,
                 password: password
             }),
+            credentials: 'include'
         });
         
         const data = await response.json();
@@ -34,6 +35,7 @@ async function login(username, password) {
             const token = username;
             localStorage.setItem('userToken', token);
             console.log("token: " + token);
+            console.log("data: " + data);
             return true;
         } else {
             console.log("response KO");
