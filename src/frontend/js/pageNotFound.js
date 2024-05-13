@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-function cargarPaginaNoEncontrada() {
+function loadPageNotFound() {
 	document.getElementById('main-content').innerHTML = `
 		<!DOCTYPE html>
 		<html lang="en">
@@ -60,4 +60,4 @@ function cargarPaginaNoEncontrada() {
 	`;
 }
 
-export default cargarPaginaNoEncontrada;
+export default loadPageNotFound;

@@ -45,7 +45,7 @@ async function handleRegisterSubmit(event) {
     const userData = {
         username: username,
         password: password,
-        profilePicture: "",
+        profilePicture: "static/avatars/default.jpg",
     };
 
     try {

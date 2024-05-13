@@ -34,8 +34,6 @@ async function login(username, password) {
             const token = username;
             localStorage.setItem('userToken', token);
             console.log("token: " + token);
-            updateNavbar();
-            router.route('/profile');
             return true;
         } else {
             console.log("response KO");

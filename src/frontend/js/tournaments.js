@@ -75,7 +75,6 @@ function attachEventListeners() {
             router.route(`/tournaments/${tournamentId}`);
         } else if (e.target.classList.contains('join-tournament-btn')) {
             const tournamentId = viewBtn.getAttribute('data-id');
-            const tournamentName = viewBtn.getAttribute('data-id');
             console.log("id: " + tournamentId);
             joinTournament(tournamentId);
         }
@@ -91,7 +90,7 @@ function viewTournaments(tournaments) {
                 <div class="participants-container">
                     <h4>Participants: ${tournament.number_participants}</h4>
                     <div class="participants-list">
-                        ${tournament.participants.map(participant => `<span>${participant.username}</span>`).join(', ')}
+                        ${tournament.participants.map(participant => `<span>${participant.username}</span>`).join('')}
                     </div>
                 </div>
                 <button class="button view-tournament-btn" data-name="${tournament.name}" data-id="${tournament.id}">View Details</button>

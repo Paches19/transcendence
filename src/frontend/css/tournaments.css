@@ -272,9 +272,9 @@
         margin: 10px auto;
         flex: none;
     }
-    
-    .tournament-details div {
-        flex-direction: column;
+
+    h4{
+        font-size: 2vh;
     }
 
     .btn-group {
