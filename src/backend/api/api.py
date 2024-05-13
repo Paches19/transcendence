@@ -10,9 +10,8 @@ from .populate_data import *
 from typing import Optional
 from .schema import (UserSchema, ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema, SingleTournamentSchema,
-                     AddFriendSchema, TournamentSchema,
-                     UserNameSchema, MatchSchema, UserFriendSchema,
-                     SuccessSchema, TournamentCreateSchema)
+                     AddFriendSchema, TournamentSchema, UserNameSchema,
+                     UserFriendSchema, SuccessSchema, TournamentCreateSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -67,6 +66,9 @@ def get_users(request, user_id: Optional[int] = None):
             return auth_response
         user = request.user
 
+    print("________________")
+    print(user.profilePicture)
+    print("________________")
     resp = {
         "id": user.id,
         "username": user.username,
@@ -214,13 +216,13 @@ def get_tournament(request, tournament_id: int):
 
 
 @app.post("tournaments/{tournament_id}/join", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Tournaments'])
-def join_tournament(request, user_id: int, tournament_id: int):
-    user = get_object_or_404(User, id=user_id)
+def join_tournament(request, tournament_id: int):
+    user = get_object_or_404(User, id=request.user.id)
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
 
     user_tournament_data = {
-        "user": user,
-        "tournament": tournament
+        "user": request.user.id,
+        "tournament": tournament.tournamentID
     }
 
     UserTournament.objects.create(**user_tournament_data)
@@ -228,8 +230,8 @@ def join_tournament(request, user_id: int, tournament_id: int):
 
 
 @app.post("tournaments/{tournament_id}/leave", response={200: UserSchema, 400: ErrorSchema}, tags=['Tournaments'])
-def leave_tournament(request, user_id: int, tournament_id: int):
-    user = get_object_or_404(User, id=user_id)
+def leave_tournament(request, tournament_id: int):
+    user = get_object_or_404(User, id=request.user.id)
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
 
     if not UserTournament.objects.filter(user=user, tournament=tournament).exists():
@@ -238,16 +240,4 @@ def leave_tournament(request, user_id: int, tournament_id: int):
     user_tournament = get_object_or_404(
         UserTournament, user=user, tournament=tournament)
     user_tournament.delete()
-    return 200, {"error_msg": "User left tournament"}
-
-
-@app.get("tournaments/{tournament_id}/matches", response=list[MatchSchema], tags=['Tournaments'])
-def get_tournament_matches(request, tournament_id: int):
-    tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
-    matches = Match.objects.filter(tournamentId=tournament)
-    return matches
-
-
-@app.get("api/tournaments/{tournament_id}/standings", tags=['Tournaments'])
-def tournaments_standings(request, tournament_id: int):
-    pass
+    return 200, {"msg": "User left tournament"}

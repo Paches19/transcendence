@@ -10,17 +10,12 @@ from ninja import ModelSchema, Schema
 class UserRegisterSchema(Schema):
     username: str
     password: str
-    profilePicture: str = ""
+    profilePicture: str = "static/avatars/default.jpg"
 
 
 class LoginSchema(Schema):
     username: str
     password: str
-
-
-class BasicUserSchema(Schema):
-    username: str
-    profilePicture: str | None
 
 
 """ User schemas """
@@ -127,18 +122,6 @@ class SingleTournamentSchema(Schema):
 class TournamentNameSchema(Schema):
     id: int
     name: str
-
-
-""" Match schemas """
-
-
-class MatchSchema(Schema):
-    user1: int
-    user2: int
-    pointsUser1: int = 0
-    pointsUser2: int = 0
-    date: str = datetime.date.today().isoformat()
-    tournamentId: int = None
 
 
 """ General schemas """
