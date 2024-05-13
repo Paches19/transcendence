@@ -187,6 +187,7 @@ def get_tournaments(request):
     resp = []
     for tournament in all_tournaments:
         resp.append({
+            "id": tournament.id,
             "name": tournament.name,
             "date": tournament.date.isoformat(),
             "status": tournament.status,

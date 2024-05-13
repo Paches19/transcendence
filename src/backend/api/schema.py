@@ -84,6 +84,7 @@ class UserTournamentSchema(Schema):
 
 
 class TournamentSchema(Schema):
+    id: int
     name: str
     date: str = datetime.date.today().isoformat()
     status: str

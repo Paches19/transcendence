@@ -32,7 +32,7 @@ def populate_matches(user):
         if len(matches) >= 10:
             break
         if match.user1.id == user.id or match.user2.id == user.id:
-            is_user1 = match.user1 == user.id
+            is_user1 = match.user1.id == user.id
             matches.append({
                 "date": str(match.date),
                 "opponent": match.user2.username if is_user1 else match.user1.username,
