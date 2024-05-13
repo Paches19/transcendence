@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
                 ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
                 ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
-                ('profilePicture', models.CharField(default='static/avatars/default.jpg')),
+                ('profilePicture', models.CharField(default='/static/avatars/default.jpg')),
                 ('totalPoints', models.IntegerField(default=0)),
                 ('status', models.BooleanField(default=True)),
                 ('matchesTotal', models.IntegerField(default=0)),

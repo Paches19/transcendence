@@ -13,33 +13,6 @@
 import { isLoggedIn } from './auth.js';
 import router from './main.js';
 
-const mockUser =
-{
-	username: "user1",
-	avatar: "./images/avatar/author_1.png",
-	gamesPlayed: 150,
-	gamesWon: 100,
-	gamesLost: 50,
-	pointsFor: 1200,
-	pointsAgainst: 800,
-	tournamentsPlayed: 10,
-	tournamentsWon: 5,
-	matchHistory:
-	[
-		{ date: "04/07/2024", opponent: "Player42", result: "Win", score: "21-15" },
-		{ date: "04/09/2024", opponent: "ArcadeMaster", result: "Loss", score: "18-21" },
-		{ date: "04/12/2024", opponent: "PixelNinja", result: "Win", score: "21-10" }
-	]
-};
-
-const mockFriends =
-[
-    { username: "ArcadeMaster", avatar: "./images/avatar/author_2.png" },
-    { username: "PongChamp", avatar: "./images/avatar/author_3.png" },
-    { username: "RetroGamer42", avatar: "./images/avatar/author_3.png" },
-	{ username: "Jutrera", avatar: "./images/avatar/author_2.png" }
-];
-
 async function loadProfile() {
     if (!isLoggedIn()) {
         localStorage.setItem('loginRedirect', 'true');
