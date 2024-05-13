@@ -151,4 +151,5 @@ CHANNEL_LAYERS = {
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:8080',
+    'https://localhost:8080'
 ]

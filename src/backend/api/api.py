@@ -66,9 +66,6 @@ def get_users(request, user_id: Optional[int] = None):
             return auth_response
         user = request.user
 
-    print("________________")
-    print(user.profilePicture)
-    print("________________")
     resp = {
         "id": user.id,
         "username": user.username,
