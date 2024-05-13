@@ -46,12 +46,6 @@ async function handleRegisterSubmit(event) {
         username: username,
         password: password,
         profilePicture: "",
-        totalPoints: 0,
-        status: 0,
-        matchesTotal: 0,
-        matchesWon: 0,
-        matchesLost: 0,
-        matchesDraw: 0
     };
 
     try {

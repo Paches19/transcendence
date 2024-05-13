@@ -238,15 +238,15 @@
     transform: translate(-50%, -50%);
 }
 
-.btn-secondary{
+#upload-picture{
     background-color: var(--retro-purple) !important;
 }
-.btn-secondary:hover{
+#upload-picture:hover{
     background-color: var(--border-purple) !important;
     transform: scale(1.1);
 }
 
-.btn-secondary, .btn-primary {
+#upload-picture, #save-profile{
     display: flex;
     align-items: center;
     justify-content: center;
@@ -255,7 +255,7 @@
     padding: 5px 10px;
 }
 
-.btn-secondary span {
+.btn-secondary span{
     white-space: normal;
     text-align: center;
 }

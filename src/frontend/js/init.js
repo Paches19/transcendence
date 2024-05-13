@@ -18,7 +18,7 @@ function loadInitialContent()
 		<div class="hero-text-container">
 			<h1>Welcome to Trascendence</h1>
 			<p>The return of the iconic game that will end everything</p>
-			<a data-route="/play" class="btn btn-primary btn-lg">PLAY NOW</a>
+			<a data-route="/play" id="play-now" class="btn btn-primary btn-lg">PLAY NOW</a>
 		</div>
 	</div>
 

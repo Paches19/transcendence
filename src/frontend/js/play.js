@@ -31,7 +31,7 @@ function renderGameOptions() {
     <div class="play-options-container text-center mt-5">
         <h1 class="play-title mb-4">Elige tu Modo de Juego</h1>
         <div class="game-options btn-group">
-            <button id="solo-vs-ia" class="btn btn-primary game-option-button">Solo vs IA</button>
+            <button id="solo-vs-ia" class="btn btn-light game-option-button">Solo vs IA</button>
             <button id="local-vs-human" class="btn btn-light game-option-button">Local vs Human</button>
             <button id="remote-vs-human" class="btn btn-success game-option-button">Remote vs Human</button>
             <button id="join-tournament" class="btn btn-info game-option-button">Tournament Game</button>
