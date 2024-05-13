@@ -13,6 +13,7 @@
 import Router from './router.js';
 import loadProfile from './profile.js';
 import loadEditProfile from './editProfile.js';
+import loadFriendProfile from './friendProfile.js';
 import initPlayPage from './play.js';
 import { loadTournaments } from './tournaments.js';
 import loadTournamentDetails from './tournamentDetails.js';
@@ -28,6 +29,7 @@ const router = new Router();
 router.addRoute('/', loadInitialContent);
 router.addRoute('/home', loadInitialContent);
 router.addRoute('/profile', loadProfile);
+router.addRoute('/friend-profile/:id,', id => { loadFriendProfile(id) });
 router.addRoute('/edit-profile', loadEditProfile);
 router.addRoute('/play', initPlayPage);
 router.addRoute('/tournaments', loadTournaments);

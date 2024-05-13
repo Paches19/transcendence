@@ -16,6 +16,8 @@ async function fetchTournaments() {
     const apiUrl = 'http://localhost:8000/api/tournaments';
     return fetch(apiUrl, {
         method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
     })
         .then(response => {
             if (!response.ok) {

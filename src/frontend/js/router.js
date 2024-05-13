@@ -10,6 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+import updateNavbar from "./navbar.js";
+
 export default class Router {
     constructor() {
         this.routes = {};
@@ -26,6 +28,7 @@ export default class Router {
     }
 
     resolveCurrentPath() {
+        updateNavbar();
         const path = window.location.pathname || '/';
         this.route(path, false);
     }
