@@ -10,17 +10,12 @@ from ninja import ModelSchema, Schema
 class UserRegisterSchema(Schema):
     username: str
     password: str
-    profilePicture: str = ""
+    profilePicture: str = "static/avatars/default.jpg"
 
 
 class LoginSchema(Schema):
     username: str
     password: str
-
-
-class BasicUserSchema(Schema):
-    username: str
-    profilePicture: str | None
 
 
 """ User schemas """
@@ -41,6 +36,13 @@ class FriendSchema(Schema):
     status: bool
 
 
+class MatchSchema(Schema):
+    date: str
+    opponent: str
+    result: bool
+    score: str
+
+
 class UserFriendSchema(Schema):
     id: int
     username: str
@@ -50,8 +52,8 @@ class UserFriendSchema(Schema):
     matchesTotal: int
     matchesWon: int
     matchesLost: int
-    matchesDraw: int
     friends: List[FriendSchema]
+    matches: List[MatchSchema]
 
 
 class UserUpdateSchema(Schema):
@@ -64,7 +66,7 @@ class UserNameSchema(Schema):
 
 
 class AddFriendSchema(Schema):
-    friend_id: int
+    friend_username: str
 
 
 """ Tournaments schemas """
@@ -75,9 +77,10 @@ class TournamentCreateSchema(Schema):
     number_participants: int
 
 
-class TournamentUserSchema(Schema):
+class UserTournamentSchema(Schema):
     user_id: int
     username: str
+    profilePicture: str
 
 
 class TournamentSchema(Schema):
@@ -85,24 +88,40 @@ class TournamentSchema(Schema):
     date: str = datetime.date.today().isoformat()
     status: str
     number_participants: int
-    participants: List[TournamentUserSchema]
+    participants: List[UserTournamentSchema]
+
+
+class StandingsSchema(Schema):
+    username: str
+    games_played: int
+    games_won: int
+    games_lost: int
+    points_for: int
+    points_against: int
+
+
+class MatchInfoSchema(Schema):
+    player1_username: str
+    player2_username: str
+    player1_points: int
+    player2_points: int
+    played: bool
+
+
+class SingleTournamentSchema(Schema):
+    id: int
+    name: str
+    date: str
+    status: str
+    number_participants: int
+    participants: List[UserTournamentSchema]
+    standings: List[StandingsSchema]
+    matches: List[MatchInfoSchema]
 
 
 class TournamentNameSchema(Schema):
     id: int
     name: str
-
-
-""" Match schemas """
-
-
-class MatchSchema(Schema):
-    user1: int
-    user2: int
-    pointsUser1: int = 0
-    pointsUser2: int = 0
-    date: str = datetime.date.today().isoformat()
-    tournamentId: int = None
 
 
 """ General schemas """

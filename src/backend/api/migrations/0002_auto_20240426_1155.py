@@ -28,8 +28,8 @@ def generate_matches_data(apps, schema_editor):
         user2 = User.objects.get(username=f"user{i+2}")
         tournament = Tournament.objects.get(name=f"tournament{i+1}")
         Match.objects.create(user1=user1, user2=user2, tournamentId=tournament,
-                             pointsUser1=random.randint(0, 100),
-                             pointsUser2=random.randint(0, 100),
+                             pointsUser1=random.randint(0, 10),
+                             pointsUser2=random.randint(0, 10),
                              date=datetime.date.today().isoformat())
 
 
@@ -40,6 +40,17 @@ def generate_friends_data(apps, schema_editor):
         user1 = User.objects.get(username=f"user{i+1}")
         user2 = User.objects.get(username=f"user{i+2}")
         Friend.objects.create(user1=user1, user2=user2, status=True)
+
+
+def generate_tournament_participants_data(apps, schema_editor):
+    Tournament = apps.get_model("api", "Tournament")
+    User = apps.get_model("api", "User")
+    UserTournament = apps.get_model("api", "UserTournament")
+    for i in range(10):
+        tournament = Tournament.objects.get(name=f"tournament{i+1}")
+        for j in range(9):
+            user = User.objects.get(username=f"user{j+1}")
+            UserTournament.objects.create(user=user, tournament=tournament)
 
 
 class Migration(migrations.Migration):
@@ -53,4 +64,5 @@ class Migration(migrations.Migration):
         migrations.RunPython(generate_tournaments_data),
         migrations.RunPython(generate_matches_data),
         migrations.RunPython(generate_friends_data),
+        migrations.RunPython(generate_tournament_participants_data),
     ]
