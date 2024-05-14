@@ -143,6 +143,9 @@ def add_friend(request, friend_username: AddFriendSchema):
     user = get_object_or_404(User, id=user_id)
     friend = get_object_or_404(User, username=friend_username.friend_username)
 
+    if user == friend:
+        return 400, {"error_msg": "Cannot add yourself as friend"}
+
     if Friend.objects.filter(user1=user, user2=friend).exists() or Friend.objects.filter(user1=friend, user2=user).exists():
         return 400, {"error_msg": "Friend request already sent"}
 
@@ -161,8 +164,11 @@ def accept_friend(request, friend_username: AddFriendSchema):
     user = request.user
     friend = get_object_or_404(User, username=friend_username.friend_username)
 
-    if not Friend.objects.filter(user1=user, user2=friend, status=False).exists():
+    if not Friend.objects.filter(user1=friend, user2=user).exists() and not Friend.objects.filter(user1=user, user2=friend).exists():
         return 400, {"error_msg": "Friend request not found"}
+
+    if Friend.objects.filter(user1=friend, user2=user).exists():
+        return 400, {"error_msg": "Only user 1 can accept the friend request"}
 
     friendship = get_object_or_404(Friend, user1=user, user2=friend)
     friendship.status = True
@@ -230,20 +236,25 @@ def get_tournament(request, tournament_id: int):
 
 
 @app.post("tournaments/{tournament_id}/join", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Tournaments'])
+@login_required
 def join_tournament(request, tournament_id: int):
     user = get_object_or_404(User, id=request.user.id)
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
 
+    if UserTournament.objects.filter(user=user, tournament=tournament).exists():
+        return 400, {"error_msg": "User already in tournament"}
+
     user_tournament_data = {
-        "user": request.user.id,
-        "tournament": tournament.tournamentID
+        "user": user,
+        "tournament": tournament
     }
 
     UserTournament.objects.create(**user_tournament_data)
     return 200, {"msg": "User joined tournament"}
 
 
-@app.post("tournaments/{tournament_id}/leave", response={200: UserSchema, 400: ErrorSchema}, tags=['Tournaments'])
+@app.post("tournaments/{tournament_id}/leave", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Tournaments'])
+@login_required
 def leave_tournament(request, tournament_id: int):
     user = get_object_or_404(User, id=request.user.id)
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
