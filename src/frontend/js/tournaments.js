@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/22 12:12:27 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/14 11:59:54 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ function attachEventListeners() {
             details.style.display = details.style.display === 'none' ? 'block' : 'none';
         });
     });
-    
+
     document.addEventListener('click', function(e) {
         const viewBtn = e.target.closest('.view-tournament-btn');
         if (viewBtn) {
@@ -76,7 +76,8 @@ function attachEventListeners() {
             console.log("id: " + tournamentId);
             router.route(`/tournaments/${tournamentId}`);
         } else if (e.target.classList.contains('join-tournament-btn')) {
-            const tournamentId = viewBtn.getAttribute('data-id');
+            e.preventDefault();
+            const tournamentId = e.target.getAttribute('data-id');
             console.log("id: " + tournamentId);
             joinTournament(tournamentId);
         }
@@ -95,8 +96,10 @@ function viewTournaments(tournaments) {
                         ${tournament.participants.map(participant => `<span>${participant.username}</span>`).join('')}
                     </div>
                 </div>
-                <button class="button view-tournament-btn" data-name="${tournament.name}" data-id="${tournament.id}">View Details</button>
-                ${tournament.status !== 'In Progress' ? `<button class="button join-tournament-btn" data-id="${tournament.id}">Join Tournament</button>` : ''}
+                <div class="button-div">
+                    <button class="button view-tournament-btn" data-name="${tournament.name}" data-id="${tournament.id}">View Details</button>
+                    ${tournament.status !== 'In Progress' ? `<button class="button join-tournament-btn" data-id="${tournament.id}">Join Tournament</button>` : ''}
+                </div>
             </div>
         </div>
     `).join('');
@@ -197,15 +200,45 @@ function showNotification(message, isSuccess = true) {
     }, 5000);
 }
 
-function joinTournament(tournament) {
+async function joinTournament(tournamentId) {
     const username = localStorage.getItem('userToken');
     if (username) {
-        console.log(`${username} logged in. Joining tournament with name: ${tournament}`);
-        showNotification(`${username} joined tournament "${tournament}" successfully!`, true);
+        console.log(`${username} logged in. Joining tournament with ID: ${tournamentId}`);
+
+        const apiUrl = `http://localhost:8000/api/tournaments/${tournamentId}/join`;
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Join tournament successful:', data);
+                showNotification(data.msg, true);
+                loadTournaments();
+            } else if (response.status === 400) {
+                const errorData = await response.json();
+                console.error('Error joining tournament:', errorData.error_msg);
+                showNotification(`Error: ${errorData.error_msg}`, false);
+            } else {
+                console.error('Unexpected error:', response.status);
+                showNotification('Unexpected error occurred. Please try again later.', false);
+            }
+        } catch (error) {
+            console.error('Error joining tournament:', error);
+            showNotification('Error joining tournament. Please try again later.', false);
+        }
     } else {
         console.log('User not logged in. Please log in to join a tournament.');
         showNotification('Please log in to join a tournament.', false);
     }
 }
+
 
 export { loadTournaments, createTournament, joinTournament, viewTournaments};

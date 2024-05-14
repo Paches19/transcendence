@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 18:11:12 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/18 17:38:06 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/14 11:46:22 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ async function fetchTournamentById(id) {
 
 async function loadTournamentDetails(id) {
 
-	let tournament = null;
+    let tournament = null;
     try {
         tournament = await fetchTournamentById(id);
     } catch (error) {
@@ -45,7 +45,7 @@ async function loadTournamentDetails(id) {
     const previousMatches = matches.filter(match => match.played);
     const upcomingMatches = matches.filter(match => !match.played);
 
-	const standings = tournament.standings.map(player => ({
+    const standings = tournament.standings.map(player => ({
         ...player,
         games_played: Number(player.games_played),
         games_won: Number(player.games_won),
@@ -64,6 +64,10 @@ async function loadTournamentDetails(id) {
     const tournamentDetailsHTML = `
     <div class="container mt-5 tournament-details-container">
         <h1 class="text-center mb-3 tournament-header">${tournament.name}</h1>
+        <div class="d-flex justify-content-center my-4">
+            ${tournament.status !== 'In Progress' ? `<button class="button join-tournament-btn2 mx-2" data-id="${tournament.id}">Join Tournament</button>` : ''}
+            <button class="button leave-tournament-btn2 mx-2" data-id="${tournament.id}">Leave Tournament</button>
+        </div>
         <div class="row">
             <div class="col-lg-5">
                 <div class="card custom-card mb-4">
@@ -110,19 +114,19 @@ async function loadTournamentDetails(id) {
                                     </tr>
                                 </thead>
                                 <tbody>
-									${sortedStandings.length > 0 ? `
-									${sortedStandings.map(player => `
-										<tr>
-											<td>${player.username}</td>
-											<td>${player.games_played}</td>
-											<td>${player.games_won}</td>
-											<td>${player.games_lost}</td>
-											<td>${player.points_for}</td>
-											<td>${player.points_against}</td>
-										</tr>
-									`).join('')}
-								` : '<tr><td colspan="6">No standings available</td></tr>'}
-								</tbody>
+                                    ${sortedStandings.length > 0 ? `
+                                    ${sortedStandings.map(player => `
+                                        <tr>
+                                            <td>${player.username}</td>
+                                            <td>${player.games_played}</td>
+                                            <td>${player.games_won}</td>
+                                            <td>${player.games_lost}</td>
+                                            <td>${player.points_for}</td>
+                                            <td>${player.points_against}</td>
+                                        </tr>
+                                    `).join('')}
+                                ` : '<tr><td colspan="6">No standings available</td></tr>'}
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -132,6 +136,114 @@ async function loadTournamentDetails(id) {
     </div>
     `;
     document.getElementById('main-content').innerHTML = tournamentDetailsHTML;
+    attachEventListenersForTournamentDetails();
+}
+
+function attachEventListenersForTournamentDetails() {
+    document.querySelector('.join-tournament-btn').addEventListener('click', function(e) {
+        const tournamentId = e.target.getAttribute('data-id');
+        joinTournament(tournamentId);
+    });
+
+    document.querySelector('.leave-tournament-btn').addEventListener('click', function(e) {
+        const tournamentId = e.target.getAttribute('data-id');
+        leaveTournament(tournamentId);
+    });
+}
+
+async function joinTournament(tournamentId) {
+    const username = localStorage.getItem('userToken');
+    if (username) {
+        console.log(`${username} logged in. Joining tournament with ID: ${tournamentId}`);
+
+        const apiUrl = `http://localhost:8000/api/tournaments/${tournamentId}/join`;
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Join tournament successful:', data);
+                showNotification(data.msg, true);
+                loadTournamentDetails(tournamentId); // Recargar los detalles del torneo para reflejar los cambios
+            } else if (response.status === 400) {
+                const errorData = await response.json();
+                console.error('Error joining tournament:', errorData.error_msg);
+                showNotification(`Error: ${errorData.error_msg}`, false);
+            } else {
+                console.error('Unexpected error:', response.status);
+                showNotification('Unexpected error occurred. Please try again later.', false);
+            }
+        } catch (error) {
+            console.error('Error joining tournament:', error);
+            showNotification('Error joining tournament. Please try again later.', false);
+        }
+    } else {
+        console.log('User not logged in. Please log in to join a tournament.');
+        showNotification('Please log in to join a tournament.', false);
+    }
+}
+
+async function leaveTournament(tournamentId) {
+    const username = localStorage.getItem('userToken');
+    if (username) {
+        console.log(`${username} logged in. Leaving tournament with ID: ${tournamentId}`);
+
+        const apiUrl = `http://localhost:8000/api/tournaments/${tournamentId}/leave`;
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Leave tournament successful:', data);
+                showNotification(data.msg, true);
+                loadTournamentDetails(tournamentId);
+            } else if (response.status === 400) {
+                const errorData = await response.json();
+                console.error('Error leaving tournament:', errorData.error_msg);
+                showNotification(`Error: ${errorData.error_msg}`, false);
+            } else {
+                console.error('Unexpected error:', response.status);
+                showNotification('Unexpected error occurred. Please try again later.', false);
+            }
+        } catch (error) {
+            console.error('Error leaving tournament:', error);
+            showNotification('Error leaving tournament. Please try again later.', false);
+        }
+    } else {
+        console.log('User not logged in. Please log in to leave a tournament.');
+        showNotification('Please log in to leave a tournament.', false);
+    }
+}
+
+function showNotification(message, isSuccess = true) {
+    let notification = document.getElementById('notification');
+    if (!notification) {
+        notification = document.createElement('div');
+    }
+    notification.id = 'notification';
+    notification.textContent = message;
+    notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+    document.body.appendChild(notification);
+    notification.classList.add('show');
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 5000);
 }
 
 export default loadTournamentDetails;

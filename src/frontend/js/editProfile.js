@@ -6,38 +6,40 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 13:04:35 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/07 16:28:01 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:38:05 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 import { isLoggedIn } from './auth.js';
 import router from './main.js';
+import updateNavbar from './navbar.js';
 
-const mockUser =
-	{
-		username: "user1",
-		password: "pass1",
-		avatar: "./images/avatar/author_1.png",
-		gamesPlayed: 150,
-		gamesWon: 100,
-		gamesLost: 50,
-		pointsFor: 1200,
-		pointsAgainst: 800,
-		tournamentsPlayed: 10,
-		tournamentsWon: 5,
-		matchHistory:
-		[
-			{ date: "04/07/2024", opponent: "Player42", result: "Win", score: "21-15" },
-			{ date: "04/09/2024", opponent: "ArcadeMaster", result: "Loss", score: "18-21" },
-			{ date: "04/12/2024", opponent: "PixelNinja", result: "Win", score: "21-10" }
-		]
-	};
+async function loadEditProfile() {
+    if (!isLoggedIn()) {
+        localStorage.setItem('loginRedirect', 'true');
+        router.route('/login');
+        return;
+    }
 
-function loadEditProfile() {
-
-	const currentUser = mockUser;
-  
+    const apiUrl = 'http://localhost:8000/api/users';
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const user = await response.json();
+        loadHtmlEditProfile(user);
+    } catch (error) {
+        console.error('Error loading profile:', error);
+        router.route("/error");
+    }
+}
+function loadHtmlEditProfile(currentUser) {
 	const editProfileHTML = `
 	  <div class="container mt-5">
 		<div class="row">
@@ -57,7 +59,7 @@ function loadEditProfile() {
 				  <div class="form-group" id="picture-group">
 					<label for="profile-picture">Profile Picture URL</label>
 					<input type="file" class="form-control-file" id="profile-picture-upload" accept="image/*">
-					<img id="profile-picture-preview" src="${currentUser.avatar}" alt="Profile Picture Preview" class="img-thumbnail" style="margin-top: 10px; max-width: 200px;">
+					<img id="profile-picture-preview" src="http://localhost:8000${currentUser.profilePicture}" alt="Profile Picture Preview" class="img-thumbnail" style="margin-top: 10px; max-width: 200px;">
 				  </div>
 				  <div class="button-container">
 					<button type="button" class="btn btn-secondary" id="upload-picture"><span>Upload<br>Picture</span></button>
@@ -79,7 +81,10 @@ function loadEditProfile() {
   function addEditProfileEventListeners() {
 	document.getElementById('save-profile').addEventListener('click', function() {
 	  const password = document.getElementById('profile-password').value;
-	  updateUserProfile(password);
+	  if (!password)
+			password = "pass123";
+	  const username = document.getElementById('profile-name').value;
+	  updateUserProfile(username, password);
 	});
 
 	document.getElementById('profile-picture-upload').addEventListener('change', function() {
@@ -114,6 +119,7 @@ function loadEditProfile() {
     const requestOptions = {
         method: 'POST',  
         body: formData,
+		credentials: 'include'
     };
 
     fetch(apiUrl, requestOptions)
@@ -129,6 +135,7 @@ function loadEditProfile() {
             }
             console.log('Success:', data);
             showNotification("Photo uploaded successfully.");
+			updateNavbar();
         })
         .catch((error) => {
             console.error('Error:', error); 
@@ -154,22 +161,18 @@ function loadEditProfile() {
 	}, 4000);
   }
   
-  function updateUserProfile(newPassword) {
+  function updateUserProfile(newUsername, newPassword) {
     const apiUrl = 'http://localhost:8000/api/users/update';
     const requestBody = {
+		username: newUsername,
         password: newPassword, 
-        totalPoints: 0,        
-        status: true,          
-        matchesTotal: 0,        
-        matchesWon: 0,         
-        matchesLost: 0,         
-        matchesDraw: 0
     };
 
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
+		credentials: 'include'
     };
 
     fetch(apiUrl, requestOptions)
@@ -177,6 +180,7 @@ function loadEditProfile() {
         .then(data => {
             console.log('Success:', data);
 			showNotification('Profile updated successfully.');
+			updateNavbar();
         })
         .catch((error) => {
             console.error('Error:', error);

@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   friendProfile.js                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/05/14 10:20:30 by adpachec          #+#    #+#             */
+/*   Updated: 2024/05/14 10:21:11 by adpachec         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 import { isLoggedIn } from './auth.js';
 import router from './main.js';
@@ -121,7 +132,6 @@ function addEventListeners() {
 	document.querySelector('.history-toggler').addEventListener('click', toggleHistory);
 	document.getElementById('friends-button').addEventListener('click', toggleFriendSection);
 	document.getElementById('toggle-friend-form').addEventListener('click', toggleFriendForm);
-	document.getElementById('sendRequestBtn').addEventListener('click', sendFriendRequest);
 }
 
 function toggleStats() {
@@ -142,41 +152,6 @@ function toggleFriendSection() {
 function toggleFriendForm() {
 	const form = document.getElementById('add-friend-form');
 	form.style.display = form.style.display === 'none' ? 'block' : 'none';
-}
-
-function sendFriendRequest()
-{
-	const friendUsernameInput = document.getElementById('new-friend-name');
-	const friendUsername = friendUsernameInput.value.trim();
-	if (friendUsername)
-	{
-		console.log(`Sending friend request to ${friendUsername}`);
-		// updateFriendsList(friendUsername);
-		friendUsernameInput.value = "";
-		showNotification(`Friend request sent to ${friendUsername}`);
-	}
-	else
-	{
-		alert("Please enter a friend's username.");
-	}
-}
-
-function showNotification(message) {
-	let notification = document.getElementById('notification');
-	if (!notification)
-	{
-		notification = document.createElement('div');
-		notification.id = 'notification';
-		notification.className = 'notification';
-		document.body.appendChild(notification);
-	}
-	notification.textContent = message;
-	
-	notification.classList.add('show');
-	setTimeout(() =>
-	{
-		notification.classList.remove('show');
-	}, 4000);
 }
 
 export default loadFriendProfile;
