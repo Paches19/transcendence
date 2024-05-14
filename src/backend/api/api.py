@@ -134,12 +134,15 @@ def update_avatar(request, file: UploadedFile = File(...)):
     return {"msg": "Avatar updated"}
 
 
-@app.post("users/friends/add", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
+@app.post("users/friends/add", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Users'])
 @login_required
-def add_friend(request, friend_in: AddFriendSchema):
+def add_friend(request, friend_username: AddFriendSchema):
     user_id = request.user.id
     user = get_object_or_404(User, id=user_id)
-    friend = get_object_or_404(User, id=friend_in.friend_id)
+    friend = get_object_or_404(User, username=friend_username.friend_username)
+
+    if Friend.objects.filter(user1=user, user2=friend).exists() or Friend.objects.filter(user1=friend, user2=user).exists():
+        return 400, {"error_msg": "Friend request already sent"}
 
     friend_data = {
         "user1": user,
@@ -147,14 +150,14 @@ def add_friend(request, friend_in: AddFriendSchema):
     }
 
     Friend.objects.create(**friend_data)
-    return 200, {"error_msg": "Friend request sent"}
+    return 200, {"msg": "Friend request sent"}
 
 
-@app.post("users/friends/accept", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
+@app.post("users/friends/accept", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Users'])
 @login_required
-def accept_friend(request, friend_in: AddFriendSchema):
+def accept_friend(request, friend_username: AddFriendSchema):
     user = request.user
-    friend = get_object_or_404(User, id=friend_in.friend_id)
+    friend = get_object_or_404(User, username=friend_username.friend_username)
 
     if not Friend.objects.filter(user1=user, user2=friend, status=False).exists():
         return 400, {"error_msg": "Friend request not found"}
@@ -162,17 +165,17 @@ def accept_friend(request, friend_in: AddFriendSchema):
     friendship = get_object_or_404(Friend, user1=user, user2=friend)
     friendship.status = True
     friendship.save()
-    return 200, {"error_msg": "Friend request accepted"}
+    return 200, {"msg": "Friend request accepted"}
 
 
-@app.post("users/friends/remove", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
+@app.post("users/friends/remove", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Users'])
 @login_required
-def remove_friend(request, friend_in: AddFriendSchema):
+def remove_friend(request, friend_username: AddFriendSchema):
     user = request.user
-    friend = get_object_or_404(User, id=friend_in.friend_id)
+    friend = get_object_or_404(User, username=friend_username.friend_username)
 
     if not Friend.objects.filter(user1=user, user2=friend).exists() and not Friend.objects.filter(user1=friend, user2=user).exists():
-        return 400, {"error_msg": "Friend not found"}
+        return 400, {"msg": "Friend not found"}
 
     user.friends.remove(friend)
     return user
