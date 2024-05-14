@@ -35,17 +35,16 @@ router.addRoute('/play', initPlayPage);
 router.addRoute('/tournaments', loadTournaments);
 router.addRoute('/login', login);
 router.addRoute('/register', setupRegisterForm);
-router.addRoute('/tournaments/:id', id => {
-    const tournaments = 0;
+router.addRoute('/tournaments/:id', async id => {
+    let tournaments = [];
     try {
-        tournaments = fetchTournaments();
-        updateTournamentHTML(tournaments);
+        tournaments = await fetchTournaments();
     } catch (error) {
         console.error('Error loading tournaments:', error);
     }
     const tournament = tournaments.find(t => t.id === parseInt(id));
     if (tournament) {
-        loadTournamentDetails(tournament);
+        loadTournamentDetails(id);
     } else {
         loadPageNotFound();
     }
@@ -54,19 +53,23 @@ router.setDefaultRoute(loadPageNotFound);
 
 async function fetchTournaments() {
     const apiUrl = 'http://localhost:8000/api/tournaments';
-    return fetch(apiUrl, {
-        method: 'GET',
-    })
-        .then(response => {
-            if (!response.ok) {
-                console.error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .catch(error => {
-            console.error('Error fetching tournaments:', error);
-            return [];
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
         });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const tournaments = await response.json();
+        return tournaments;
+    } catch (error) {
+        console.error('Error fetching tournaments:', error);
+        return [];
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () =>
