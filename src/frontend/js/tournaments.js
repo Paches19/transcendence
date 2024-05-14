@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/14 11:59:54 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/14 17:26:12 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,20 +68,22 @@ function attachEventListeners() {
         });
     });
 
-    document.addEventListener('click', function(e) {
-        const viewBtn = e.target.closest('.view-tournament-btn');
-        if (viewBtn) {
-            e.preventDefault();
-            const tournamentId = viewBtn.getAttribute('data-id');
-            console.log("id: " + tournamentId);
-            router.route(`/tournaments/${tournamentId}`);
-        } else if (e.target.classList.contains('join-tournament-btn')) {
-            e.preventDefault();
-            const tournamentId = e.target.getAttribute('data-id');
-            console.log("id: " + tournamentId);
-            joinTournament(tournamentId);
-        }
-    });
+    document.addEventListener('click', handleDocumentClick);
+}
+
+function handleDocumentClick(e) {
+    const viewBtn = e.target.closest('.view-tournament-btn');
+    if (viewBtn) {
+        e.preventDefault();
+        const tournamentId = viewBtn.getAttribute('data-id');
+        console.log("id: " + tournamentId);
+        router.route(`/tournaments/${tournamentId}`);
+    } else if (e.target.classList.contains('join-tournament-btn')) {
+        e.preventDefault();
+        const tournamentId = e.target.getAttribute('data-id');
+        console.log("id: " + tournamentId);
+        joinTournament(tournamentId);
+    }
 }
 
 function viewTournaments(tournaments) {
@@ -173,7 +175,7 @@ function addModalEventListeners() {
         })
         .then(data => {
             console.log('Success:', data);
-            showNotification('Tournament succesfully created!');
+            showNotification('Tournament successfully created!');
             loadTournaments();
         })
         .catch(error => {
@@ -185,8 +187,7 @@ function addModalEventListeners() {
 
 function showNotification(message, isSuccess = true) {
     let notification = document.getElementById('notification');
-    if (!notification)
-    {
+    if (!notification) {
         notification = document.createElement('div');
     }
     notification.id = 'notification';
@@ -194,8 +195,7 @@ function showNotification(message, isSuccess = true) {
     notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
     document.body.appendChild(notification);
     notification.classList.add('show');
-    setTimeout(() =>
-    {
+    setTimeout(() => {
         notification.classList.remove('show');
     }, 5000);
 }
@@ -221,7 +221,7 @@ async function joinTournament(tournamentId) {
                 const data = await response.json();
                 console.log('Join tournament successful:', data);
                 showNotification(data.msg, true);
-                loadTournaments();
+                loadTournaments(); // Carga la lista de torneos después de unirse.
             } else if (response.status === 400) {
                 const errorData = await response.json();
                 console.error('Error joining tournament:', errorData.error_msg);
@@ -240,5 +240,8 @@ async function joinTournament(tournamentId) {
     }
 }
 
+// Limpia los event listeners antes de asignarlos nuevamente para evitar que se ejecuten múltiples veces
+document.removeEventListener('click', handleDocumentClick);
+document.addEventListener('click', handleDocumentClick);
 
-export { loadTournaments, createTournament, joinTournament, viewTournaments};
+export { loadTournaments, createTournament, joinTournament, viewTournaments };

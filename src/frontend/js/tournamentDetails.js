@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 18:11:12 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/14 11:46:22 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/14 17:11:47 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,12 +140,12 @@ async function loadTournamentDetails(id) {
 }
 
 function attachEventListenersForTournamentDetails() {
-    document.querySelector('.join-tournament-btn').addEventListener('click', function(e) {
+    document.querySelector('.join-tournament-btn2').addEventListener('click', function(e) {
         const tournamentId = e.target.getAttribute('data-id');
         joinTournament(tournamentId);
     });
 
-    document.querySelector('.leave-tournament-btn').addEventListener('click', function(e) {
+    document.querySelector('.leave-tournament-btn2').addEventListener('click', function(e) {
         const tournamentId = e.target.getAttribute('data-id');
         leaveTournament(tournamentId);
     });

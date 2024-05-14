@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/12 12:46:57 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/07 11:06:36 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/14 16:45:22 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,7 @@
 }
 
 .friend-entry:hover {
-	transform: scale(1.1);
+	transform: scale(1.05);
 	background-color: var(--black);
     cursor: pointer;
 }
@@ -197,9 +197,70 @@
 .friend-entry {
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    justify-content: space-between;
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
     padding: 10px;
+    margin-bottom: 10px;
+}
+
+.friend-avatar {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+}
+
+.friend-username {
+    color: #f1f1f1;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.friend-btn-group {
+    display: flex;
+    align-items: center;
+}
+
+.delete-friend-btn, .accept-friend-btn, .pending {
+    background-color: #444;
+    border: none;
     border-radius: 5px;
+    color: #fff;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-left: 5px;
+    padding: 5px 10px;
+    transition: background-color 0.3s ease;
+}
+
+.delete-friend-btn:hover {
+    background-color: #e74c3c;
+}
+
+.accept-friend-btn:hover {
+    background-color: #2ecc71;
+}
+
+.pending {
+    background-color: #f39c12;
+}
+
+.pending::after {
+    content: ' Pending';
+    font-size: 0.9em;
+    color: #fff;
+}
+
+.friend-entry a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.friend-entry a:hover .friend-username {
+    text-decoration: underline;
 }
 
 .friend-avatar {
@@ -258,6 +319,12 @@
 .btn-secondary span{
     white-space: normal;
     text-align: center;
+}
+
+
+.friend-btn-group {
+    display: flex;
+    align-items: center;
 }
 
 @media (min-width: 1024px) {

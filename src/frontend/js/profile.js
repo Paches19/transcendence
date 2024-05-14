@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:18 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/14 10:34:08 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/14 16:41:34 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,12 +122,17 @@ function renderFriendsList(friends) {
             <a data-id="${friend.name}">
                 <img src="http://localhost:8000${friend.profilePicture}" alt="${friend.name}'s Avatar" class="friend-avatar">
                 <span class="friend-username">${friend.name}</span>
+                
             </a>
-            ${friend.status ? `
-                <button class="delete-friend-btn" data-id="${friend.name}">🗑️</button>
-            ` : `
-                <button class="accept-friend-btn" data-id="${friend.name}">✅</button>
-            `}
+            <div class="friend-btn-group">
+                ${friend.status ? `
+                    <button class="delete-friend-btn" data-id="${friend.name}">🗑️</button>
+                ` : `
+                    <span class="pending" data-id="${friend.name}">🕐</span>
+                    <button class="accept-friend-btn" data-id="${friend.name}">✅</button>
+                    <button class="delete-friend-btn" data-id="${friend.name}">🗑️</button>
+                `}
+            </div>
         </div>
     `).join('');
 }

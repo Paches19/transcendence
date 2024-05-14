@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:22:20 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/07 10:02:33 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/14 17:00:36 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ async function handleRegisterSubmit(event) {
     const userData = {
         username: username,
         password: password,
-        profilePicture: "static/avatars/default.jpg",
+        profilePicture: "/static/avatars/default.jpg",
     };
 
     try {

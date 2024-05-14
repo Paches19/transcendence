@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 13:04:35 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/14 12:38:05 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/14 16:26:59 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,7 @@ function loadHtmlEditProfile(currentUser) {
 					<label for="profile-name">Name</label>
 					<input type="text" class="form-control" id="profile-name" value="${currentUser.username}" required>
 					<label for="profile-name">Password</label>
-					<input type="password" class="form-control" id="profile-password" value="${currentUser.password}" required>
+					<input type="password" class="form-control" id="profile-password" value="" required>
 				  </div>
 				  <div class="form-group" id="picture-group">
 					<label for="profile-picture">Profile Picture URL</label>
