@@ -96,6 +96,8 @@ def update_user(request, user_in: UserUpdateSchema):
     if user_in.password is not None:
         user.set_password(user_in.password)
     user.save()
+    # Reauthenticate user
+    login(request, user)
     return {"username": user.username}
 
 
