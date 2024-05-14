@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:18 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/27 13:46:56 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/14 10:34:08 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,14 +17,14 @@ async function loadProfile() {
     if (!isLoggedIn()) {
         localStorage.setItem('loginRedirect', 'true');
         router.route('/login');
-        return ;
+        return;
     }
 
     const apiUrl = 'http://localhost:8000/api/users';
     try {
         const response = await fetch(apiUrl, {
             method: 'GET',
-			headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
         });
         if (!response.ok) {
@@ -34,7 +34,7 @@ async function loadProfile() {
         updateProfileUI(user);
     } catch (error) {
         console.error('Error loading profile:', error);
-		router.route("/error");
+        router.route("/error");
     }
 }
 
@@ -80,6 +80,17 @@ function updateProfileUI(user) {
     addEventListeners();
 }
 
+document.addEventListener("DOMContentLoaded", function() {
+    const links = document.querySelectorAll('.friend-entry a');
+    links.forEach(link => {
+        link.addEventListener('click', function(event) {
+            event.preventDefault();
+            const id = this.getAttribute('data-id');
+            router.route(`/friend-profile/${id}`, id);
+        });
+    });
+});
+
 function renderMatchHistory(matches) {
     return `
         <table class="table table-dark table-striped">
@@ -108,24 +119,80 @@ function renderMatchHistory(matches) {
 function renderFriendsList(friends) {
     return friends.map(friend => `
         <div class="friend-entry">
-            <a data-id="${friend.id}">
+            <a data-id="${friend.name}">
                 <img src="http://localhost:8000${friend.profilePicture}" alt="${friend.name}'s Avatar" class="friend-avatar">
                 <span class="friend-username">${friend.name}</span>
             </a>
+            ${friend.status ? `
+                <button class="delete-friend-btn" data-id="${friend.name}">🗑️</button>
+            ` : `
+                <button class="accept-friend-btn" data-id="${friend.name}">✅</button>
+            `}
         </div>
     `).join('');
 }
 
-document.addEventListener("DOMContentLoaded", function() {
-    const links = document.querySelectorAll('.friend-entry a');
-    links.forEach(link => {
-        link.addEventListener('click', function(event) {
-            event.preventDefault();
-            const id = this.getAttribute('data-id');
-            router.route(`/friend-profile/${id}`, id);
+async function acceptFriendRequest(friend_username) {
+    const apiUrl = `http://localhost:8000/api/users/friends/accept`;
+    const requestBody = {
+        friend_username: friend_username
+    };
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(requestBody),
+            credentials: 'include'
         });
-    });
-});
+
+        if (response.ok) {
+            showNotification('Friend request accepted');
+            loadProfile();
+        } else {
+            const errorData = await response.json();
+            console.error('Error accepting friend request:', errorData.error_msg);
+            showNotification(`Error: ${errorData.error_msg}`);
+        }
+    } catch (error) {
+        console.error('Error accepting friend request:', error);
+        showNotification('Error accepting friend request. Please try again later.');
+    }
+}
+
+async function deleteFriend(friend_username) {
+    const apiUrl = `http://localhost:8000/api/users/friends/remove`;
+    const requestBody = {
+        friend_username: friend_username
+    };
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(requestBody),
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            showNotification('Friend removed successfully');
+            loadProfile(); // Recargar el perfil para actualizar la lista de amigos
+        } else {
+            const errorData = await response.json();
+            console.error('Error removing friend:', errorData.error_msg);
+            showNotification(`Error: ${errorData.error_msg}`);
+        }
+    } catch (error) {
+        console.error('Error removing friend:', error);
+        showNotification('Error removing friend. Please try again later.');
+    }
+}
 
 function addEventListeners() {
 	document.querySelector('.stats-toggler').addEventListener('click', toggleStats);
@@ -133,6 +200,20 @@ function addEventListeners() {
 	document.getElementById('friends-button').addEventListener('click', toggleFriendSection);
 	document.getElementById('toggle-friend-form').addEventListener('click', toggleFriendForm);
 	document.getElementById('sendRequestBtn').addEventListener('click', sendFriendRequest);
+
+    document.querySelectorAll('.delete-friend-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const friend_username = this.getAttribute('data-id');
+            deleteFriend(friend_username);
+        });
+    });
+
+    document.querySelectorAll('.accept-friend-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const friend_username = this.getAttribute('data-id');
+            acceptFriendRequest(friend_username);
+        });
+    });
 }
 
 function toggleStats() {
@@ -155,21 +236,48 @@ function toggleFriendForm() {
 	form.style.display = form.style.display === 'none' ? 'block' : 'none';
 }
 
-function sendFriendRequest()
-{
-	const friendUsernameInput = document.getElementById('new-friend-name');
-	const friendUsername = friendUsernameInput.value.trim();
-	if (friendUsername)
-	{
-		console.log(`Sending friend request to ${friendUsername}`);
-		// updateFriendsList(friendUsername);
-		friendUsernameInput.value = "";
-		showNotification(`Friend request sent to ${friendUsername}`);
-	}
-	else
-	{
-		alert("Please enter a friend's username.");
-	}
+async function sendFriendRequest() {
+    const friendUsernameInput = document.getElementById('new-friend-name');
+    const friendUsername = friendUsernameInput.value.trim();
+    if (friendUsername) {
+        console.log(`Sending friend request to ${friendUsername}`);
+
+        const apiUrl = 'http://localhost:8000/api/users/friends/add';
+        const requestBody = {
+            friend_username: friendUsername
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(requestBody),
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('Friend request successful:', data);
+                showNotification(`Friend request sent to ${friendUsername}`);
+                friendUsernameInput.value = "";
+            } else if (response.status === 400) {
+                const errorData = await response.json();
+                console.error('Error sending friend request:', errorData.error_msg);
+                showNotification(`Error: ${errorData.error_msg}`);
+            } else {
+                console.error('Unexpected error:', response.status);
+                showNotification('Unexpected error occurred. Please try again later.');
+            }
+        } catch (error) {
+            console.error('Error sending friend request:', error);
+            showNotification('Error sending friend request. Please try again later.');
+        }
+    } else {
+        alert("Please enter a friend's username.");
+    }
 }
 
 function showNotification(message) {

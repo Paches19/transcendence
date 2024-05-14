@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 17:08:21 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/19 13:31:34 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/14 12:00:17 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,12 @@
     background-color: var(--index-red);
     color: white;
     border: none;
-    padding: 1.5vh 1.5vh;
+    padding: 1rem 1.5rem;
     border-radius: 5px;
     cursor: pointer;
-	font-size: 2vh;
-	width: 40vh;
+    font-size: 1.2rem;
+    min-width: 200px;
+    transition: background-color 0.3s, transform 0.3s;
 }
 
 .tournament-filter {
@@ -54,9 +55,8 @@
 
 .button:hover {
     background-color: var(--electric-blue);
-	transform: scale(1.1);
+    transform: scale(1.1);
 }
-
 .tournament-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -240,6 +240,24 @@
     background-color: #dc3545;
 }
 
+/* Estilo para el botón "Leave Tournament" */
+.leave-tournament-btn {
+    background-color: #dc3545; /* Bootstrap danger color */
+    color: white;
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    min-width: 200px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.leave-tournament-btn:hover {
+    background-color: #c82333; /* Bootstrap darken danger color */
+    transform: scale(1.05);
+}
+
 @keyframes fadeOut {
     90% { opacity: 1; }
     100% { opacity: 0; visibility: hidden; }
@@ -285,6 +303,11 @@
         width: 60%;
         font-size: 1.2vh;
         padding: 2vh 2vh;
+    }
+    
+    .button-div{
+        justify-content: center;
+        gap: 10px;
     }
     
     .tournament-list {
