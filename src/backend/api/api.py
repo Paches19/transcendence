@@ -177,10 +177,14 @@ def remove_friend(request, friend_username: AddFriendSchema):
     friend = get_object_or_404(User, username=friend_username.friend_username)
 
     if not Friend.objects.filter(user1=user, user2=friend).exists() and not Friend.objects.filter(user1=friend, user2=user).exists():
-        return 400, {"msg": "Friend not found"}
+        return 400, {"error_msg": "Friend not found"}
 
-    user.friends.remove(friend)
-    return user
+    if Friend.objects.filter(user1=user, user2=friend).exists():
+        friendship = get_object_or_404(Friend, user1=user, user2=friend)
+    else:
+        friendship = get_object_or_404(Friend, user1=friend, user2=user)
+    friendship.delete()
+    return 200, {"msg": "Friend removed"}
 
 
 """ Tournaments """
