@@ -87,7 +87,8 @@ def update_user(request, user_in: UserUpdateSchema):
     user = request.user
     user_data = user_in.dict()
 
-    if user_data["username"] is not None:
+    if (user_data["username"] is not None and
+            user_data["username"] != user.username):
         if User.objects.filter(username=user_data["username"]).exists():
             return 400, {"error_msg": "Username already exists"}
         user.username = user_data["username"]
