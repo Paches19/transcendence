@@ -114,16 +114,22 @@ def update_avatar(request, file: UploadedFile = File(...)):
     if file.content_type not in ["image/jpeg", "image/png", "image/gif"]:
         return 400, {"error_msg": "Image format not supported"}
 
+    # Delete previous avatar unless default
+    if request.user.profilePicture != "/static/avatars/default.jpg":
+        os.remove("api"+request.user.profilePicture)
+
     # Save the uploaded image
-    file_route = os.path.join(os.getcwd(), "users", "static", "avatars", (str(
-        user_id) + "." + str(file.content_type[-4:])))
+    relative_file_route = os.path.join("static", "avatars",
+                                       str(user_id) + "." + file.content_type.split('/')[-1])
+    file_route = os.path.join(os.getcwd(), "api", relative_file_route)
     file = open(file_route, "wb")
     file.write(avatar_data)
     file.close()
 
     # Update the user avatar route
     user = get_object_or_404(User, id=user_id)
-    user.profilePicture = file_route
+    user.profilePicture = "/"+relative_file_route
+    user.save()
     return {"msg": "Avatar updated"}
 
 
@@ -187,7 +193,7 @@ def get_tournaments(request):
     resp = []
     for tournament in all_tournaments:
         resp.append({
-            "id": tournament.id,
+            "id": tournament.tournamentID,
             "name": tournament.name,
             "date": tournament.date.isoformat(),
             "status": tournament.status,
