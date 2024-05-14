@@ -164,11 +164,8 @@ def accept_friend(request, friend_username: AddFriendSchema):
     user = request.user
     friend = get_object_or_404(User, username=friend_username.friend_username)
 
-    if not Friend.objects.filter(user1=friend, user2=user).exists():
+    if not Friend.objects.filter(user1=friend, user2=user, status=False).exists():
         return 400, {"error_msg": "Friend request not found"}
-
-    if Friend.objects.filter(user1=friend, user2=user).exists():
-        return 400, {"error_msg": "Only user 1 can accept the friend request"}
 
     friendship = get_object_or_404(Friend, user1=friend, user2=user)
     friendship.status = True
@@ -243,6 +240,12 @@ def join_tournament(request, tournament_id: int):
 
     if UserTournament.objects.filter(user=user, tournament=tournament).exists():
         return 400, {"error_msg": "User already in tournament"}
+
+    if tournament.status != "upcoming":
+        return 400, {"error_msg": "Tournament is " + tournament.status}
+
+    if UserTournament.objects.filter(tournament=tournament).count() >= tournament.number_participants:
+        tournament.status = "in_progress"
 
     user_tournament_data = {
         "user": user,
