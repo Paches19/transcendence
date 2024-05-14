@@ -164,13 +164,13 @@ def accept_friend(request, friend_username: AddFriendSchema):
     user = request.user
     friend = get_object_or_404(User, username=friend_username.friend_username)
 
-    if not Friend.objects.filter(user1=friend, user2=user).exists() and not Friend.objects.filter(user1=user, user2=friend).exists():
+    if not Friend.objects.filter(user1=friend, user2=user).exists():
         return 400, {"error_msg": "Friend request not found"}
 
     if Friend.objects.filter(user1=friend, user2=user).exists():
         return 400, {"error_msg": "Only user 1 can accept the friend request"}
 
-    friendship = get_object_or_404(Friend, user1=user, user2=friend)
+    friendship = get_object_or_404(Friend, user1=friend, user2=user)
     friendship.status = True
     friendship.save()
     return 200, {"msg": "Friend request accepted"}
