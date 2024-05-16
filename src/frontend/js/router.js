@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:51:47 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/22 12:17:06 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/16 09:40:56 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,9 @@ export default class Router {
     }
 
     resolveCurrentPath() {
-        updateNavbar();
         const path = window.location.pathname || '/';
         this.route(path, false);
+        updateNavbar();
     }
 
     route(path, updateHistory = true) {
