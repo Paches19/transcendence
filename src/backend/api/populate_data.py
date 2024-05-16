@@ -54,9 +54,9 @@ def populate_tournament_participants(tournament):
     return resp
 
 
-def matches_won(user):
+def matches_won(user, tournament):
     matches = Match.objects.filter(
-        user1=user) | Match.objects.filter(user2=user)
+        user1=user, tournamentId=tournament) | Match.objects.filter(user2=user, tournamentId=tournament)
     count = 0
     for match in matches:
         if (match.user1 == user and match.pointsUser1 == 3) or (match.user2 == user and match.pointsUser2 == 3):
@@ -74,8 +74,8 @@ def populate_standings(tournament):
         resp.append({
             "username": participant.user.username,
             "games_played": user_matches.count(),
-            "games_won": matches_won(participant.user),
-            "games_lost": user_matches.count() - matches_won(participant.user),
+            "games_won": matches_won(participant.user, tournament),
+            "games_lost": user_matches.count() - matches_won(participant.user, tournament),
             "points_for": sum([match.pointsUser1 if match.user1 == participant.user else match.pointsUser2 for match in user_matches]),
             "points_against": sum([match.pointsUser2 if match.user1 == participant.user else match.pointsUser1 for match in user_matches])
         })

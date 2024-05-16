@@ -241,11 +241,12 @@ def join_tournament(request, tournament_id: int):
     if UserTournament.objects.filter(user=user, tournament=tournament).exists():
         return 400, {"error_msg": "User already in tournament"}
 
-    if tournament.status != "upcoming":
+    if tournament.status != "Upcoming":
         return 400, {"error_msg": "Tournament is " + tournament.status}
 
     if UserTournament.objects.filter(tournament=tournament).count() >= tournament.number_participants:
-        tournament.status = "in_progress"
+        tournament.status = "In Progress"
+        tournament.save()
 
     user_tournament_data = {
         "user": user,

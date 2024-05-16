@@ -45,7 +45,7 @@ def generate_tournament_participants_data(apps, schema_editor):
                 0, nParticipants, UserTournament, User, tournament)
         # change tournament status if all participants are added
         if UserTournament.objects.filter(tournament=tournament).count() == tournament.number_participants:
-            tournament.status = "in_progress"
+            tournament.status = "In Progress"
             tournament.save()
 
 
@@ -70,14 +70,22 @@ def generate_matches_data(apps, schema_editor):
         if random.random() > 0.5:
             tournament = Tournament.objects.get(
                 name=f"tournament{random.randint(1, 10)}")
+            user_tournaments = UserTournament.objects.filter(
+                tournament=tournament)
+            if user_tournaments.count() < 2:
+                continue
+            else:
+                user1 = random.choice(user_tournaments).user
+                user2 = random.choice(user_tournaments).user
+                while user1 == user2:
+                    user2 = random.choice(user_tournaments).user
         else:
             tournament = None
-
-        user1 = User.objects.get(username=f"user{random.randint(1, 10)}")
-        user2 = User.objects.get(username=f"user{random.randint(1, 10)}")
-        while user1 == user2:
-            user2 = User.objects.get(
-                username=f"user{random.randint(1, 10)}")
+            user1 = User.objects.get(username=f"user{random.randint(1, 10)}")
+            user2 = User.objects.get(username=f"user{random.randint(1, 10)}")
+            while user1 == user2:
+                user2 = User.objects.get(
+                    username=f"user{random.randint(1, 10)}")
 
         points1 = random.randint(0, 10)
         points2 = random.randint(0, 10)
