@@ -41,6 +41,13 @@ class FriendSchema(Schema):
     status: bool
 
 
+class MatchSchema(Schema):
+    date: str
+    opponent: str
+    result: bool
+    score: str
+
+
 class UserFriendSchema(Schema):
     id: int
     username: str
@@ -52,6 +59,7 @@ class UserFriendSchema(Schema):
     matchesLost: int
     matchesDraw: int
     friends: List[FriendSchema]
+    matches: List[MatchSchema]
 
 
 class UserUpdateSchema(Schema):
@@ -64,7 +72,7 @@ class UserNameSchema(Schema):
 
 
 class AddFriendSchema(Schema):
-    friend_id: int
+    friend_username: str
 
 
 """ Tournaments schemas """
@@ -75,7 +83,7 @@ class TournamentCreateSchema(Schema):
     number_participants: int
 
 
-class TournamentUserSchema(Schema):
+class UserTournamentSchema(Schema):
     user_id: int
     username: str
 
@@ -85,7 +93,7 @@ class TournamentSchema(Schema):
     date: str = datetime.date.today().isoformat()
     status: str
     number_participants: int
-    participants: List[TournamentUserSchema]
+    participants: List[UserTournamentSchema]
 
 
 class TournamentNameSchema(Schema):
@@ -95,12 +103,20 @@ class TournamentNameSchema(Schema):
 
 """ Match schemas """
 
-
 class MatchSchema(Schema):
     user1: int
-    user2: int
+    y1: int
     pointsUser1: int = 0
+    
+    user2: int
+    y2: int
     pointsUser2: int = 0
+
+    ball_x: int
+    ball_y: int
+    ball_speed_x: int
+    ball_speed_y: int
+    
     date: str = datetime.date.today().isoformat()
     tournamentId: int = None
 

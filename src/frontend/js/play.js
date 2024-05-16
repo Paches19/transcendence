@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/08 20:41:30 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/05/16 00:10:09 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,30 +67,33 @@ function attachEventListeners() {
 }
 
 function startSoloVsIA() {
-    if (isLoggedIn()) {
-        console.log("Starting game: Solo vs IA");
-        showGameAIScreen();
-    } else {
-        router.route("/login");
-    }
+    // if (isLoggedIn()) {
+    //     console.log("Starting game: Solo vs IA");
+    //     showGameAIScreen();
+    // } else {
+    //     router.route("/login");
+    // }
+	showGameAIScreen();
 }
 
 function startLocalVsHuman() {
-    if (isLoggedIn()) {
-        console.log("Starting game: Local vs Human");
-        showGameHumanScreen();
-    } else {
-        router.route("/login");
-    }
+    // if (isLoggedIn()) {
+    //     console.log("Starting game: Local vs Human");
+    //     showGameHumanScreen();
+    // } else {
+    //     router.route("/login");
+    // }
+	showGameHumanScreen();
 }
 
 function startRemoteVsHuman() {
-	if (isLoggedIn()) {
-		console.log("Starting game: Remote vs Human");
-		showGameRemoteScreen();
-	} else {
-		router.route("/login");
-	}
+	// if (isLoggedIn()) {
+	// 	console.log("Starting game: Remote vs Human");
+	// 	showGameRemoteScreen();
+	// } else {
+	// 	router.route("/login");
+	// }
+	showGameRemoteScreen();
 }
 
 function showGameAIScreen() {
@@ -174,12 +177,9 @@ function showGameRemoteScreen() {
             </div>
         </div>
     </div>
-	<script>
-		const socket = new WebSocket("ws://" + window.location.host + "/ws/game/{{match.id}}/")
-	</script>
     `;
     initializeGame();
-	initGameRemote();
+	//initGameRemote();
     attachGameControlEventListeners();
 }
 

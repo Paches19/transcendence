@@ -1,9 +1,13 @@
 version: "3.8"
 
 services:
+    # Postgres container
     postgres:
         container_name: postgres
-        image: postgres:16.2
+        build:
+            context: ../../
+            dockerfile: src/docker/postgres/Dockerfile
+        image: postgres_transcendence
         env_file:
             - .env
         environment:
@@ -15,6 +19,7 @@ services:
             - transcendence_net
         restart: always
 
+    # Django container
     django:
         container_name: django
         build:
@@ -36,6 +41,7 @@ services:
         depends_on:
             - postgres
 
+    # Nginx container for the frontend
     nginx:
         container_name: nginx
         build:
@@ -49,7 +55,7 @@ services:
         networks:
             - transcendence_net
         restart: always
-
+  
 networks:
     transcendence_net:
         name: transcendence_net

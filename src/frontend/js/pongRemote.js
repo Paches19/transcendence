@@ -11,8 +11,6 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-import {initPlayPage, resetTime} from "./play.js";
-
 let socket;
 let canvas;
 let stateMatch = {
@@ -109,11 +107,11 @@ function gameOver(){
 }
 
 function initGameRemote(){
+	//socket = new WebSocket("ws://localhost:8000/ws/game/");
 	console.log('Game initialized');
 	canvas = document.getElementById('pong-game');
 	ctx = canvas.getContext('2d');
 	ctx.fillStyle = 'white';
-	socket = new WebSocket("ws://localhost:8080/ws/game/remote");
 	document.addEventListener('keydown', handleKeyDown);
 	stateMatch = {
 		'ball': {

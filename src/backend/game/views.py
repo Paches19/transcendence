@@ -2,14 +2,14 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from game.models import *
 
-def index(request):
+def home(request):
 	if request.method == "GET":
 		return render(request, "index.html")
 	elif request.method == 'POST':
 		matchId = request.POST.get("match-id", None)
 		userName = request.POST.get("user-name", None)
 		if not userName:
-			userName = "unknown"
+			userName = "Unknown"
 		if(matchId):
 			try:
 				match = Match.objects.get(id=matchId)
@@ -28,4 +28,3 @@ def game(request, id=None, name=None):
 	except Match.DoesNotExist:
 		messages.error(request, "Match does not exist.")
 		return redirect("/")
-	

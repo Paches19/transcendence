@@ -1,14 +1,14 @@
-/******************************************************************************/
+/* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   main.js                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:24:45 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/07 14:11:27 by alaparic         ###   ########.fr       */
+/*   Updated: 2024/05/15 23:57:27 by jutrera-         ###   ########.fr       */
 /*                                                                            */
-/******************************************************************************/
+/* ************************************************************************** */
 
 import Router from './router.js';
 import loadProfile from './profile.js';
@@ -80,6 +80,7 @@ router.addRoute('/tournaments/:id', id => {
         loadPageNotFound();
     }
 });
+
 router.setDefaultRoute(loadPageNotFound);
 
 document.addEventListener('DOMContentLoaded', () =>
