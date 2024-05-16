@@ -19,18 +19,21 @@ def generate_tournaments_data(apps, schema_editor):
                                   number_participants=random.randint(2, 16))
 
 
-def generate_matches_data(apps, schema_editor):
-    Match = apps.get_model("api", "Match")
-    User = apps.get_model("api", "User")
+def generate_tournament_participants_data(apps, schema_editor):
     Tournament = apps.get_model("api", "Tournament")
-    for i in range(9):
-        user1 = User.objects.get(username=f"user{i+1}")
-        user2 = User.objects.get(username=f"user{i+2}")
+    User = apps.get_model("api", "User")
+    UserTournament = apps.get_model("api", "UserTournament")
+    for i in range(10):
         tournament = Tournament.objects.get(name=f"tournament{i+1}")
-        Match.objects.create(user1=user1, user2=user2, tournamentId=tournament,
-                             pointsUser1=random.randint(0, 10),
-                             pointsUser2=random.randint(0, 10),
-                             date=datetime.date.today().isoformat())
+        for j in range(1, 10):
+            # select a user that is not already in the tournament
+            users_in_tournament = UserTournament.objects.filter(
+                tournament=tournament).values_list('user', flat=True)
+            users_not_in_tournament = User.objects.exclude(
+                id__in=users_in_tournament)
+            user = random.choice(users_not_in_tournament)
+            # add user to tournament
+            UserTournament.objects.create(user=user, tournament=tournament)
 
 
 def generate_friends_data(apps, schema_editor):
@@ -42,15 +45,46 @@ def generate_friends_data(apps, schema_editor):
         Friend.objects.create(user1=user1, user2=user2, status=True)
 
 
-def generate_tournament_participants_data(apps, schema_editor):
-    Tournament = apps.get_model("api", "Tournament")
+def generate_matches_data(apps, schema_editor):
+    Match = apps.get_model("api", "Match")
     User = apps.get_model("api", "User")
+    Tournament = apps.get_model("api", "Tournament")
     UserTournament = apps.get_model("api", "UserTournament")
-    for i in range(10):
-        tournament = Tournament.objects.get(name=f"tournament{i+1}")
-        for j in range(9):
-            user = User.objects.get(username=f"user{j+1}")
-            UserTournament.objects.create(user=user, tournament=tournament)
+    count = 0
+    while count < 50:
+
+        # 50% of the matches will have a tournament
+        if random.random() > 0.5:
+            tournament = Tournament.objects.get(
+                name=f"tournament{random.randint(1, 10)}")
+            user1 = random.choice(UserTournament.objects.filter(
+                tournament=tournament))
+            user2 = random.choice(UserTournament.objects.filter(
+                tournament=tournament))
+            while user1.user == user2.user:
+                user2 = random.choice(UserTournament.objects.filter(
+                    tournament=tournament))
+        else:
+            tournament = None
+            user1 = User.objects.get(username=f"user{random.randint(1, 10)}")
+            user2 = User.objects.get(username=f"user{random.randint(1, 10)}")
+            while user1 == user2:
+                user2 = User.objects.get(
+                    username=f"user{random.randint(1, 10)}")
+
+        points1 = random.randint(0, 10)
+        points2 = random.randint(0, 10)
+        while points1 == points2:
+            points2 = random.randint(0, 10)
+
+        count += 1
+        Match.objects.create(user1=user1.user if tournament else user1,
+                             user2=user2.user if tournament else user2,
+                             tournamentId=tournament,
+                             pointsUser1=points1,
+                             pointsUser2=points2,
+                             date=datetime.date.today().isoformat())
+    # modify users to update their statistics with the match data
 
 
 class Migration(migrations.Migration):
@@ -62,7 +96,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.RunPython(generate_users_data),
         migrations.RunPython(generate_tournaments_data),
-        migrations.RunPython(generate_matches_data),
-        migrations.RunPython(generate_friends_data),
         migrations.RunPython(generate_tournament_participants_data),
+        migrations.RunPython(generate_friends_data),
+        migrations.RunPython(generate_matches_data),
     ]

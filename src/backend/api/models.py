@@ -15,7 +15,7 @@ class Match(models.Model):
     pointsUser2 = models.IntegerField(default=0)
     date = models.DateField()
     tournamentId = models.ForeignKey(
-        'Tournament', on_delete=models.CASCADE, null=True, blank=True)
+        'Tournament', on_delete=models.CASCADE, null=True, blank=True, default=None)
 
 
 # User inherits from AbstractUser, which is a built-in Django model

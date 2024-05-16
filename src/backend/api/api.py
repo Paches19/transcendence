@@ -8,7 +8,7 @@ from .models import User, Friend, Tournament, UserTournament, Match
 from .middleware import login_required, require_auth
 from .populate_data import *
 from typing import Optional
-from .schema import (UserSchema, ErrorSchema, UserUpdateSchema,
+from .schema import (ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema, SingleTournamentSchema,
                      AddFriendSchema, TournamentSchema, UserNameSchema,
                      UserFriendSchema, SuccessSchema, TournamentCreateSchema)

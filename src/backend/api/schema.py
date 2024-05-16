@@ -21,14 +21,6 @@ class LoginSchema(Schema):
 """ User schemas """
 
 
-class UserSchema(ModelSchema):
-    class Meta:
-        model = User
-        fields = '__all__'
-        exclude = ['first_name', 'last_name', 'email', "user_permissions", "groups",
-                   "is_staff", "is_active", "is_superuser", "last_login", "date_joined"]
-
-
 class FriendSchema(Schema):
     id: int
     name: str
