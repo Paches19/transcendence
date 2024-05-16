@@ -9,6 +9,7 @@ def generate_users_data(apps, schema_editor):
     User = apps.get_model("api", "User")
     for i in range(10):
         User.objects.create_user(username=f"user{i+1}", password=f"pass123")
+    User.objects.create_user(username="transcendence", password="pass123")
 
 
 def generate_tournaments_data(apps, schema_editor):
@@ -19,21 +20,29 @@ def generate_tournaments_data(apps, schema_editor):
                                   number_participants=random.randint(2, 16))
 
 
+# Aux function
+def create_new_user_tournaments_data(start, nParticipants, UserTournament, User, tournament):
+    for j in range(start, nParticipants):
+        # select a user that is not already in the tournament
+        users_in_tournament = UserTournament.objects.filter(
+            tournament=tournament).values_list('user', flat=True)
+        users_not_in_tournament = User.objects.exclude(
+            id__in=users_in_tournament)
+        user = random.choice(users_not_in_tournament)
+        # add user to tournament
+        UserTournament.objects.create(user=user, tournament=tournament)
+
+
 def generate_tournament_participants_data(apps, schema_editor):
     Tournament = apps.get_model("api", "Tournament")
     User = apps.get_model("api", "User")
     UserTournament = apps.get_model("api", "UserTournament")
     for i in range(10):
         tournament = Tournament.objects.get(name=f"tournament{i+1}")
-        for j in range(1, 10):
-            # select a user that is not already in the tournament
-            users_in_tournament = UserTournament.objects.filter(
-                tournament=tournament).values_list('user', flat=True)
-            users_not_in_tournament = User.objects.exclude(
-                id__in=users_in_tournament)
-            user = random.choice(users_not_in_tournament)
-            # add user to tournament
-            UserTournament.objects.create(user=user, tournament=tournament)
+        nParticipants = 10 if tournament.number_participants > 10 else tournament.number_participants
+        if (random.random() > 0.5):
+            create_new_user_tournaments_data(
+                0, nParticipants, UserTournament, User, tournament)
 
 
 def generate_friends_data(apps, schema_editor):
@@ -57,20 +66,14 @@ def generate_matches_data(apps, schema_editor):
         if random.random() > 0.5:
             tournament = Tournament.objects.get(
                 name=f"tournament{random.randint(1, 10)}")
-            user1 = random.choice(UserTournament.objects.filter(
-                tournament=tournament))
-            user2 = random.choice(UserTournament.objects.filter(
-                tournament=tournament))
-            while user1.user == user2.user:
-                user2 = random.choice(UserTournament.objects.filter(
-                    tournament=tournament))
         else:
             tournament = None
-            user1 = User.objects.get(username=f"user{random.randint(1, 10)}")
-            user2 = User.objects.get(username=f"user{random.randint(1, 10)}")
-            while user1 == user2:
-                user2 = User.objects.get(
-                    username=f"user{random.randint(1, 10)}")
+
+        user1 = User.objects.get(username=f"user{random.randint(1, 10)}")
+        user2 = User.objects.get(username=f"user{random.randint(1, 10)}")
+        while user1 == user2:
+            user2 = User.objects.get(
+                username=f"user{random.randint(1, 10)}")
 
         points1 = random.randint(0, 10)
         points2 = random.randint(0, 10)
@@ -78,13 +81,24 @@ def generate_matches_data(apps, schema_editor):
             points2 = random.randint(0, 10)
 
         count += 1
-        Match.objects.create(user1=user1.user if tournament else user1,
-                             user2=user2.user if tournament else user2,
+        Match.objects.create(user1=user1,
+                             user2=user2,
                              tournamentId=tournament,
                              pointsUser1=points1,
                              pointsUser2=points2,
                              date=datetime.date.today().isoformat())
-    # modify users to update their statistics with the match data
+        # modify users to update their statistics with the match data
+        user1.totalPoints += points1
+        user1.matchesTotal += 1
+        user1.matchesWon += 1 if points1 > points2 else 0
+        user1.matchesLost += 1 if points1 < points2 else 0
+        user1.save()
+
+        user2.totalPoints += points2
+        user2.matchesTotal += 1
+        user2.matchesWon += 1 if points2 > points1 else 0
+        user2.matchesLost += 1 if points2 < points1 else 0
+        user2.save()
 
 
 class Migration(migrations.Migration):
