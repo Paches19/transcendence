@@ -59,7 +59,8 @@ def matches_won(user, tournament):
         user1=user, tournamentId=tournament) | Match.objects.filter(user2=user, tournamentId=tournament)
     count = 0
     for match in matches:
-        if (match.user1 == user and match.pointsUser1 == 3) or (match.user2 == user and match.pointsUser2 == 3):
+        if ((match.user1 == user and match.pointsUser1 > match.pointsUser2) or
+                (match.user2 == user and match.pointsUser2 > match.pointsUser1)):
             count += 1
     return count
 
