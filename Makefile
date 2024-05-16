@@ -53,4 +53,4 @@ re-django:
 re-nginx:
 			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) up -d --no-deps --build nginx
 
-.PHONY:		all stop clean fclean re
+.PHONY:		all stop clean fclean re re-postgres re-django re-nginx
