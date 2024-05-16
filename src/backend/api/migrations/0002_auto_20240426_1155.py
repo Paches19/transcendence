@@ -43,6 +43,10 @@ def generate_tournament_participants_data(apps, schema_editor):
         if (random.random() > 0.5):
             create_new_user_tournaments_data(
                 0, nParticipants, UserTournament, User, tournament)
+        # change tournament status if all participants are added
+        if UserTournament.objects.filter(tournament=tournament).count() == tournament.number_participants:
+            tournament.status = "in_progress"
+            tournament.save()
 
 
 def generate_friends_data(apps, schema_editor):

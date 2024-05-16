@@ -22,8 +22,8 @@ class Match(models.Model):
 # this allows us to use the built-in Django authentication system
 class User(AbstractUser):
     profilePicture = models.CharField(default='/static/avatars/default.jpg')
-    totalPoints = models.IntegerField(default=0)
     status = models.BooleanField(default=True)  # online or offline
+    totalPoints = models.IntegerField(default=0)
     matchesTotal = models.IntegerField(default=0)
     matchesWon = models.IntegerField(default=0)
     matchesLost = models.IntegerField(default=0)
