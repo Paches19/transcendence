@@ -4,7 +4,6 @@ import datetime
 
 # Create your models here.
 
-
 class Match(models.Model):
     matchID = models.AutoField(primary_key=True)
     user1 = models.ForeignKey(

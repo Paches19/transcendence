@@ -106,8 +106,25 @@ function gameOver(){
 	});
 }
 
-function initGameRemote(){
-	//socket = new WebSocket("ws://localhost:8000/ws/game/");
+async function initGameRemote(){
+	await fetch('http://localhost:8000')
+	.then(response => {
+		if (response.ok) {
+			// La solicitud se realizó correctamente, puedes mostrar un mensaje al usuario o realizar otras acciones necesarias.
+			console.log("El juego remoto se ha iniciado correctamente.");
+		} else {
+			// Manejar errores de la solicitud
+			console.error("Ocurrió un error al intentar iniciar el juego remoto.");
+		}
+	})
+	.catch(error => {
+		// Manejar errores de red u otros errores
+		console.error("Ocurrió un error de red al intentar iniciar el juego remoto:", error);
+	});
+}
+
+function initGameRemote2(){
+	//socket = new WebSocket("ws://localhost:8000");
 	console.log('Game initialized');
 	canvas = document.getElementById('pong-game');
 	ctx = canvas.getContext('2d');

@@ -22,9 +22,31 @@ class BasicUserSchema(Schema):
     username: str
     profilePicture: str | None
 
+""" Match schemas """
 
+
+class MatchCreateSchema(Schema):
+    id: int
+
+
+class MatchSchema(Schema):
+    user1: int
+    y1: int
+    pointsUser1: int = 0
+    
+    user2: int
+    y2: int
+    pointsUser2: int = 0
+
+    ball_x: int
+    ball_y: int
+    ball_speed_x: int
+    ball_speed_y: int
+    
+    date: str = datetime.date.today().isoformat()
+    tournamentId: int = None
+    
 """ User schemas """
-
 
 class UserSchema(ModelSchema):
     class Meta:
@@ -40,12 +62,6 @@ class FriendSchema(Schema):
     profilePicture: str
     status: bool
 
-
-class MatchSchema(Schema):
-    date: str
-    opponent: str
-    result: bool
-    score: str
 
 
 class UserFriendSchema(Schema):
@@ -101,24 +117,7 @@ class TournamentNameSchema(Schema):
     name: str
 
 
-""" Match schemas """
 
-class MatchSchema(Schema):
-    user1: int
-    y1: int
-    pointsUser1: int = 0
-    
-    user2: int
-    y2: int
-    pointsUser2: int = 0
-
-    ball_x: int
-    ball_y: int
-    ball_speed_x: int
-    ball_speed_y: int
-    
-    date: str = datetime.date.today().isoformat()
-    tournamentId: int = None
 
 
 """ General schemas """

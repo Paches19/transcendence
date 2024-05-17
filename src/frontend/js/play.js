@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/16 00:10:09 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/05/17 23:24:52 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,14 +86,102 @@ function startLocalVsHuman() {
 	showGameHumanScreen();
 }
 
-function startRemoteVsHuman() {
+async function startRemoteVsHuman() {
 	// if (isLoggedIn()) {
 	// 	console.log("Starting game: Remote vs Human");
 	// 	showGameRemoteScreen();
 	// } else {
 	// 	router.route("/login");
 	// }
-	showGameRemoteScreen();
+	//showGameRemoteScreen()
+	let username = "jose";
+	const inputOptions = new Promise((resolve) => {
+		setTimeout(() => {
+		  resolve({
+			"new": "New",
+			"join": "Join",
+		  });
+		}, 1000);
+	  });
+	  
+	  const { value: mode } = await Swal.fire({
+		title: "Select mode",
+		input: "radio",
+		inputOptions,
+		inputValidator: (value) => {
+		  if (!value) {
+			return "You need to choose something!";
+		  }
+		}
+	  });
+	  
+	  if (mode == "new") {
+		const apiUrl = 'http://localhost:8000/api/newmatch';
+		var randomId = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000);
+		
+		try {
+			const response = await fetch(apiUrl, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					id: randomId,
+				}),
+			});
+	
+			const data = await response.json();
+			
+			if (response.ok && data.msg == "Match created"){
+				window.location.href = 'http://localhost:8000/game/' + randomId + '/' + username;
+			}else {
+				console.error("Error al guardar el id remoto: ", response.status);
+			}
+		} catch(error) {
+			console.error("Error al guardar el id remoto:", error);
+			return false;
+		}
+	
+	} else if (mode == "join") {
+		const apiUrl = 'http://localhost:8000/api/joinmatch';
+		
+		const { value: matchId } = await Swal.fire({
+			title: "Enter the match id",
+			input: "text",
+			inputPlaceholder: "Match id",
+			inputValidator: (value) => {
+				if (!value) {
+					return "You need to write something!";
+				}
+			}
+		});
+		
+		try{
+			const response = await fetch(apiUrl, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					id: matchId,
+				}),
+			});
+	
+			const data = await response.json();
+		
+			if (response.ok && data.msg === "Match joined") {
+				window.location.href = 'http://localhost:8000/game/' + matchId + '/' + username;
+			} else{
+				console.error("Error al comprobar id remoto: ", response.status);
+			}
+		} catch(error) {
+			console.error("Error al comprobar id remoto:", error);
+			return false;
+		}
+
+	} else {
+		console.log("No se ha seleccionado ninguna opción");
+	}
 }
 
 function showGameAIScreen() {
@@ -157,6 +245,8 @@ function showGameHumanScreen() {
 function showGameRemoteScreen() {
 	const mainContent = document.getElementById('main-content');
 	const username = getUsernameFromToken();
+	if (username == NaN)
+		username = "Player";
 	mainContent.innerHTML = `
     <div class="container mt-5 game-container">
         <div class="row align-items-center">
@@ -177,9 +267,12 @@ function showGameRemoteScreen() {
             </div>
         </div>
     </div>
+	<script>
+
+	</script>
     `;
     initializeGame();
-	//initGameRemote();
+	initGameRemote();
     attachGameControlEventListeners();
 }
 

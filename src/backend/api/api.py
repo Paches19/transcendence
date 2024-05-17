@@ -1,5 +1,6 @@
 import os
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render, redirect
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
@@ -11,7 +12,8 @@ from .schema import (UserSchema, ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema,
                      AddFriendSchema, TournamentSchema,
                      UserNameSchema, MatchSchema, UserFriendSchema,
-                     SuccessSchema, TournamentCreateSchema)
+                     SuccessSchema, TournamentCreateSchema, MatchCreateSchema)
+from game.models import MatchRemote
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -21,8 +23,33 @@ app = NinjaAPI(
     description="API for the ft_transcendence project made with the django-ninja library.",
 )
 
-""" Auth """
+@app.post("/newmatch", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
+def saveIdRemote(request, match: MatchCreateSchema):
+    try:
+        MatchRemote.objects.get(id=match.id)
+        return 400, {"error_msg": "Match already exists"}
+    except MatchRemote.DoesNotExist:
+        MatchRemote.objects.create(id=match.id)
+        return {"msg": "Match created"}
+    
+@app.post("/joinmatch", response=SuccessSchema, tags=['Match'])
+def getMatch(request, match: MatchCreateSchema):
+	try:
+		MatchRemote.objects.get(id=match.id)
+		return {"msg": "Match joined"}
+	except MatchRemote.DoesNotExist:
+		return 400, {"error_msg": "Match does not exist"}
 
+@app.post("/deletematch", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
+def deleteMatch(request, match: MatchCreateSchema):
+	try:
+		tmpmatch = MatchRemote.objects.get(id=match.id)
+		tmpmatch.delete()
+		return 200, {"msg": "Match deleted"}
+	except MatchRemote.DoesNotExist:
+		return 400, {"error_msg": "Match does not exist"}
+
+""" Auth """
 
 @app.post("auth/register", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Auth'])
 def create_user(request, user_in: UserRegisterSchema):
@@ -275,30 +302,3 @@ def get_tournament_matches(request, tournament_id: int):
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
     matches = Match.objects.filter(tournamentId=tournament)
     return matches
-
-
-""" Game """
-
-# @app.get("game/state", tags=['Game'])
-# def get_game_state(request, game_state=MatchSchema):
-    
-# 	return game_state
-
-# @app.post("game/update", tags=['Game'])
-# def update_game(request, game_state=MatchSchema):
-# 	return {"msg": "Game updated"}
-# @app.post("game/move", tags=['Game'])
-# def get_game_move(request):
-# 	return {"msg": "Game move"}
-
-# @app.post("game/start", tags=['Game'])
-# def start_game(request):
-# 	return {"msg": "Game started"}
-
-# @app.post("game/end", tags=['Game'])
-# def end_game(request):
-# 	return {"msg": "Game ended"}
-
-# @app.get("game/history", tags=['Game'])
-# def get_game_history(request):
-# 	return {"msg": "Game history"}

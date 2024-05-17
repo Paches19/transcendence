@@ -1,5 +1,6 @@
-import contextlib, random
+import contextlib
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from game.models import MatchRemote
 
 class PongConsumer(AsyncJsonWebsocketConsumer):
     
@@ -76,6 +77,8 @@ class PongConsumer(AsyncJsonWebsocketConsumer):
                 "event": "opponent_left",
             }
         })
+        match = MatchRemote.objects.get(id=self.match_id)
+        match.delete()
 
     async def gameData_send(self, context):
         await self.send_json(context['data'])

@@ -153,22 +153,6 @@ function drawElements() {
 	drawScores();
 }
 
-// function player2IA() {
-// 	let level = Math.floor(Math.random() * 3) + 3;
-// 	if (stateMatch.ball.y > stateMatch.player2.y + playerHeight / 2 &&
-// 		stateMatch.ball.x > canvas.width / 2 &&
-// 		stateMatch.player2.y + playerHeight + v < canvas.height) {
-// 			stateMatch.player2.y += v / level;
-// 	} else if (stateMatch.player2.y - v > 0 && stateMatch.ball.x > canvas.width / 2){
-// 		stateMatch.player2.y -= v / level;
-// 	}
-
-// 	if (stateMatch.state === 'ended'){
-// 		return;
-// 	}
-// 	requestAnimationFrame(player2IA);
-// }
-
 function handleKeyDown(e) {
     const key = e.key;
     let y;
