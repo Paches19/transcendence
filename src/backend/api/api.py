@@ -139,8 +139,11 @@ def update_avatar(request, file: UploadedFile = File(...)):
 @app.post("users/friends/add", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Users'])
 @login_required
 def add_friend(request, friend_username: AddFriendSchema):
-    user_id = request.user.id
-    user = get_object_or_404(User, id=user_id)
+    # if friend does not exist
+    if not User.objects.filter(username=friend_username.friend_username).exists():
+        return 400, {"error_msg": "User does not exist"}
+
+    user = request.user
     friend = get_object_or_404(User, username=friend_username.friend_username)
 
     if user == friend:

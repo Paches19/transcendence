@@ -45,7 +45,7 @@ This project was a team effort. You can checkout the team members here:
 cp .example.env src/docker/.env
 
 #Enter values for the variables in the .env file
-vim /src/docker/.env
+vim src/docker/.env
 
 make
 ```
