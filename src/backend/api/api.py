@@ -164,6 +164,10 @@ def accept_friend(request, friend_username: AddFriendSchema):
     user = request.user
     friend = get_object_or_404(User, username=friend_username.friend_username)
 
+    # can't accept a friend request if user is the sender
+    if (user == Friend.objects.filter(user1=user, user2=friend).first().user1):
+        return 400, {"error_msg": "Can't accept your own friend request"}
+
     if not Friend.objects.filter(user1=friend, user2=user, status=False).exists():
         return 400, {"error_msg": "Friend request not found"}
 
