@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 11:37:37 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/15 12:25:40 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/07 10:00:51 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,14 @@
 #error-message	{
    	color: var(--arcade-red);
 	display: none;
+	text-align: center;
+	width: 100%;
+	margin-top: 3vh;
+}
+
+#register-msg{
+	color: var(--neon-green);
+	font-size: 2.5vh;
 	text-align: center;
 	width: 100%;
 	margin-top: 3vh;
@@ -113,5 +121,10 @@
 		text-align: center;
 		width: 100%;
 		margin-top: 3vh;
+	}
+
+	#register-msg{
+		color: var(--neon-green);
+		font-size: 2vh;
 	}
 }

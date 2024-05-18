@@ -6,7 +6,11 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2024/05/08 20:27:02 by jutrera-         ###   ########.fr       */
+=======
+/*   Updated: 2024/05/07 16:27:15 by adpachec         ###   ########.fr       */
+>>>>>>> main
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,15 +32,22 @@ async function login(username, password) {
             }),
         });
         
+<<<<<<< HEAD
 		const data = await response.json();
 
+=======
+        const data = await response.json();
+        
+>>>>>>> main
         if (response.ok && data.msg === "Login successful") {
             const token = username;
             localStorage.setItem('userToken', token);
+            console.log("token: " + token);
             updateNavbar();
             router.route('/profile');
             return true;
         } else {
+            console.log("response KO");
             return false;
         }
     } catch (error) {
@@ -54,10 +65,9 @@ async function logout() {
     const logoutEndpoint = 'http://localhost:8000/api/auth/logout';
     try {
         const response = await fetch(logoutEndpoint, {
-            method: 'POST',
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('userToken')}`
             },
         });
 
@@ -66,8 +76,6 @@ async function logout() {
             updateNavbar();
             router.route('/home');
             console.log('Logged out successfully.');
-        } else {
-            throw new Error('Logout failed');
         }
     } catch (error) {
         console.error('An error occurred during logout:', error);
