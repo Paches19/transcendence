@@ -5,12 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
-<<<<<<< HEAD
-/*   Updated: 2024/05/08 20:27:02 by jutrera-         ###   ########.fr       */
-=======
-/*   Updated: 2024/05/07 16:27:15 by adpachec         ###   ########.fr       */
->>>>>>> main
+/*   Created: 2024/04/10 11:27:22 by jutrera-          #+#    #+#             */
+/*   Updated: 2024/05/18 17:06:59 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,13 +28,8 @@ async function login(username, password) {
             }),
         });
         
-<<<<<<< HEAD
 		const data = await response.json();
 
-=======
-        const data = await response.json();
-        
->>>>>>> main
         if (response.ok && data.msg === "Login successful") {
             const token = username;
             localStorage.setItem('userToken', token);
