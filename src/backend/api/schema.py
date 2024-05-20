@@ -35,7 +35,7 @@ class MatchSchema(Schema):
     score: str
 
 
-class UserFriendSchema(Schema):
+class UserSchema(Schema):
     id: int
     username: str
     profilePicture: str
@@ -44,6 +44,8 @@ class UserFriendSchema(Schema):
     matchesTotal: int
     matchesWon: int
     matchesLost: int
+    tournamentsPlayed: int
+    tournamentsWon: int
     friends: List[FriendSchema]
     matches: List[MatchSchema]
 
