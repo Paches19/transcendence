@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:24:45 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/16 09:40:34 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/20 12:08:03 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ const router = new Router();
 router.addRoute('/', loadInitialContent);
 router.addRoute('/home', loadInitialContent);
 router.addRoute('/profile', loadProfile);
-router.addRoute('/friend-profile/:id,', id => { loadFriendProfile(id) });
+router.addRoute('/friend-profile/:id', id => { loadFriendProfile(id) });
 router.addRoute('/edit-profile', loadEditProfile);
 router.addRoute('/play', initPlayPage);
 router.addRoute('/tournaments', loadTournaments);

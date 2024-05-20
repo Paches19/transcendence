@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:56:12 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/08 11:59:36 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/20 12:04:39 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,35 +18,6 @@ function loadPageNotFound() {
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<title>Error 404 - Page Not Found</title>
-			<style>
-				body {
-					font-family: 'Arial', sans-serif;
-					background-color: #f4f4f4;
-					color: #333;
-					text-align: center;
-					padding: 50px;
-					margin: 0;
-				}
-		
-				.container {
-					max-width: 600px;
-					margin: 0 auto;
-				}
-		
-				h1 {
-					color: #d9534f;
-				}
-		
-				p {
-					font-size: 18px;
-					line-height: 1.5;
-				}
-		
-				img {
-					max-width: 100%;
-					height: auto;
-				}
-			</style>
 		</head>
 		<body>
 			<div class="container">

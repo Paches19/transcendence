@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 18:11:12 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/14 17:11:47 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/20 11:58:01 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,16 +233,21 @@ async function leaveTournament(tournamentId) {
 
 function showNotification(message, isSuccess = true) {
     let notification = document.getElementById('notification');
-    if (!notification) {
-        notification = document.createElement('div');
+    if (notification) {
+        notification.remove();
     }
+    notification = document.createElement('div');
     notification.id = 'notification';
     notification.textContent = message;
-    notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+    notification.className = `notification ${isSuccess ? 'success' : 'error'}`;   
+    
     document.body.appendChild(notification);
     notification.classList.add('show');
     setTimeout(() => {
         notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
     }, 5000);
 }
 

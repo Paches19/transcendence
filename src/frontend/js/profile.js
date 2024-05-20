@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:18 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/14 16:41:34 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/20 12:34:08 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,9 +78,10 @@ function updateProfileUI(user) {
 
     document.getElementById('main-content').innerHTML = profileHTML;
     addEventListeners();
+    addFriendLinkListeners();
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+function addFriendLinkListeners() {
     const links = document.querySelectorAll('.friend-entry a');
     links.forEach(link => {
         link.addEventListener('click', function(event) {
@@ -89,7 +90,7 @@ document.addEventListener("DOMContentLoaded", function() {
             router.route(`/friend-profile/${id}`, id);
         });
     });
-});
+}
 
 function renderMatchHistory(matches) {
     return `
@@ -119,7 +120,7 @@ function renderMatchHistory(matches) {
 function renderFriendsList(friends) {
     return friends.map(friend => `
         <div class="friend-entry">
-            <a data-id="${friend.name}">
+            <a data-id="${friend.id}">
                 <img src="http://localhost:8000${friend.profilePicture}" alt="${friend.name}'s Avatar" class="friend-avatar">
                 <span class="friend-username">${friend.name}</span>
                 
@@ -155,16 +156,16 @@ async function acceptFriendRequest(friend_username) {
         });
 
         if (response.ok) {
-            showNotification('Friend request accepted');
+            showNotification('Friend request accepted', 'success');
             loadProfile();
         } else {
             const errorData = await response.json();
             console.error('Error accepting friend request:', errorData.error_msg);
-            showNotification(`Error: ${errorData.error_msg}`);
+            showNotification(`Error: ${errorData.error_msg}`, 'error');
         }
     } catch (error) {
         console.error('Error accepting friend request:', error);
-        showNotification('Error accepting friend request. Please try again later.');
+        showNotification('Error accepting friend request. Please try again later.', 'error');
     }
 }
 
@@ -186,16 +187,16 @@ async function deleteFriend(friend_username) {
         });
 
         if (response.ok) {
-            showNotification('Friend removed successfully');
-            loadProfile(); // Recargar el perfil para actualizar la lista de amigos
+            showNotification('Friend removed successfully', 'success');
+            loadProfile();
         } else {
             const errorData = await response.json();
             console.error('Error removing friend:', errorData.error_msg);
-            showNotification(`Error: ${errorData.error_msg}`);
+            showNotification(`Error: ${errorData.error_msg}`, 'error');
         }
     } catch (error) {
         console.error('Error removing friend:', error);
-        showNotification('Error removing friend. Please try again later.');
+        showNotification('Error removing friend. Please try again later.', 'error');
     }
 }
 
@@ -266,41 +267,52 @@ async function sendFriendRequest() {
             if (response.ok) {
                 const data = await response.json();
                 console.log('Friend request successful:', data);
-                showNotification(`Friend request sent to ${friendUsername}`);
+                showNotification(`Friend request sent to ${friendUsername}`, 'success');
                 friendUsernameInput.value = "";
+                loadProfile();
+                toggleFriendSection();
             } else if (response.status === 400) {
                 const errorData = await response.json();
                 console.error('Error sending friend request:', errorData.error_msg);
-                showNotification(`Error: ${errorData.error_msg}`);
+                showNotification(`Error: ${errorData.error_msg}`, 'error');
             } else {
                 console.error('Unexpected error:', response.status);
-                showNotification('Unexpected error occurred. Please try again later.');
+                showNotification('Unexpected error occurred. Please try again later.', 'error');
             }
         } catch (error) {
             console.error('Error sending friend request:', error);
-            showNotification('Error sending friend request. Please try again later.');
+            showNotification('Error sending friend request. Please try again later.', 'error');
         }
     } else {
         alert("Please enter a friend's username.");
     }
 }
 
-function showNotification(message) {
-	let notification = document.getElementById('notification');
-	if (!notification)
-	{
-		notification = document.createElement('div');
-		notification.id = 'notification';
-		notification.className = 'notification';
-		document.body.appendChild(notification);
-	}
-	notification.textContent = message;
-	
-	notification.classList.add('show');
-	setTimeout(() =>
-	{
-		notification.classList.remove('show');
-	}, 4000);
+function showNotification(message, type) {
+    let notification = document.getElementById('notification');
+    if (notification) {
+        notification.remove();
+    }
+    notification = document.createElement('div');
+    notification.id = 'notification';
+    notification.className = 'notification';
+    document.body.appendChild(notification);
+
+    notification.textContent = message;
+    notification.classList.remove('success-msg', 'error-msg');
+    if (type === 'success') {
+        notification.classList.add('success-msg');
+    } else if (type === 'error') {
+        notification.classList.add('error-msg');
+    }
+
+    notification.classList.add('show');
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
+    }, 4000);
 }
 
 export default loadProfile;

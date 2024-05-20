@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/20 10:39:11 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/20 12:00:52 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,7 +175,7 @@ function addModalEventListeners() {
         })
         .then(response => {
             if (!response.ok) {
-                showNotification()('Network response was not ok');
+                showNotification('Network response was not ok');
             }
             return response.json();
         })
@@ -193,16 +193,21 @@ function addModalEventListeners() {
 
 function showNotification(message, isSuccess = true) {
     let notification = document.getElementById('notification');
-    if (!notification) {
-        notification = document.createElement('div');
+    if (notification) {
+        notification.remove();
     }
+    notification = document.createElement('div');
     notification.id = 'notification';
     notification.textContent = message;
-    notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+    notification.className = `notification ${isSuccess ? 'success' : 'error'}`;   
+    
     document.body.appendChild(notification);
     notification.classList.add('show');
     setTimeout(() => {
         notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
     }, 5000);
 }
 
@@ -246,7 +251,6 @@ async function joinTournament(tournamentId) {
     }
 }
 
-// Limpia los event listeners antes de asignarlos nuevamente para evitar que se ejecuten múltiples veces
 document.removeEventListener('click', handleDocumentClick);
 document.addEventListener('click', handleDocumentClick);
 

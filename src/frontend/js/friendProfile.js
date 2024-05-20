@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 10:20:30 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/14 10:21:11 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/20 12:43:09 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,17 +67,13 @@ function updateProfileUI(user) {
                 <div id="friends-list" class="friends-list">
                     ${renderFriendsList(user.friends)}
                 </div>
-                <button class="toggle-button" id="toggle-friend-form">Add a New Friend</button>
-                <div id="add-friend-form" class="add-friend-form" style="display: none;">
-                    <input type="text" id="new-friend-name" placeholder="Enter friend's username" />
-                    <button id="sendRequestBtn">Send Friend Request</button>
-                </div>
             </div>
         </div>
     `;
 
     document.getElementById('main-content').innerHTML = profileHTML;
     addEventListeners();
+    addFriendLinkListeners();
 }
 
 function renderMatchHistory(matches) {
@@ -116,7 +112,7 @@ function renderFriendsList(friends) {
     `).join('');
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+function addFriendLinkListeners() {
     const links = document.querySelectorAll('.friend-entry a');
     links.forEach(link => {
         link.addEventListener('click', function(event) {
@@ -125,13 +121,12 @@ document.addEventListener("DOMContentLoaded", function() {
             router.route(`/friend-profile/${id}`, id);
         });
     });
-});
+}
 
 function addEventListeners() {
 	document.querySelector('.stats-toggler').addEventListener('click', toggleStats);
 	document.querySelector('.history-toggler').addEventListener('click', toggleHistory);
 	document.getElementById('friends-button').addEventListener('click', toggleFriendSection);
-	document.getElementById('toggle-friend-form').addEventListener('click', toggleFriendForm);
 }
 
 function toggleStats() {
@@ -147,11 +142,6 @@ function toggleHistory() {
 function toggleFriendSection() {
 	const section = document.getElementById('friends-section');
 	section.style.display = section.style.display === 'none' ? 'block' : 'none';
-}
-
-function toggleFriendForm() {
-	const form = document.getElementById('add-friend-form');
-	form.style.display = form.style.display === 'none' ? 'block' : 'none';
 }
 
 export default loadFriendProfile;

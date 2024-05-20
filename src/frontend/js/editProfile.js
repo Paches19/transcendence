@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 13:04:35 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/14 16:26:59 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/20 12:52:32 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,12 +103,27 @@ function loadHtmlEditProfile(currentUser) {
 	  document.getElementById('upload-picture').addEventListener('click', function() {
 		const fileInput = document.getElementById('profile-picture-upload');
 		const file = fileInput.files[0];
-		if (file) {
-		  updateUserAvatar(file);
-		} else {
-			showNotification("Please select a photo first!!");
+	
+		if (!file) {
+			showNotification("Please select a photo first!!", "error");
+			return;
 		}
-	  });
+	
+		const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+		const maxSize = 5 * 1024 * 1024;
+	
+		if (!validTypes.includes(file.type)) {
+			showNotification("Invalid file type. Please upload an image (JPEG, PNG, GIF).", "error");
+			return;
+		}
+	
+		if (file.size > maxSize) {
+			showNotification("File is too large. Please upload an image smaller than 5MB.", "error");
+			return;
+		}
+	
+		updateUserAvatar(file);
+	});
   }
   
   function updateUserAvatar(file) {
@@ -125,7 +140,8 @@ function loadHtmlEditProfile(currentUser) {
     fetch(apiUrl, requestOptions)
         .then(response => {
             if (!response.ok) {
-				showNotification('Network response was not ok.');
+				showNotification('Network response was not ok.', "error");
+                return;
             }
             return response.json();
         })
@@ -134,32 +150,41 @@ function loadHtmlEditProfile(currentUser) {
                 throw new Error(data.error);
             }
             console.log('Success:', data);
-            showNotification("Photo uploaded successfully.");
-			updateNavbar();
+            showNotification("Photo uploaded successfully.", "success");
+            updateNavbar();
         })
         .catch((error) => {
-            console.error('Error:', error); 
-            showNotification("Error uploading photo: " + error.message);
+            console.error('Error:', error);
+            showNotification("Error uploading photo: " + error.message, "error");
         });
 }
-  
-  function showNotification(message) {
-	let notification = document.getElementById('notification');
-	if (!notification)
-	{
-		notification = document.createElement('div');
-		notification.id = 'notification';
-		notification.className = 'notification';
-		document.body.appendChild(notification);
-	}
-	notification.textContent = message;
-	
-	notification.classList.add('show');
-	setTimeout(() =>
-	{
-		notification.classList.remove('show');
-	}, 4000);
-  }
+
+function showNotification(message, type) {
+    let notification = document.getElementById('notification');
+    if (notification) {
+        notification.remove();
+    }
+    notification = document.createElement('div');
+    notification.id = 'notification';
+    notification.className = 'notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    notification.classList.remove('success-msg', 'error-msg');
+    if (type === 'success') {
+        notification.classList.add('success-msg');
+    } else if (type === 'error') {
+        notification.classList.add('error-msg');
+    }
+
+    notification.classList.add('show');
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
+    }, 4000);
+}
   
   function updateUserProfile(newUsername, newPassword) {
     const apiUrl = 'http://localhost:8000/api/users/update';

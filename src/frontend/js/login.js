@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:21:53 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/20 11:09:15 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/20 11:32:46 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,13 @@ import { login } from './auth.js';
 import updateNavbar from "./navbar.js";
 import router from './main.js';
 
-function handleLoginSubmit() {
-    const loginButton = document.getElementById('login-btn');
-    loginButton.addEventListener('submit', setupLoginEvent);
-}
-
-async function setupLoginEvent(event) {
+async function handleLoginSubmit(event) {
     event.preventDefault();
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
-    login(username, password).then(isSuccessful => {
+    try {
+        const isSuccessful = await login(username, password);
         const loginMsg = document.getElementById('login-msg');
         if (isSuccessful) {
             updateNavbar();
@@ -34,23 +30,24 @@ async function setupLoginEvent(event) {
                 loginMsg.classList.add('success-msg');
             }
             setTimeout(() => {
-                    router.route('/profile');
-            }, 2000);
+                router.route('/profile');
+            }, 2500);
         } else {
             if (loginMsg) {
-                loginMsg.innerText = 'Hmm, that username and password don´t seem to match.';
+                loginMsg.innerText = 'Hmm, that username and password don’t seem to match.';
                 loginMsg.classList.remove('success-msg');
                 loginMsg.classList.add('error-msg');
             }
         }
-    }).catch(error => {
+    } catch (error) {
         console.error('Login error:', error);
+        const loginMsg = document.getElementById('login-msg');
         if (loginMsg) {
             loginMsg.innerText = 'Error during login process.';
             loginMsg.classList.remove('success-msg');
             loginMsg.classList.add('error-msg');
         }
-    });
+    }
 }
 
 function loadLogin() {
@@ -59,7 +56,7 @@ function loadLogin() {
             <div class="flip-card__inner">
                 <div class="flip-card__front">
                     <div class="title">Log in</div>
-                        <form action="" class="flip-card__form">
+                        <form action="" class="flip-card__form" id="login-form">
                             <input type="text" placeholder="Name" id="username" class="flip-card__input">
                             <input type="password" placeholder="Password" id="password" class="flip-card__input">
                             <button type="submit" class="flip-card__btn" id="login-btn">Let's go!</button>
@@ -70,11 +67,8 @@ function loadLogin() {
         </div>
     `;
     
-    if (document.readyState === 'loading') { 
-        document.addEventListener('DOMContentLoaded', handleLoginSubmit);
-    } else {
-        handleLoginSubmit();
-    }
+    const loginForm = document.getElementById('login-form');
+    loginForm.addEventListener('submit', handleLoginSubmit);
 }
 
 export default loadLogin;

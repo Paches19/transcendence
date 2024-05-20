@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:35:31 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/20 11:02:50 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/20 11:50:50 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,11 +142,13 @@
 
 /* En tu archivo CSS */
 .success-msg {
-  color: var(--neon-green);
+  color: black !important;
+  background-color: var(--neon-green) !important;
 }
 
 .error-msg {
-  color: var(--arcade-red);
+  color: black !important;
+  background-color: var(--arcade-red) !important;
 }
   
   @media (max-width: 1023px) {
