@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:35:31 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/27 13:17:56 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/20 11:02:50 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -140,7 +140,12 @@
 	box-shadow: 0.3vw 0.3vw var(--border-purple);
 } 
 
-#login-msg{
+/* En tu archivo CSS */
+.success-msg {
+  color: var(--neon-green);
+}
+
+.error-msg {
   color: var(--arcade-red);
 }
   

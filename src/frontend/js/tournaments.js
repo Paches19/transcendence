@@ -6,10 +6,11 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/14 17:26:12 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/20 10:39:11 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+import { isLoggedIn } from "./auth.js";
 import router from "./main.js"
 
 async function fetchTournaments() {
@@ -109,6 +110,11 @@ function viewTournaments(tournaments) {
 
 function showCreateTournamentModal() {
     const modal = document.getElementById('createTournamentModal');
+    if (!isLoggedIn()) {
+        localStorage.setItem('loginRedirect', 'true');
+        router.route('/login');
+        return ;
+    }
     if (!modal) {
         createTournament();
     }
