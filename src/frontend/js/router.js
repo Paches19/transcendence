@@ -3,12 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   router.js                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:51:47 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/22 12:17:06 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/20 23:04:54 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+import updateNavbar from "./navbar.js";
 
 export default class Router {
     constructor() {
@@ -28,6 +30,7 @@ export default class Router {
     resolveCurrentPath() {
         const path = window.location.pathname || '/';
         this.route(path, false);
+        updateNavbar();
     }
 
     route(path, updateHistory = true) {

@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/10 11:27:22 by jutrera-          #+#    #+#             */
-/*   Updated: 2024/05/18 17:06:59 by jutrera-         ###   ########.fr       */
+/*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
+/*   Updated: 2024/05/20 23:02:20 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,16 +26,16 @@ async function login(username, password) {
                 username: username,
                 password: password
             }),
+            credentials: 'include'
         });
         
-		const data = await response.json();
-
+        const data = await response.json();
+        
         if (response.ok && data.msg === "Login successful") {
             const token = username;
             localStorage.setItem('userToken', token);
             console.log("token: " + token);
-            updateNavbar();
-            router.route('/profile');
+            console.log("data: " + data);
             return true;
         } else {
             console.log("response KO");
@@ -45,6 +45,7 @@ async function login(username, password) {
         console.error('An error occurred during login:', error);
         return false;
     }
+    return false;
 }
 
 function isLoggedIn()
@@ -77,9 +78,9 @@ function getUsernameFromToken() {
     const token = localStorage.getItem('userToken');
     if (!token)
         return null;
-//    const decoded = atob(token);
-//	return decoded.split(':')[0];
-	return token;
+
+    const decoded = atob(token);
+    return decoded.split(':')[0];
 }
 
 export { login, isLoggedIn, logout, getUsernameFromToken };

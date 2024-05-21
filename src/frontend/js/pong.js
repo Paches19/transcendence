@@ -13,6 +13,87 @@
 
 import {initPlayPage, resetTime} from "./play.js";
 
+async function sendState(state){
+    const logoutEndpoint = 'http://localhost:8000/api/game';
+    try {
+        const response = await fetch(logoutEndpoint, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+			});
+
+        if (response.ok) {
+            console.log(state + ' sent');
+        }
+    } catch (error) {
+        console.error('An error has occurred', error);
+    }
+}
+
+function playPong(mode){
+	sendState('play');
+}
+
+function quitPong(){
+	sendState('quit');
+}
+
+function pausePong(){
+	sendState('pause');
+}
+
+function startPong(mode){
+	sendState('start');
+
+	// console.log('Game initialized');
+	// canvas = document.getElementById('pong-game');
+	// ctx = canvas.getContext('2d');
+	// ctx.fillStyle = 'white';
+	// document.addEventListener('keydown', handleKeyDown);
+	// stateMatch = {
+	// 	'ball': {
+	// 		'x': canvas.width / 2 - 5,
+	// 		'y': canvas.height / 2 - 5,
+	// 		'vx': Math.floor(Math.random() * 7) - 3,
+	// 		'vy': Math.floor(Math.random() * 7) - 3,
+	// 	},
+	// 	'player1': {
+	// 		'x': 10,
+	// 		'y': canvas.height / 2 - 40,
+	// 		'score': 0,
+	// 	},
+	// 	'player2': {
+	// 		'x': canvas.width - 25,
+	// 		'y': canvas.height / 2 - 40,
+	// 		'score': 0,
+	
+	// 	},
+	// 	'state': 'waiting',
+	// }
+	// var words = document.getElementById('game-score').textContent.split(' ');
+    // name1 = words[0];
+	// name2 = words[4];
+	// drawElements();
+	// drawScores();
+	// stateMatch.ball.vx = Math.floor(Math.random() * 7) - 3;
+	// stateMatch.ball.vy = Math.floor(Math.random() * 7) - 3;
+	// if (stateMatch.ball.vx == 0)
+	// 	stateMatch.ball.vx = 4;
+	// if (stateMatch.ball.vy == 0)
+	// 	stateMatch.ball.vy = 4
+	// loop();
+	// player2IA()
+	// setTimeout(playAI,3000);
+}
+
+function handleKeyDown(e) {
+    const key = e.key;
+
+    if (key === 'ArrowUp' || key === 'ArrowDown')
+		sendState(key);
+}
+
 let canvas
 let stateMatch = {
 	'ball': {
@@ -73,91 +154,41 @@ function player2IA() {
 	requestAnimationFrame(player2IA);
 }
 
-function playAI(){
-	stateMatch.state = 'playing';
-}
 
-function quitAI(){
-	stateMatch.state = 'gameover';
-}
-
-function pauseAI(){
-	stateMatch.state = 'waiting';
-}
 
 function gameOver(){
-	pauseAI();
-	stateMatch.state = 'gameover';
-	let texto;
-	if (stateMatch.player1.score == finalScore)
-		texto = "YOU WIN";
-	else
-		texto = "YOU LOSE";
+	sendState('gameover');
+	// pauseAI();
+	// stateMatch.state = 'gameover';
+	// let texto;
+	// if (stateMatch.player1.score == finalScore)
+	// 	texto = "YOU WIN";
+	// else
+	// 	texto = "YOU LOSE";
 
-	Swal.fire({
-		title: texto,
-		confirmButtonColor: '#32B974',
-	}).then((result) => {	
-		if (result.isConfirmed){
-			Swal.fire({
-				confirmButtonColor: '#32B974',
-				title: "Play again ?",
-				showDenyButton: true,
-				showCancelButton: false,
-				confirmButtonText: "Yes",
-				denyButtonText: `No`
-			  }).then((result) => {
-				if (result.isConfirmed) {
-					resetTime();
-					initGameAI();
-				}else if (result.isDenied){
-					initPlayPage();
-				}});
-		};
-	});
+	// Swal.fire({
+	// 	title: texto,
+	// 	confirmButtonColor: '#32B974',
+	// }).then((result) => {	
+	// 	if (result.isConfirmed){
+	// 		Swal.fire({
+	// 			confirmButtonColor: '#32B974',
+	// 			title: "Play again ?",
+	// 			showDenyButton: true,
+	// 			showCancelButton: false,
+	// 			confirmButtonText: "Yes",
+	// 			denyButtonText: `No`
+	// 		  }).then((result) => {
+	// 			if (result.isConfirmed) {
+	// 				resetTime();
+	// 				initGameAI();
+	// 			}else if (result.isDenied){
+	// 				initPlayPage();
+	// 			}});
+	// 	};
+	// });
 }
 
-function initGameAI(){
-	console.log('Game initialized');
-	canvas = document.getElementById('pong-game');
-	ctx = canvas.getContext('2d');
-	ctx.fillStyle = 'white';
-	document.addEventListener('keydown', handleKeyDown);
-	stateMatch = {
-		'ball': {
-			'x': canvas.width / 2 - 5,
-			'y': canvas.height / 2 - 5,
-			'vx': Math.floor(Math.random() * 7) - 3,
-			'vy': Math.floor(Math.random() * 7) - 3,
-		},
-		'player1': {
-			'x': 10,
-			'y': canvas.height / 2 - 40,
-			'score': 0,
-		},
-		'player2': {
-			'x': canvas.width - 25,
-			'y': canvas.height / 2 - 40,
-			'score': 0,
-	
-		},
-		'state': 'waiting',
-	}
-	var words = document.getElementById('game-score').textContent.split(' ');
-    name1 = words[0];
-	name2 = words[4];
-	drawElements();
-	drawScores();
-	stateMatch.ball.vx = Math.floor(Math.random() * 7) - 3;
-	stateMatch.ball.vy = Math.floor(Math.random() * 7) - 3;
-	if (stateMatch.ball.vx == 0)
-		stateMatch.ball.vx = 4;
-	if (stateMatch.ball.vy == 0)
-		stateMatch.ball.vy = 4
-	loop();
-	player2IA()
-	setTimeout(playAI,3000);
-}
 	
 function resetBall(){
 	stateMatch.ball.x = canvas.width / 2 - 5;
@@ -255,15 +286,4 @@ function drawElements() {
 	drawPaddles();
 }
 
-function handleKeyDown(e) {
-    const key = e.key;
-
-    let y = stateMatch.player1.y;
-    if ((key === 'ArrowUp' && y - v > 0) ||
-        (key === 'ArrowDown' && y + playerHeight + v < canvas.height))
-       		 y += key === 'ArrowUp' ? -v : v;
-    stateMatch.player1.y = y;
-	drawElements();
-}
-
-export {initGameAI, quitAI, pauseAI, playAI};
+export {startPong, quitPong, pausePong, playPong};

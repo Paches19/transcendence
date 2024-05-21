@@ -1,19 +1,18 @@
 import os
-from django.shortcuts import get_object_or_404, render, redirect
-
-from django.contrib import messages
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
 from ninja.params import Query
 from .models import User, Friend, Tournament, UserTournament, Match
 from .middleware import login_required, require_auth
+from .populate_data import *
 from typing import Optional
-from .schema import (UserSchema, ErrorSchema, UserUpdateSchema,
-                     UserRegisterSchema, LoginSchema,
-                     AddFriendSchema, TournamentSchema, BasicUserSchema,
-                     UserNameSchema, MatchSchema, UserFriendSchema,
-                     SuccessSchema, TournamentCreateSchema, MatchCreateSchema)
+from .schema import (ErrorSchema, UserUpdateSchema,
+                     UserRegisterSchema, LoginSchema, SingleTournamentSchema,
+                     AddFriendSchema, TournamentSchema, UserNameSchema,
+                     UserSchema, SuccessSchema, TournamentCreateSchema, 
+                     MatchCreateSchema)
 from game.models import MatchRemote
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
@@ -23,6 +22,10 @@ app = NinjaAPI(
     version="1.0",
     description="API for the ft_transcendence project made with the django-ninja library.",
 )
+
+@app.get("/game", tags=['Game'])
+def game(request):
+	return {"msg": "pong"}
 
 @app.post("/newmatch", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
 def saveIdRemote(request, match: MatchCreateSchema):
@@ -56,11 +59,12 @@ def deleteMatch(request, match: MatchCreateSchema):
 @app.post("auth/register", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Auth'])
 def create_user(request, user_in: UserRegisterSchema):
     if User.objects.filter(username=user_in.username).exists():
-        return 400, {"error_error_msg": "User already exists"}
+        return 400, {"error_msg": "User already exists"}
 
     user_data = user_in.model_dump()
     User.objects.create_user(**user_data)
     return {"msg": "User created"}
+
 
 @app.post("auth/login", tags=['Auth'])
 def login_user(request, login_in: LoginSchema):
@@ -82,28 +86,7 @@ def logout_user(request):
 """ Users """
 
 
-# aux function to add friend data to the get_users response
-def populate_friends(user):
-    all_friends = Friend.objects.all()
-    friends = []
-    for friend in all_friends:
-        if friend.user1.id == user.id:
-            friends.append({
-                "id": friend.user2.id,
-                "name": friend.user2.username,
-                "profilePicture": str(friend.user2.profilePicture),
-                "status": friend.status
-            })
-        elif friend.user2.id == user.id:
-            friends.append({
-                "id": friend.user1.id,
-                "name": friend.user1.username,
-                "profilePicture": str(friend.user1.profilePicture),
-                "status": friend.status
-            })
-    return friends
-
-@app.get("users", response=UserFriendSchema, tags=['Users'])
+@app.get("users", response=UserSchema, tags=['Users'])
 def get_users(request, user_id: Optional[int] = None):
     if user_id:
         user = get_object_or_404(User, id=user_id)
@@ -124,8 +107,10 @@ def get_users(request, user_id: Optional[int] = None):
         "matchesTotal": user.matchesTotal,
         "matchesWon": user.matchesWon,
         "matchesLost": user.matchesLost,
-        "matchesDraw": user.matchesDraw,
-        "friends": populate_friends(user)
+        "tournamentsPlayed": userTournamentsPlayed(user),
+        "tournamentsWon": userTournamentsWon(user),
+        "friends": populate_friends(user),
+        "matches": populate_matches(user)
     }
     return resp
 
@@ -136,7 +121,8 @@ def update_user(request, user_in: UserUpdateSchema):
     user = request.user
     user_data = user_in.dict()
 
-    if user_data["username"] is not None:
+    if (user_data["username"] is not None and
+            user_data["username"] != user.username):
         if User.objects.filter(username=user_data["username"]).exists():
             return 400, {"error_msg": "Username already exists"}
         user.username = user_data["username"]
@@ -144,6 +130,8 @@ def update_user(request, user_in: UserUpdateSchema):
     if user_in.password is not None:
         user.set_password(user_in.password)
     user.save()
+    # Reauthenticate user
+    login(request, user)
     return {"username": user.username}
 
 
@@ -163,25 +151,40 @@ def update_avatar(request, file: UploadedFile = File(...)):
     if file.content_type not in ["image/jpeg", "image/png", "image/gif"]:
         return 400, {"error_msg": "Image format not supported"}
 
+    # Delete previous avatar unless default
+    if request.user.profilePicture != "/static/avatars/default.jpg":
+        os.remove("api"+request.user.profilePicture)
+
     # Save the uploaded image
-    file_route = os.path.join(os.getcwd(), "users", "static", "avatars", (str(
-        user_id) + "." + str(file.content_type[-4:])))
+    relative_file_route = os.path.join("static", "avatars",
+                                       str(user_id) + "." + file.content_type.split('/')[-1])
+    file_route = os.path.join(os.getcwd(), "api", relative_file_route)
     file = open(file_route, "wb")
     file.write(avatar_data)
     file.close()
 
     # Update the user avatar route
     user = get_object_or_404(User, id=user_id)
-    user.profilePicture = file_route
+    user.profilePicture = "/"+relative_file_route
+    user.save()
     return {"msg": "Avatar updated"}
 
 
-@app.post("users/friends/add", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
+@app.post("users/friends/add", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Users'])
 @login_required
-def add_friend(request, friend_in: AddFriendSchema):
-    user_id = request.user.id
-    user = get_object_or_404(User, id=user_id)
-    friend = get_object_or_404(User, id=friend_in.friend_id)
+def add_friend(request, friend_username: AddFriendSchema):
+    # if friend does not exist
+    if not User.objects.filter(username=friend_username.friend_username).exists():
+        return 400, {"error_msg": "User does not exist"}
+
+    user = request.user
+    friend = get_object_or_404(User, username=friend_username.friend_username)
+
+    if user == friend:
+        return 400, {"error_msg": "Cannot add yourself as friend"}
+
+    if Friend.objects.filter(user1=user, user2=friend).exists() or Friend.objects.filter(user1=friend, user2=user).exists():
+        return 400, {"error_msg": "Friend request already sent"}
 
     friend_data = {
         "user1": user,
@@ -189,35 +192,43 @@ def add_friend(request, friend_in: AddFriendSchema):
     }
 
     Friend.objects.create(**friend_data)
-    return 200, {"error_msg": "Friend request sent"}
+    return 200, {"msg": "Friend request sent"}
 
 
-@app.post("users/friends/accept", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
+@app.post("users/friends/accept", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Users'])
 @login_required
-def accept_friend(request, friend_in: AddFriendSchema):
+def accept_friend(request, friend_username: AddFriendSchema):
     user = request.user
-    friend = get_object_or_404(User, id=friend_in.friend_id)
+    friend = get_object_or_404(User, username=friend_username.friend_username)
 
-    if not Friend.objects.filter(user1=user, user2=friend, status=False).exists():
+    # can't accept a friend request if user is the sender
+    if (user == Friend.objects.filter(user1=user, user2=friend).first().user1):
+        return 400, {"error_msg": "Can't accept your own friend request"}
+
+    if not Friend.objects.filter(user1=friend, user2=user, status=False).exists():
         return 400, {"error_msg": "Friend request not found"}
 
-    friendship = get_object_or_404(Friend, user1=user, user2=friend)
+    friendship = get_object_or_404(Friend, user1=friend, user2=user)
     friendship.status = True
     friendship.save()
-    return 200, {"error_msg": "Friend request accepted"}
+    return 200, {"msg": "Friend request accepted"}
 
 
-@app.post("users/friends/remove", response={200: UserSchema, 400: ErrorSchema}, tags=['Users'])
+@app.post("users/friends/remove", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Users'])
 @login_required
-def remove_friend(request, friend_in: AddFriendSchema):
+def remove_friend(request, friend_username: AddFriendSchema):
     user = request.user
-    friend = get_object_or_404(User, id=friend_in.friend_id)
+    friend = get_object_or_404(User, username=friend_username.friend_username)
 
     if not Friend.objects.filter(user1=user, user2=friend).exists() and not Friend.objects.filter(user1=friend, user2=user).exists():
         return 400, {"error_msg": "Friend not found"}
 
-    user.friends.remove(friend)
-    return user
+    if Friend.objects.filter(user1=user, user2=friend).exists():
+        friendship = get_object_or_404(Friend, user1=user, user2=friend)
+    else:
+        friendship = get_object_or_404(Friend, user1=friend, user2=user)
+    friendship.delete()
+    return 200, {"msg": "Friend removed"}
 
 
 """ Tournaments """
@@ -236,25 +247,47 @@ def get_tournaments(request):
     resp = []
     for tournament in all_tournaments:
         resp.append({
+            "id": tournament.tournamentID,
             "name": tournament.name,
             "date": tournament.date.isoformat(),
             "status": tournament.status,
             "number_participants": tournament.number_participants,
-            "participants": [{"user_id": user.id, "username": user.username} for user in UserTournament.objects.filter(tournament=tournament)]
+            "participants": populate_tournament_participants(tournament)
         })
     return resp
 
 
-@app.get("tournaments/{tournament_id}", response=TournamentSchema, tags=['Tournaments'])
+@app.get("tournaments/{tournament_id}", response=SingleTournamentSchema, tags=['Tournaments'])
 def get_tournament(request, tournament_id: int):
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
-    return tournament
+    resp = {
+        "id": tournament.tournamentID,
+        "name": tournament.name,
+        "date": tournament.date.isoformat(),
+        "status": tournament.status,
+        "number_participants": tournament.number_participants,
+        "participants": populate_tournament_participants(tournament),
+        "standings": populate_standings(tournament),
+        "matches": populate_tournament_matches(tournament_id)
+    }
+    return resp
 
 
 @app.post("tournaments/{tournament_id}/join", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Tournaments'])
-def join_tournament(request, user_id: int, tournament_id: int):
-    user = get_object_or_404(User, id=user_id)
+@login_required
+def join_tournament(request, tournament_id: int):
+    user = get_object_or_404(User, id=request.user.id)
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
+
+    if UserTournament.objects.filter(user=user, tournament=tournament).exists():
+        return 400, {"error_msg": "User already in tournament"}
+
+    if tournament.status != "Upcoming":
+        return 400, {"error_msg": "Tournament is " + tournament.status}
+
+    if UserTournament.objects.filter(tournament=tournament).count() >= tournament.number_participants:
+        tournament.status = "In Progress"
+        tournament.save()
 
     user_tournament_data = {
         "user": user,
@@ -265,25 +298,16 @@ def join_tournament(request, user_id: int, tournament_id: int):
     return 200, {"msg": "User joined tournament"}
 
 
-@app.post("tournaments/{tournament_id}/leave", response={200: UserSchema, 400: ErrorSchema}, tags=['Tournaments'])
-def leave_tournament(request, user_id: int, tournament_id: int):
-    user = get_object_or_404(User, id=user_id)
+@app.post("tournaments/{tournament_id}/leave", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Tournaments'])
+@login_required
+def leave_tournament(request, tournament_id: int):
+    user = get_object_or_404(User, id=request.user.id)
     tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
 
     if not UserTournament.objects.filter(user=user, tournament=tournament).exists():
-        return 400, {"error_error_msg": "User not in tournament"}
+        return 400, {"error_msg": "User not in tournament"}
 
     user_tournament = get_object_or_404(
         UserTournament, user=user, tournament=tournament)
     user_tournament.delete()
-    return 200, {"error_error_msg": "User left tournament"}
-
-
-@app.get("tournaments/{tournament_id}/matches", response=list[MatchSchema], tags=['Tournaments'])
-def get_tournament_matches(request, tournament_id: int):
-    tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
-    matches = Match.objects.filter(tournamentId=tournament)
-    return matches
-
-
-""" Match """
+    return 200, {"msg": "User left tournament"}

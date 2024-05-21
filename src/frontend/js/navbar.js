@@ -3,32 +3,48 @@
 /*                                                        :::      ::::::::   */
 /*   navbar.js                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 17:23:01 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/27 13:31:54 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/20 23:08:48 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { isLoggedIn } from './auth.js';
+import router from './main.js';
 
-function updateNavbar()
+async function loadUser() {
+    const apiUrl = 'http://localhost:8000/api/users';
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+			headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const user = await response.json();
+		return user;
+    } catch (error) {
+        console.error('Error loading profile:', error);
+		router.route("/error");
+		return null;
+    }
+}
+
+async function updateNavbar()
 {
 	const navBarDiv = document.getElementById('login-navbar');
 
-	const mockUser =
-	{
-		username: "user1",
-		avatar: "./images/avatar/author_1.png"
-	};
-	
 	if (isLoggedIn())
 	{
+		const user = await loadUser();
 		navBarDiv.innerHTML = `
 			<div class="user-info" id="user-info">
 				<a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-					<img src="${mockUser.avatar}" id="user-avatar" class="rounded-circle" alt="User Avatar">
-					<span id="username">${mockUser.username}</span>
+					<img src="http://localhost:8000${user.profilePicture}" id="user-avatar" class="rounded-circle" alt="User Avatar">
+					<span id="username">${user.username}</span>
 				</a>
 				<ul class="dropdown-menu" aria-labelledby="navbarDropdown">
 					<li><a class="dropdown-item" data-route="/edit-profile">Edit Profile</a></li>
@@ -52,6 +68,5 @@ function updateNavbar()
 		`;
 	}
 }
-
 
 export default updateNavbar;

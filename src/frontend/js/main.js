@@ -6,13 +6,14 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:24:45 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/18 17:02:07 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/05/20 23:16:53 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import Router from './router.js';
 import loadProfile from './profile.js';
 import loadEditProfile from './editProfile.js';
+import loadFriendProfile from './friendProfile.js';
 import initPlayPage from './play.js';
 import { loadTournaments } from './tournaments.js';
 import loadTournamentDetails from './tournamentDetails.js';
@@ -23,65 +24,53 @@ import loadInitialContent from './init.js'
 import { logout } from './auth.js';
 import updateNavbar from './navbar.js';
 
-const mockTournaments = [
-    {
-        id: 1,
-        name: 'Spring Pong Championship',
-        participants: ['Player1', 'Player2', 'Player3'],
-        status: 'Upcoming'
-    },
-    {
-        id: 2,
-        name: 'Summer Pong Fest',
-        participants: ['Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6', 'Player4', 'Player5', 'Player6'],
-        status: 'In Progress'
-    },
-	{
-        id: 3,
-        name: 'Spring Pong Championship',
-        participants: ['Player1', 'Player2', 'Player3'],
-        status: 'Upcoming'
-    },
-    {
-        id: 4,
-        name: 'Summer Pong Fest',
-        participants: ['Player4', 'Player5', 'Player6'],
-        status: 'In Progress'
-    },
-	{
-        id: 5,
-        name: 'Spring Pong Championship',
-        participants: ['Player1', 'Player2', 'Player3'],
-        status: 'Upcoming'
-    },
-    {
-        id: 6,
-        name: 'Summer Pong Fest',
-        participants: ['Player4', 'Player5', 'Player6'],
-        status: 'Ended'
-    }
-];
-
 const router = new Router();
 
 router.addRoute('/', loadInitialContent);
 router.addRoute('/home', loadInitialContent);
 router.addRoute('/profile', loadProfile);
+router.addRoute('/friend-profile/:id,', id => { loadFriendProfile(id) });
 router.addRoute('/edit-profile', loadEditProfile);
 router.addRoute('/play', initPlayPage);
 router.addRoute('/tournaments', loadTournaments);
 router.addRoute('/login', login);
 router.addRoute('/register', setupRegisterForm);
-router.addRoute('/tournaments/:id', id => {
-    const tournament = mockTournaments.find(t => t.id === parseInt(id));
+router.addRoute('/tournaments/:id', async id => {
+    let tournaments = [];
+    try {
+        tournaments = await fetchTournaments();
+    } catch (error) {
+        console.error('Error loading tournaments:', error);
+    }
+    const tournament = tournaments.find(t => t.id === parseInt(id));
     if (tournament) {
-        loadTournamentDetails(tournament);
+        loadTournamentDetails(id);
     } else {
         loadPageNotFound();
     }
 });
-
 router.setDefaultRoute(loadPageNotFound);
+
+async function fetchTournaments() {
+    const apiUrl = 'http://localhost:8000/api/tournaments';
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include'
+        });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
+        const tournaments = await response.json();
+        return tournaments;
+    } catch (error) {
+        console.error('Error fetching tournaments:', error);
+        return [];
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () =>
 {

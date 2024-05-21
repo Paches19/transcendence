@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   login.js                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:21:53 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/07 10:10:29 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/20 23:02:36 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import { login } from './auth.js';
+import {login} from "./auth.js";
 import updateNavbar from "./navbar.js";
 import router from './main.js';
 
