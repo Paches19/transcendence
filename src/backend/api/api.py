@@ -11,7 +11,7 @@ from typing import Optional
 from .schema import (ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema, SingleTournamentSchema,
                      AddFriendSchema, TournamentSchema, UserNameSchema,
-                     UserFriendSchema, SuccessSchema, TournamentCreateSchema)
+                     UserSchema, SuccessSchema, TournamentCreateSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -54,7 +54,7 @@ def logout_user(request):
 """ Users """
 
 
-@app.get("users", response=UserFriendSchema, tags=['Users'])
+@app.get("users", response=UserSchema, tags=['Users'])
 def get_users(request, user_id: Optional[int] = None):
     if user_id:
         user = get_object_or_404(User, id=user_id)
@@ -75,6 +75,8 @@ def get_users(request, user_id: Optional[int] = None):
         "matchesTotal": user.matchesTotal,
         "matchesWon": user.matchesWon,
         "matchesLost": user.matchesLost,
+        "tournamentsPlayed": userTournamentsPlayed(user),
+        "tournamentsWon": userTournamentsWon(user),
         "friends": populate_friends(user),
         "matches": populate_matches(user)
     }

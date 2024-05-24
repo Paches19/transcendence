@@ -1,4 +1,4 @@
-from .models import Friend, Match, UserTournament
+from .models import User, Friend, Match, UserTournament
 
 # Aux functions to populate response fields with data
 # They are imported and used in `api.py`
@@ -95,3 +95,33 @@ def populate_tournament_matches(tournament):
             "played": (match.pointsUser1 + match.pointsUser2) != 0
         })
     return resp
+
+
+def userTournamentsPlayed(user):
+    tournaments = UserTournament.objects.filter(user=user)
+    return len(tournaments)
+
+# Count of the tournaments the user has won, most won games in the tournament
+
+
+def userTournamentsWon(user):
+    tournaments = UserTournament.objects.filter(user=user, status='ended')
+    count = 0
+    for tournament in tournaments:
+        tournament_users = UserTournament.objects.filter(
+            tournament=tournament.tournament)
+        # A dictionary that contains the name of the user and their wins
+        players = {}
+        # Initialize the dictionary with 0 wins
+        for u in tournament_users:
+            players[u.user.username] = 0
+        matches = Match.objects.filter(tournamentId=tournament.tournament)
+        # Count the wins of each player
+        for match in matches:
+            if match.pointsUser1 > match.pointsUser2:
+                players[match.user1.username] += 1
+            else:
+                players[match.user2.username] += 1
+        if players[user.username] == max(players.values()):
+            count += 1
+    return count
