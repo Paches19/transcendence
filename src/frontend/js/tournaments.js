@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/20 12:00:52 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/24 13:15:41 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@ import { isLoggedIn } from "./auth.js";
 import router from "./main.js"
 
 async function fetchTournaments() {
-    const apiUrl = 'http://localhost:8000/api/tournaments';
+    const apiUrl = 'https://localhost/api/tournaments';
     return fetch(apiUrl, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -165,7 +165,7 @@ function addModalEventListeners() {
             number_participants: numPlayers,
         };
 
-        const apiUrl = 'http://localhost:8000/api/tournaments/create';
+        const apiUrl = 'https://localhost/api/tournaments/create';
         fetch(apiUrl, {
             method: 'POST',
             headers: {
@@ -216,7 +216,7 @@ async function joinTournament(tournamentId) {
     if (username) {
         console.log(`${username} logged in. Joining tournament with ID: ${tournamentId}`);
 
-        const apiUrl = `http://localhost:8000/api/tournaments/${tournamentId}/join`;
+        const apiUrl = `https://localhost/api/tournaments/${tournamentId}/join`;
 
         try {
             const response = await fetch(apiUrl, {

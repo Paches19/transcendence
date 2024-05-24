@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 10:20:30 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/20 12:43:09 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/24 13:16:00 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ async function loadFriendProfile(id) {
         return ;
     }
 
-	const apiUrl = `http://localhost:8000/api/users?user_id=${id}`;
+	const apiUrl = `https://localhost/api/users?user_id=${id}`;
     try {
         const response = await fetch(apiUrl, {
             method: 'GET',
@@ -42,7 +42,7 @@ function updateProfileUI(user) {
     const profileHTML = `
         <div class="profile-container">
             <div class="profile-header">
-                <img src="http://localhost:8000${user.profilePicture}" class="profile-avatar" alt="Avatar del usuario">
+                <img src="https://localhost${user.profilePicture}" class="profile-avatar" alt="Avatar del usuario">
                 <h2 class="profile-username">${user.username}</h2>
             </div>
             <div class="profile-stats">
@@ -105,7 +105,7 @@ function renderFriendsList(friends) {
     return friends.map(friend => `
         <div class="friend-entry">
             <a data-id="${friend.id}">
-                <img src="http://localhost:8000${friend.profilePicture}" alt="${friend.name}'s Avatar" class="friend-avatar">
+                <img src="https://localhost${friend.profilePicture}" alt="${friend.name}'s Avatar" class="friend-avatar">
                 <span class="friend-username">${friend.name}</span>
             </a>
         </div>

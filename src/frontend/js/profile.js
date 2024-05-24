@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:18 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/20 12:34:08 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/24 13:15:48 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ async function loadProfile() {
         return;
     }
 
-    const apiUrl = 'http://localhost:8000/api/users';
+    const apiUrl = 'https://localhost/api/users';
     try {
         const response = await fetch(apiUrl, {
             method: 'GET',
@@ -42,7 +42,7 @@ function updateProfileUI(user) {
     const profileHTML = `
         <div class="profile-container">
             <div class="profile-header">
-                <img src="http://localhost:8000${user.profilePicture}" class="profile-avatar" alt="Avatar del usuario">
+                <img src="https://localhost${user.profilePicture}" class="profile-avatar" alt="Avatar del usuario">
                 <h2 class="profile-username">${user.username}</h2>
             </div>
             <div class="profile-stats">
@@ -121,7 +121,7 @@ function renderFriendsList(friends) {
     return friends.map(friend => `
         <div class="friend-entry">
             <a data-id="${friend.id}">
-                <img src="http://localhost:8000${friend.profilePicture}" alt="${friend.name}'s Avatar" class="friend-avatar">
+                <img src="https://localhost${friend.profilePicture}" alt="${friend.name}'s Avatar" class="friend-avatar">
                 <span class="friend-username">${friend.name}</span>
                 
             </a>
@@ -139,7 +139,7 @@ function renderFriendsList(friends) {
 }
 
 async function acceptFriendRequest(friend_username) {
-    const apiUrl = `http://localhost:8000/api/users/friends/accept`;
+    const apiUrl = `https://localhost/api/users/friends/accept`;
     const requestBody = {
         friend_username: friend_username
     };
@@ -170,7 +170,7 @@ async function acceptFriendRequest(friend_username) {
 }
 
 async function deleteFriend(friend_username) {
-    const apiUrl = `http://localhost:8000/api/users/friends/remove`;
+    const apiUrl = `https://localhost/api/users/friends/remove`;
     const requestBody = {
         friend_username: friend_username
     };
@@ -248,7 +248,7 @@ async function sendFriendRequest() {
     if (friendUsername) {
         console.log(`Sending friend request to ${friendUsername}`);
 
-        const apiUrl = 'http://localhost:8000/api/users/friends/add';
+        const apiUrl = 'https://localhost/api/users/friends/add';
         const requestBody = {
             friend_username: friendUsername
         };

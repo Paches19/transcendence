@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/07 16:27:15 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/24 13:16:03 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@ import router from "./main.js";
 import updateNavbar from "./navbar.js";
 
 async function login(username, password) {
-    const loginEndpoint = 'http://localhost:8000/api/auth/login';
+    const loginEndpoint = 'https://localhost/api/auth/login';
     
     try {
         const response = await fetch(loginEndpoint, {
@@ -54,7 +54,7 @@ function isLoggedIn()
 }
 
 async function logout() {
-    const logoutEndpoint = 'http://localhost:8000/api/auth/logout';
+    const logoutEndpoint = 'https://localhost/api/auth/logout';
     try {
         const response = await fetch(logoutEndpoint, {
             method: 'GET',

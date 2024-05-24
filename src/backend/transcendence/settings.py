@@ -155,5 +155,11 @@ CHANNEL_LAYERS = {
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:8080',
-    'https://localhost:8080'
+    'https://localhost:8080',
+    'https://localhost'
 ]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True 
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True

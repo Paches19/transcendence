@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 17:23:01 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/27 13:31:54 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/24 13:15:54 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@ import { isLoggedIn } from './auth.js';
 import router from './main.js';
 
 async function loadUser() {
-    const apiUrl = 'http://localhost:8000/api/users';
+    const apiUrl = 'https://localhost/api/users';
     try {
         const response = await fetch(apiUrl, {
             method: 'GET',
@@ -43,7 +43,7 @@ async function updateNavbar()
 		navBarDiv.innerHTML = `
 			<div class="user-info" id="user-info">
 				<a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-					<img src="http://localhost:8000${user.profilePicture}" id="user-avatar" class="rounded-circle" alt="User Avatar">
+					<img src="https://localhost${user.profilePicture}" id="user-avatar" class="rounded-circle" alt="User Avatar">
 					<span id="username">${user.username}</span>
 				</a>
 				<ul class="dropdown-menu" aria-labelledby="navbarDropdown">

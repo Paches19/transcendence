@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 13:04:35 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/20 12:52:32 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/24 13:16:01 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ async function loadEditProfile() {
         return;
     }
 
-    const apiUrl = 'http://localhost:8000/api/users';
+    const apiUrl = 'https://localhost/api/users';
     try {
         const response = await fetch(apiUrl, {
             method: 'GET',
@@ -59,7 +59,7 @@ function loadHtmlEditProfile(currentUser) {
 				  <div class="form-group" id="picture-group">
 					<label for="profile-picture">Profile Picture URL</label>
 					<input type="file" class="form-control-file" id="profile-picture-upload" accept="image/*">
-					<img id="profile-picture-preview" src="http://localhost:8000${currentUser.profilePicture}" alt="Profile Picture Preview" class="img-thumbnail" style="margin-top: 10px; max-width: 200px;">
+					<img id="profile-picture-preview" src="https://localhost${currentUser.profilePicture}" alt="Profile Picture Preview" class="img-thumbnail" style="margin-top: 10px; max-width: 200px;">
 				  </div>
 				  <div class="button-container">
 					<button type="button" class="btn btn-secondary" id="upload-picture"><span>Upload<br>Picture</span></button>
@@ -127,7 +127,7 @@ function loadHtmlEditProfile(currentUser) {
   }
   
   function updateUserAvatar(file) {
-    const apiUrl = 'http://localhost:8000/api/users/avatar';
+    const apiUrl = 'https://localhost/api/users/avatar';
     const formData = new FormData();
     formData.append('file', file);
 
@@ -187,7 +187,7 @@ function showNotification(message, type) {
 }
   
   function updateUserProfile(newUsername, newPassword) {
-    const apiUrl = 'http://localhost:8000/api/users/update';
+    const apiUrl = 'https://localhost/api/users/update';
     const requestBody = {
 		username: newUsername,
         password: newPassword, 

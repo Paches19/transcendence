@@ -29,12 +29,13 @@ services:
             - "PIP_DISABLE_PIP_VERSION_CHECK=1"
             - "PYTHONDONTWRITEBYTECODE=1"
             - "PYTHONUNBUFFERED=1"
-        ports:
-            - "8000:8000"
+        expose:
+            - "8000"
         networks:
             - transcendence_net
         depends_on:
             - postgres
+        restart: always
 
     nginx:
         container_name: nginx
@@ -45,7 +46,7 @@ services:
         env_file:
             - .env
         ports:
-            - "8080:8080"
+            - "443:443"
         networks:
             - transcendence_net
         restart: always

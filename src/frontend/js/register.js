@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:22:20 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/14 17:00:36 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/24 13:15:47 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ async function handleRegisterSubmit(event) {
     };
 
     try {
-        const response = await fetch('http://localhost:8000/api/auth/register', {
+        const response = await fetch('https://localhost/api/auth/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
