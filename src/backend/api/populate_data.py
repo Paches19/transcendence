@@ -105,9 +105,11 @@ def userTournamentsPlayed(user):
 
 
 def userTournamentsWon(user):
-    tournaments = UserTournament.objects.filter(user=user, status='ended')
+    tournaments = UserTournament.objects.filter(user=user)
     count = 0
     for tournament in tournaments:
+        if tournament.tournament.status != 'ended':
+            continue
         tournament_users = UserTournament.objects.filter(
             tournament=tournament.tournament)
         # A dictionary that contains the name of the user and their wins
