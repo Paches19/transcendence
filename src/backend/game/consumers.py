@@ -1,8 +1,104 @@
 import contextlib
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from game.models import MatchRemote
+import asyncio
 
-class PongConsumer(AsyncJsonWebsocketConsumer):
+class PongConsumerSingle(AsyncJsonWebsocketConsumer):
+    async def connect(self):
+        self.room_name = "game_room"
+        self.room_group_name = f'game_{self.room_name}'
+
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+
+        await self.accept()
+
+        # Initialize game state
+        self.game_state = {
+            'ball_position': [50, 50],  # Example initial position
+            'ball_velocity': [choice([-1, 1]), choice([-1, 1])],  # Random initial direction
+            'paddle1_position': 50,
+            'paddle2_position': 50,
+            'score': [0, 0]
+        }
+
+        # Start game loop
+        asyncio.create_task(self.game_loop())
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        player = data['player']
+        direction = data['direction']
+
+        if player == 1:
+            if direction == 'up':
+                self.game_state['paddle1_position'] = max(0, self.game_state['paddle1_position'] - 5)
+            elif direction == 'down':
+                self.game_state['paddle1_position'] = min(100, self.game_state['paddle1_position'] + 5)
+        elif player == 2:
+            if direction == 'up':
+                self.game_state['paddle2_position'] = max(0, self.game_state['paddle2_position'] - 5)
+            elif direction == 'down':
+                self.game_state['paddle2_position'] = min(100, self.game_state['paddle2_position'] + 5)
+
+    async def game_loop(self):
+        while True:
+            self.update_ball_position()
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'game_state',
+                    'game_state': self.game_state
+                }
+            )
+            await asyncio.sleep(0.03)  # 30ms for ~33 FPS
+
+    def update_ball_position(self):
+        ball_x, ball_y = self.game_state['ball_position']
+        vel_x, vel_y = self.game_state['ball_velocity']
+
+        # Update ball position
+        ball_x += vel_x
+        ball_y += vel_y
+
+        # Check for collisions with walls
+        if ball_y <= 0 or ball_y >= 100:
+            vel_y = -vel_y
+
+        # Check for collisions with paddles
+        if ball_x <= 0:  # Left wall (Paddle 1)
+            if self.game_state['paddle1_position'] - 10 <= ball_y <= self.game_state['paddle1_position'] + 10:
+                vel_x = -vel_x
+            else:
+                self.game_state['score'][1] += 1  # Player 2 scores
+                self.reset_ball()
+        elif ball_x >= 100:  # Right wall (Paddle 2)
+            if self.game_state['paddle2_position'] - 10 <= ball_y <= self.game_state['paddle2_position'] + 10:
+                vel_x = -vel_x
+            else:
+                self.game_state['score'][0] += 1  # Player 1 scores
+                self.reset_ball()
+
+        self.game_state['ball_position'] = [ball_x, ball_y]
+        self.game_state['ball_velocity'] = [vel_x, vel_y]
+
+    def reset_ball(self):
+        self.game_state['ball_position'] = [50, 50]
+        self.game_state['ball_velocity'] = [choice([-1, 1]), choice([-1, 1])]
+
+    async def game_state(self, event):
+        await self.send(text_data=json.dumps(event['game_state']))
+
+
+class PongConsumerPairs(AsyncJsonWebsocketConsumer):
     
     async def connect(self):
         self.match_id = self.scope['url_route']['kwargs']['id']

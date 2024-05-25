@@ -11,6 +11,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'transcendence.settings')
 application = ProtocolTypeRouter({
 		"http": get_asgi_application(),
 		"websocket": URLRouter([
-				path("ws/game/<int:id>/", PongConsumer.as_asgi()),
+				path("ws/game/<int:id>/<str:name>", PongConsumerPairs.as_asgi()),
+				path("ws/game/<str:name>/", PongConsumerSingle.as_asgi()),
 			])
 })

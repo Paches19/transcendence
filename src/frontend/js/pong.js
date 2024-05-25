@@ -13,7 +13,6 @@
 
 import {initPlayPage, resetTime} from "./play.js";
 
-let canvas
 let stateMatch = {
 	'ball': {
 		'x': 0,
@@ -25,48 +24,85 @@ let stateMatch = {
 		'x': 10,
 		'y': 0,
 		'score': 0,
+		'name': 'Player 1',
 	},
 	'player2': {
 		'x': 0,
 		'y': 0,
 		'score': 0,
+		'name': 'Player 2',
 	},
 	'state': 'waiting',
+	'mode': '',
 }
+
 let v = 10;
 let ballWidth = 10;
 let ballHeight = 10;
 let playerWidth = 15;
 let playerHeight = 80;
 let finalScore = 1;
-let name1;
-let name2;
 let ctx;
-let m;
+let canvas;
 
-async function sendState(state, mode){
-    const logoutEndpoint = 'http://localhost:8000';
-    try {
-        const response = await fetch(logoutEndpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-			body: JSON.stringify({
-				state: state,
-				mode: mode,
-			}),
-		});
-        if (response.ok) {
-            console.log(state + ' sent');
-        }
-    } catch (error) {
-        console.error('An error has occurred', error);
-    }
+function startPong(mode){
+	document.addEventListener('keydown', handleKeyDown);
+	console.log('Game initialized');
+	canvas = document.getElementById('pong-game');
+	ctx = canvas.getContext('2d');
+	ctx.fillStyle = 'white';
+	let words = document.getElementById('game-score').textContent.split(' ');
+
+	stateMatch = {
+		'ball': {
+			'x': canvas.width / 2 - 5,
+			'y': canvas.height / 2 - 5,
+			'vx': Math.floor(Math.random() * 7) - 3,
+			'vy': Math.floor(Math.random() * 7) - 3,
+		},
+		'player1': {
+			'x': 10,
+			'y': canvas.height / 2 - 40,
+			'score': 0,
+			'name': words[0],
+		},
+		'player2': {
+			'x': canvas.width - 25,
+			'y': canvas.height / 2 - 40,
+			'score': 0,
+			'name': words[4],
+		},
+		'state': 'waiting',
+		'mode': mode,
+	}
+
+	drawElements();
+	sendState('start');
+	playPong();
+	loop();
+}
+
+function loop() {
+	if (stateMatch.state == 'gameover'){
+		return;
+	}
+	updateGame();
+	drawElements();
+	requestAnimationFrame(loop);
+}
+
+function sendState(msg){
+	if (socket){
+		socket.send(JSON.stringify({
+			"event": msg,
+			"match": stateMatch,
+		}));
+	}
 }
 
 function playPong(mode){
-	sendState('play', mode);
+	stateMatch.state = 'playing';
+	sendState('playing');
 }
 
 function quitPong(mode){
@@ -81,94 +117,55 @@ function quitPong(mode){
 	  }).then((result) => {
 			if (result.isConfirmed) {
 				stateMatch.state = 'gameover';
-				initPlayPage();
 			}else if (result.isDenied){
-				stateMatch.state = 'playing';
 				playPong(mode);
 			}});
 }
 
-function pausePong(mode){
-	sendState('pause', mode);
+function pausePong(){
+	sendState('pause');
 }
 
-function startPong(mode){
-	m = mode;
-	console.log('Game initialized');
-	canvas = document.getElementById('pong-game');
-	ctx = canvas.getContext('2d');
-	ctx.fillStyle = 'white';
- 	document.addEventListener('keydown', handleKeyDown);
-	stateMatch = {
-		'ball': {
-			'x': canvas.width / 2 - 5,
-			'y': canvas.height / 2 - 5,
-			'vx': Math.floor(Math.random() * 7) - 3,
-			'vy': Math.floor(Math.random() * 7) - 3,
-		},
-		'player1': {
-			'x': 10,
-			'y': canvas.height / 2 - 40,
-			'score': 0,
-		},
-		'player2': {
-			'x': canvas.width - 25,
-			'y': canvas.height / 2 - 40,
-			'score': 0,
-	
-		},
-		'state': 'waiting',
-	}
-	var words = document.getElementById('game-score').textContent.split(' ');
-    name1 = words[0];
-	name2 = words[4];
-	drawElements();
-	drawScores();
-	sendState('start', mode);
-	loop();
-}
-
-async function handleKeyDown(e) {
+function handleKeyDown(e) {
     const key = e.key;
-	
+	if (socket && key == 'ArrowUp' && key == 'ArrowDown' &&
+		key == 'w' && key == 's'){
+		socket.send(JSON.stringify({
+			"event": 'move',
+			"key": key,
+			"stateMatch": stateMatch,
+		}));
+	}
 }
 
-function loop() {
-	updateGame();
-	drawElements();
-	requestAnimationFrame(loop);
+function drawPaddles(){
+	ctx.fillRect(stateMatch.player1.x, stateMatch.player1.y, playerWidth, playerHeight);
+	ctx.fillRect(stateMatch.player2.x, stateMatch.player2.y, playerWidth, playerHeight);
 }
 
-// function player2IA() {
-// 	if (stateMatch.state == 'gameover'){
-// 		return;
-// 	}
-// 	if (stateMatch.state == 'playing'){
-// 		let level = Math.floor(Math.random() * 3) + 3;
-	
-// 		if (stateMatch.ball.y > stateMatch.player2.y + playerHeight / 2 &&
-// 			stateMatch.ball.x > canvas.width / 2 &&
-// 			stateMatch.player2.y + playerHeight + v < canvas.height) {
-// 				stateMatch.player2.y += v / level;
-// 		} else if (stateMatch.player2.y - v > 0 && stateMatch.ball.x > canvas.width / 2){
-// 			stateMatch.player2.y -= v / level;
-// 		}
-// 	}
-// 	requestAnimationFrame(player2IA);
-// }
+function drawBall(){
+	ctx.fillRect(stateMatch.ball.x, stateMatch.ball.y, ballWidth, ballHeight);
+}
 
-async function updateGame() {
-	if (stateMatch.state == 'gameover'){
-		return;
-	}
-	if (stateMatch.state == 'playing'){
-		
+function drawNet(){
+	ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);
+}
 
-	}
+function drawScores(){
+	document.getElementById('game-score').innerHTML = `${name1} ${stateMatch.player1.score} - ${stateMatch.player2.score} ${name2}`;
+}
+
+function drawElements() {
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	drawBall(); 
+	drawNet();
+	drawPaddles();
+	drawScores();
 }
 
 function gameOver(){
-	sendState('gameover', m);
+	console.log('Game Over');
+	pausePong();
 	stateMatch.state = 'gameover';
 	let texto;
 	if (stateMatch.player1.score == finalScore)
@@ -199,7 +196,106 @@ function gameOver(){
 	});
 }
 
+
+if (socket){
+	socket.onopen = e => {
+		console.log(e);
+	}
+
+	socket.onmessage = e => {
+		console.log(e);
+		const data = JSON.parse(e.data);
+
+		if(data.event == "show_error"){
+			Swal.fire({
+				icon: "error",
+				title: data.error,
+			}).then(e => window.location.href = "/");
+		}
+
+		else if(data.event == "write_names"){
+			if (stateMatch.player1.name == "" || stateMatch.player1.name == "Waiting...") 
+				stateMatch.player1.name = data.name1;
+			if (stateMatch.player2.name == "" || stateMatch.player2.name == "Waiting...")
+				stateMatch.player2.name = data.name2;
+			stateMatch.ball.vy = data.ballvy;
+			drawScores();
+		}
+
+		else if(data.event == "game_start"){
+			player = data.player;
+			if (player == "1"){
+				stateMatch.player1.name = playerName;
+				socket.send(JSON.stringify({
+					"event": 'write_names',
+					"name1": playerName,
+					"name2": "Waiting...",
+					"ballvy" : 0,
+				}));
+			}else{
+				stateMatch.player2.name = playerName;
+				socket.send(JSON.stringify({
+					"event": 'write_names',
+					"name1": "",
+					"name2": playerName,
+					"ballvy" : Math.floor(Math.random() * 7) - 3,
+				}));
+			}
+			drawElements();
+			loop();
+			setTimeout(waitMatch,3000);
+		}
 	
+		else if(data.event == "game_update"){
+			stateMatch = data.stateMatch;
+			drawElements();
+		}
+	
+		else if(data.event == "opponent_left" && stateMatch.state != 'ended'){
+			stateMatch.state = 'ended';
+			drawElements();
+			setTimeout(() => {
+				Swal.fire({
+					icon:  "info",
+					title:  "Opponent Left",
+					confirmButtonText: "Ok",
+				}).then(e => window.location.href = "/")
+			}, 400);
+		}
+	
+		else if (data.event == "game_over"){
+			winner = data.winner;
+			stateMatch.state = 'ended';
+			drawElements();
+			Swal.fire({
+				icon: winner == currentName ?'success': "error",
+				title: winner == currentName ? "You win!" : "You lose!",
+				confirmButtonText: "Ok",
+			}).then((result) => { if (result.isConfirmed) {
+				window.location.href = "/";
+			}});
+		}
+	}
+}
+
+// function playerAI() {
+// 	if (stateMatch.state == 'gameover'){
+// 		return;
+// 	}
+// 	if (stateMatch.state == 'playing'){
+// 		let level = Math.floor(Math.random() * 3) + 3;
+	
+// 		if (stateMatch.ball.y > stateMatch.player2.y + playerHeight / 2 &&
+// 			stateMatch.ball.x > canvas.width / 2 &&
+// 			stateMatch.player2.y + playerHeight + v < canvas.height) {
+// 				stateMatch.player2.y += v / level;
+// 		} else if (stateMatch.player2.y - v > 0 && stateMatch.ball.x > canvas.width / 2){
+// 			stateMatch.player2.y -= v / level;
+// 		}
+// 	}
+// 	requestAnimationFrame(playerAI);
+// }
+
 // function resetBall(){
 // 	stateMatch.ball.x = canvas.width / 2 - 5;
 // 	stateMatch.ball.y = canvas.height / 2 - 5;
@@ -271,29 +367,5 @@ function gameOver(){
 // 						 	stateMatch.ball.vy -= 1;
 //   }
 // }
-
-function drawPaddles(){
-	ctx.fillRect(stateMatch.player1.x, stateMatch.player1.y, playerWidth, playerHeight);
-	ctx.fillRect(stateMatch.player2.x, stateMatch.player2.y, playerWidth, playerHeight);
-}
-
-function drawBall(){
-	ctx.fillRect(stateMatch.ball.x, stateMatch.ball.y, ballWidth, ballHeight);
-}
-
-function drawNet(){
-	ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);
-}
-
-function drawScores(){
-	document.getElementById('game-score').innerHTML = `${name1} ${stateMatch.player1.score} - ${stateMatch.player2.score} ${name2} (IA)`;
-}
-
-function drawElements() {
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	drawBall(); 
-	drawNet();
-	drawPaddles();
-}
 
 export {startPong, quitPong, pausePong, playPong};
