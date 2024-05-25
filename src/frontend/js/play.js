@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/21 23:53:59 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/05/25 14:08:54 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ let isPaused = true;
 let seconds = 0;
 let opponent;
 let username = "jose";
+let mode = "";
+
 function initPlayPage() {
     renderGameOptions();
     attachEventListeners();
@@ -40,9 +42,9 @@ function renderGameOptions() {
 
 function startGame(m) {
 	console.log("mode = " + m);
-
+	mode = m;
 	//if (isLoggedIn()) {
-		showGameScreen(m);
+		showGameScreen();
 	//}  else {
       //  router.route("/login");
    // }
@@ -55,12 +57,12 @@ function attachEventListeners() {
     document.getElementById('join-tournament').addEventListener('click', () => startGame('tournament'));
 }
 
-function showGameScreen(m) {
-	if (m == 'solo'){
+function showGameScreen() {
+	if (mode == 'solo'){
 		opponent = "AI";
-	}else if (m == 'local'){
+	}else if (mode == 'local'){
 		opponent = "Human";
-	}else if (m == 'remote'){
+	}else if (mode == 'remote'){
 		opponent = "Remote";
 	}
     const mainContent = document.getElementById('main-content');
@@ -87,7 +89,7 @@ function showGameScreen(m) {
     </div>
     `;
     initializeGame();
-	startPong(m);
+	startPong(mode);
     attachGameControlEventListeners();
 }
 
@@ -130,12 +132,12 @@ function pauseGame() {
 	if (textButton.textContent == "Pause"){
 		textButton.textContent = "Resume";
 		isPaused = true;
-		pausePong();
+		pausePong(mode);
 	}
 	else{
 		textButton.textContent = "Pause";
 		isPaused = false;
-		playPong();
+		playPong(mode);
 	}
 }
 
@@ -143,7 +145,7 @@ function quitGame() {
     resetTime();
     console.log("Game quit.");
     // Aquí se implementaría la lógica para salir del juego.
-	quitPong();
+	quitPong(mode);
 	initPlayPage();
 }
 
