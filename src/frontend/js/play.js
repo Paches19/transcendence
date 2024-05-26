@@ -6,19 +6,20 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/25 23:46:15 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/05/26 18:39:39 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { isLoggedIn, getUsernameFromToken } from "./auth.js";
 //import router from "./main.js";
-//import { startPong, quitPong, pausePong, playPong } from "./pong.js";
 
 let isPaused = true;
 let seconds = 0;
 let opponent;
-let username = "jose";
+let username = "jose";  //para quitar el login en pruebas
 let mode = "";
+let ctx;
+let canvas;
 
 function initPlayPage() {
     renderGameOptions();
@@ -43,6 +44,9 @@ function renderGameOptions() {
 function startGame(m) {
 	console.log("mode = " + m);
 	mode = m;
+
+	// Quitar comentarios para que pida login, de momento es para pruebas
+	
 	//if (isLoggedIn()) {
 		showGameScreen();
 	//}  else {
@@ -66,7 +70,7 @@ function showGameScreen() {
 		opponent = "Remote";
 	}
     const mainContent = document.getElementById('main-content');
-    const username = getUsernameFromToken();
+   // const username = getUsernameFromToken();
     mainContent.innerHTML = `
     <div class="container mt-5 game-container">
         <div class="row align-items-center">
@@ -104,7 +108,7 @@ function initializeGame() {
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
         ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#000';
+        ctx.fillStyle = '#FFF';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 		resetTime();
         startTimer();
@@ -136,20 +140,37 @@ function pauseGame() {
 	if (textButton.textContent == "Pause"){
 		textButton.textContent = "Resume";
 		isPaused = true;
-		pausePong();
+		sendState('pause'); //enviar al servidor que se ha pausado el juego
 	}
 	else{
 		textButton.textContent = "Pause";
 		isPaused = false;
-		playPong();
+		stateMatch.state = 'playing';
+		sendState('playing'); //enviar al servidor que se sigue jugando
 	}
 }
 
 function quitGame() {
-    resetTime();
-    console.log("Game quit.");
-	quitPong();
-	initPlayPage();
+    sendState('pause'); //enviar al servidor que se ha pausado el juego
+	isPaused = true;
+	Swal.fire({
+		confirmButtonColor: '#32B974',
+		title: "Are you sure ?",
+		showDenyButton: true,
+		showCancelButton: false,
+		confirmButtonText: "Yes",
+		denyButtonText: `No`
+	  }).then((result) => {
+			if (result.isConfirmed) {
+				stateMatch.state = 'quit';
+				sendState('quit'); //enviar al servidor que se ha salido del juego
+				initPlayPage();
+			}else if (result.isDenied){
+				stateMatch.state = 'playing';
+				isPaused = false;
+				sendState('playing'); //enviar al servidor que se sigue jugando
+			}});
+
 }
 
 function startTimer() {
@@ -181,7 +202,7 @@ export {initPlayPage, resetTime};
 let socket;
 
 async function startLocal() {
-	socket = new WebSocket("ws://" + window.location.host + "/ws/game/"+ username + "/");
+	socket = new WebSocket("ws://localhost:8000/ws/game/"+ username + "/");
 }
 
 async function startRemote() {
@@ -223,7 +244,11 @@ async function startRemote() {
 			const data = await response.json();
 			
 			if (response.ok && data.msg == "Match created"){
-				socket = new WebSocket("ws://" + window.location.host + "/ws/game/"+ randomId + "/" + username);
+				socket = new WebSocket("ws://localhost:8000/ws/game/"+ randomId + "/" + username);
+				Swal.fire({
+					icon: "success",
+					title: "Match created with code: " + randomId,
+				});
 			}else {
 				console.error("Error al guardar el id remoto: ", response.status);
 			}
@@ -260,9 +285,17 @@ async function startRemote() {
 			const data = await response.json();
 		
 			if (response.ok && data.msg === "Match joined") {
-				socket = new WebSocket("ws://" + window.location.host + "/ws/game/"+ randomId + "/");
+				socket = new WebSocket("ws://localhost:8000/ws/game/"+ randomId + "/");
+				Swal.fire({
+					icon: "success",
+					title: "Match joined",
+				});
 			} else{
-				console.error("Error al comprobar id remoto: ", response.status);
+				console.error("Match no encontrado: ", response.status);
+				Swal.fire({
+					icon: "error",
+					title: "Match not found",
+				});
 			}
 		} catch(error) {
 			console.error("Error al comprobar id remoto:", error);
@@ -273,7 +306,6 @@ async function startRemote() {
 		console.log("No se ha seleccionado ninguna opción");
 	}
 }
-
 
 let stateMatch = {
 	'ball': {
@@ -304,8 +336,6 @@ let ballHeight = 10;
 let playerWidth = 15;
 let playerHeight = 80;
 let finalScore = 1;
-let ctx;
-let canvas;
 
 function startPong(mode){
 	document.addEventListener('keydown', handleKeyDown);
@@ -336,13 +366,15 @@ function startPong(mode){
 	}
 
 	drawElements();
-	sendState('start');
-	playPong();
+	sendState('start');  //enviar al servidor que se ha iniciado el juego
+	stateMatch.state = 'playing';
+	isPaused = false;
+	sendState('playing'); //enviar al servidor que se esta jugando
 	loop();
 }
 
 function loop() {
-	if (stateMatch.state == 'gameover'){
+	if (stateMatch.state == 'gameover' || stateMatch.state == 'quit'){
 		return;
 	}
 	updateGame();
@@ -350,8 +382,8 @@ function loop() {
 	requestAnimationFrame(loop);
 }
 
-function sendState(msg){
-	if (socket){
+async function sendState(msg){
+	if (socket.readyState === WebSocket.OPEN){
 		socket.send(JSON.stringify({
 			"event": msg,
 			"match": stateMatch,
@@ -359,40 +391,15 @@ function sendState(msg){
 	}
 }
 
-function playPong(mode){
-	stateMatch.state = 'playing';
-	sendState('playing');
-}
-
-function quitPong(mode){
-	sendState('pause', mode);
-	Swal.fire({
-		confirmButtonColor: '#32B974',
-		title: "Are you sure ?",
-		showDenyButton: true,
-		showCancelButton: false,
-		confirmButtonText: "Yes",
-		denyButtonText: `No`
-	  }).then((result) => {
-			if (result.isConfirmed) {
-				stateMatch.state = 'gameover';
-			}else if (result.isDenied){
-				playPong(mode);
-			}});
-}
-
-function pausePong(){
-	sendState('pause');
-}
-
-function handleKeyDown(e) {
+async function handleKeyDown(e) {
     const key = e.key;
-	if (socket && key == 'ArrowUp' && key == 'ArrowDown' &&
+	if (socket.readyState === WebSocket.OPEN && 
+		key == 'ArrowUp' && key == 'ArrowDown' &&
 		key == 'w' && key == 's'){
-		socket.send(JSON.stringify({
-			"event": 'move',
-			"key": key,
-			"stateMatch": stateMatch,
+			socket.send(JSON.stringify({
+				"event": 'move',
+				"key": key,
+				"stateMatch": stateMatch,
 		}));
 	}
 }
@@ -426,8 +433,9 @@ function drawElements() {
 
 function gameOver(){
 	console.log('Game Over');
-	pausePong();
+	isPaused = true;
 	stateMatch.state = 'gameover';
+	sendState('gameover'); //enviar al servidor que se ha acabado el juego
 	let texto;
 	if (stateMatch.player1.score == finalScore)
 		texto = "YOU WIN";
@@ -457,8 +465,8 @@ function gameOver(){
 	});
 }
 
-
-if (socket){
+async function updateGame(){
+	
 	socket.onopen = e => {
 		console.log(e);
 	}
