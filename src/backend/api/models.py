@@ -21,7 +21,7 @@ class Match(models.Model):
 # User inherits from AbstractUser, which is a built-in Django model
 # this allows us to use the built-in Django authentication system
 class User(AbstractUser):
-    profilePicture = models.CharField(default='/static/avatars/default.jpg')
+    profilePicture = models.CharField(default='/avatars/default.jpg')
     status = models.BooleanField(default=True)  # online or offline
     totalPoints = models.IntegerField(default=0)
     matchesTotal = models.IntegerField(default=0)

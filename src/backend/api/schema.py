@@ -10,7 +10,7 @@ from ninja import ModelSchema, Schema
 class UserRegisterSchema(Schema):
     username: str
     password: str
-    profilePicture: str = "/static/avatars/default.jpg"
+    profilePicture: str = "/avatars/default.jpg"
 
 
 class LoginSchema(Schema):

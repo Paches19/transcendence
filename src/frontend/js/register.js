@@ -1,14 +1,14 @@
-/* ************************************************************************** */
+/******************************************************************************/
 /*                                                                            */
 /*                                                        :::      ::::::::   */
 /*   register.js                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:22:20 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/24 13:15:47 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/27 11:33:28 by alaparic         ###   ########.fr       */
 /*                                                                            */
-/* ************************************************************************** */
+/******************************************************************************/
 
 import router from './main.js';
 
@@ -45,7 +45,7 @@ async function handleRegisterSubmit(event) {
     const userData = {
         username: username,
         password: password,
-        profilePicture: "/static/avatars/default.jpg",
+        profilePicture: "/avatars/default.jpg",
     };
 
     try {

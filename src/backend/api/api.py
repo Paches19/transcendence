@@ -120,7 +120,7 @@ def update_avatar(request, file: UploadedFile = File(...)):
         return 400, {"error_msg": "Image format not supported"}
 
     # Delete previous avatar unless default
-    if request.user.profilePicture != "/static/avatars/default.jpg":
+    if request.user.profilePicture != "/avatars/default.jpg":
         os.remove("api"+request.user.profilePicture)
 
     # Save the uploaded image
@@ -170,7 +170,8 @@ def accept_friend(request, friend_username: AddFriendSchema):
     friend = get_object_or_404(User, username=friend_username.friend_username)
 
     # can't accept a friend request if user is the sender
-    if (user == Friend.objects.filter(user1=user, user2=friend).first().user1):
+    friend_request = Friend.objects.filter(user1=user, user2=friend).first()
+    if friend_request is not None and user == friend_request.user1:
         return 400, {"error_msg": "Can't accept your own friend request"}
 
     if not Friend.objects.filter(user1=friend, user2=user, status=False).exists():

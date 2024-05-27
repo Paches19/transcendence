@@ -8,7 +8,7 @@ The project is divided into three main parts:
 
 -   **Web Sockets and algorithms**: The game is played in real time from different clients, using **web sockets** to communicate the game state between the clients and the server.
 
--   **Frontend**: A **vanilla JS** fronted that accts as a **single page application**, requesting the data to the backend and updating the DOM accordingly.
+-   **Frontend**: A **vanilla JS** fronted that accts as a **single page application**, requesting the data to the backend and updating the DOM accordingly. And using **Bootstrap** for the styling of the page.
 
 -   **Backend**: A Django server that provides an API for the frontend to interact with using **Django-Ninja** and using **Postgres** as a database. It also manages the game state and the web sockets connections.
 
