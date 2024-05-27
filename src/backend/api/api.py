@@ -1,3 +1,15 @@
+#******************************************************************************#
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    api.py                                             :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
+#    Updated: 2024/05/27 12:38:00 by alaparic         ###   ########.fr        #
+#                                                                              #
+#******************************************************************************#
+
 import os
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout

@@ -1,3 +1,15 @@
+#******************************************************************************#
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    models.py                                          :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/05/27 12:38:10 by alaparic          #+#    #+#              #
+#    Updated: 2024/05/27 12:38:11 by alaparic         ###   ########.fr        #
+#                                                                              #
+#******************************************************************************#
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import datetime

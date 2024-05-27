@@ -1,3 +1,15 @@
+#******************************************************************************#
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    settings.py                                        :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/05/27 12:38:41 by alaparic          #+#    #+#              #
+#    Updated: 2024/05/27 12:38:42 by alaparic         ###   ########.fr        #
+#                                                                              #
+#******************************************************************************#
+
 from pathlib import Path
 from dotenv import load_dotenv
 from django.core.management.utils import get_random_secret_key

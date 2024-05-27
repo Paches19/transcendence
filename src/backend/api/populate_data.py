@@ -1,3 +1,15 @@
+#******************************************************************************#
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    populate_data.py                                   :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/05/27 12:38:12 by alaparic          #+#    #+#              #
+#    Updated: 2024/05/27 12:38:13 by alaparic         ###   ########.fr        #
+#                                                                              #
+#******************************************************************************#
+
 from .models import User, Friend, Match, UserTournament
 
 # Aux functions to populate response fields with data

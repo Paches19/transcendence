@@ -1,3 +1,15 @@
+#******************************************************************************#
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    schema.py                                          :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/05/27 12:38:15 by alaparic          #+#    #+#              #
+#    Updated: 2024/05/27 12:38:16 by alaparic         ###   ########.fr        #
+#                                                                              #
+#******************************************************************************#
+
 from pydantic import BaseModel, ValidationError, model_validator
 import datetime
 from .models import User
