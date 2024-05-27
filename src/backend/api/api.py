@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/27 12:38:00 by alaparic         ###   ########.fr        #
+#    Updated: 2024/05/27 18:53:52 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -52,13 +52,19 @@ def login_user(request, login_in: LoginSchema):
                         password=login_in.password)
     if user is not None:
         login(request, user)
+        user.user.status = True
+        user.save()
         return {"msg": "Login successful"}
     else:
         return {"error_msg": "Login failed"}
 
 
 @app.get("auth/logout", tags=['Auth'])
+@login_required
 def logout_user(request):
+    user = request.user
+    user.status = False
+    user.save()
     logout(request)
     return {"msg": "Logout successful"}
 
