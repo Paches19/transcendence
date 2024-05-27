@@ -120,13 +120,13 @@ def update_avatar(request, file: UploadedFile = File(...)):
         return 400, {"error_msg": "Image format not supported"}
 
     # Delete previous avatar unless default
-    if request.user.profilePicture != "/avatars/default.jpg":
-        os.remove("api"+request.user.profilePicture)
+    if request.user.profilePicture != "/api/static/avatars/default.jpg":
+        os.remove(request.user.profilePicture)
 
     # Save the uploaded image
-    relative_file_route = os.path.join("static", "avatars",
+    relative_file_route = os.path.join("api", "static", "avatars",
                                        str(user_id) + "." + file.content_type.split('/')[-1])
-    file_route = os.path.join(os.getcwd(), "api", relative_file_route)
+    file_route = os.path.join(os.getcwd(), relative_file_route)
     file = open(file_route, "wb")
     file.write(avatar_data)
     file.close()

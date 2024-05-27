@@ -6,7 +6,7 @@
 /*   By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:22:20 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/27 11:33:28 by alaparic         ###   ########.fr       */
+/*   Updated: 2024/05/27 12:02:11 by alaparic         ###   ########.fr       */
 /*                                                                            */
 /******************************************************************************/
 
@@ -45,7 +45,7 @@ async function handleRegisterSubmit(event) {
     const userData = {
         username: username,
         password: password,
-        profilePicture: "/avatars/default.jpg",
+        profilePicture: "/api/static/avatars/default.jpg",
     };
 
     try {
