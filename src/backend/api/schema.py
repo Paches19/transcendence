@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:15 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/27 12:38:16 by alaparic         ###   ########.fr        #
+#    Updated: 2024/05/27 18:30:44 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -140,3 +140,18 @@ class ErrorSchema(Schema):
 
 class SuccessSchema(Schema):
     msg: str
+
+""" Game update schemas """
+
+class MatchUpdateSchema(Schema):
+    matchID: int
+    player1_points: int
+    player2_points: int
+
+class TournamentEndedSchema(Schema):
+    tournamentID: int
+
+class UserStatsUpdateSchema(Schema):
+    userID: int
+    points: int
+    won: bool
