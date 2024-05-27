@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 18:11:12 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/24 13:15:44 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/27 18:11:07 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,11 @@ async function fetchTournamentById(id) {
     }
 }
 
+let tournament = null;
+
 async function loadTournamentDetails(id) {
 
-    let tournament = null;
+    
     try {
         tournament = await fetchTournamentById(id);
     } catch (error) {
@@ -140,15 +142,21 @@ async function loadTournamentDetails(id) {
 }
 
 function attachEventListenersForTournamentDetails() {
-    document.querySelector('.join-tournament-btn2').addEventListener('click', function(e) {
-        const tournamentId = e.target.getAttribute('data-id');
-        joinTournament(tournamentId);
-    });
-
+    
     document.querySelector('.leave-tournament-btn2').addEventListener('click', function(e) {
         const tournamentId = e.target.getAttribute('data-id');
         leaveTournament(tournamentId);
     });
+    
+    if (tournament.status !== 'In Progress' && tournament.status !== 'Ended')
+    {
+        document.querySelector('.join-tournament-btn2').addEventListener('click', function(e) {
+            const tournamentId = e.target.getAttribute('data-id');
+            joinTournament(tournamentId);
+        });
+    }
+
+
 }
 
 async function joinTournament(tournamentId) {
