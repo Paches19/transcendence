@@ -24,7 +24,6 @@ $(NAME):
 			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) up -d --remove-orphans
 			@printf "\n$(BLUE)==> $(CYAN)Transcendence is running ✅\n$(RESET)"
 			@printf "$(BLUE)==> $(BLUE)Accessible on: \n\t$(YELLOW)http://localhost:$(PORT)\n$(RESET)"
-
 stop:
 			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) stop
 			@printf "\n$(BLUE)==> $(RED)Transcendence stopped 🛑\n$(RESET)"
