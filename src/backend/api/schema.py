@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:15 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/27 18:30:44 by alaparic         ###   ########.fr        #
+#    Updated: 2024/05/28 10:32:11 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -38,6 +38,7 @@ class FriendSchema(Schema):
     name: str
     profilePicture: str
     status: bool
+    online: bool
 
 
 class MatchSchema(Schema):
@@ -52,7 +53,7 @@ class UserSchema(Schema):
     username: str
     profilePicture: str
     totalPoints: int
-    status: bool
+    online: bool
     matchesTotal: int
     matchesWon: int
     matchesLost: int
@@ -94,6 +95,7 @@ class TournamentSchema(Schema):
     name: str
     date: str = datetime.date.today().isoformat()
     status: str
+    current_participants: int
     number_participants: int
     participants: List[UserTournamentSchema]
 
@@ -120,6 +122,7 @@ class SingleTournamentSchema(Schema):
     name: str
     date: str
     status: str
+    current_participants: int
     number_participants: int
     participants: List[UserTournamentSchema]
     standings: List[StandingsSchema]
