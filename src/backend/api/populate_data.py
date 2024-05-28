@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:12 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/27 12:38:13 by alaparic         ###   ########.fr        #
+#    Updated: 2024/05/28 10:34:19 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -25,14 +25,16 @@ def populate_friends(user):
                 "id": friend.user2.id,
                 "name": friend.user2.username,
                 "profilePicture": str(friend.user2.profilePicture),
-                "status": friend.status
+                "status": friend.status,
+                "online": friend.user2.online
             })
         elif friend.user2.id == user.id:
             friends.append({
                 "id": friend.user1.id,
                 "name": friend.user1.username,
                 "profilePicture": str(friend.user1.profilePicture),
-                "status": friend.status
+                "status": friend.status,
+                "online": friend.user1.online
             })
     return friends
 
@@ -114,8 +116,6 @@ def userTournamentsPlayed(user):
     return len(tournaments)
 
 # Count of the tournaments the user has won, most won games in the tournament
-
-
 def userTournamentsWon(user):
     tournaments = UserTournament.objects.filter(user=user)
     count = 0
@@ -139,3 +139,6 @@ def userTournamentsWon(user):
         if players[user.username] == max(players.values()):
             count += 1
     return count
+
+def doTournamentMatchmaking(tournament): # TODO > Implement this function
+    pass

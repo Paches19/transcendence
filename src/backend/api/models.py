@@ -6,12 +6,13 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:10 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/27 18:51:56 by alaparic         ###   ########.fr        #
+#    Updated: 2024/05/28 10:04:57 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinValueValidator, MaxValueValidator
 import datetime
 
 # Create your models here.
@@ -34,7 +35,7 @@ class Match(models.Model):
 # this allows us to use the built-in Django authentication system
 class User(AbstractUser):
     profilePicture = models.CharField(default='/api/static/avatars/default.jpg')
-    status = models.BooleanField(default=True)  # online or offline
+    online = models.BooleanField(default=False)
     totalPoints = models.IntegerField(default=0)
     matchesTotal = models.IntegerField(default=0)
     matchesWon = models.IntegerField(default=0)
@@ -58,9 +59,9 @@ class Tournament(models.Model):
         ('ended', 'Ended'),
     ]
     tournamentID = models.AutoField(primary_key=True, unique=True)
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=30)
     date = models.DateField(default=datetime.date.today)
-    number_participants = models.IntegerField()
+    number_participants = models.IntegerField(validators=[MinValueValidator(2), MaxValueValidator(20)])
     status = models.CharField(
         max_length=11, choices=TOURNAMENT_STATUS_CHOICES, default='Upcoming')
 

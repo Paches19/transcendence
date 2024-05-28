@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/27 18:53:52 by alaparic         ###   ########.fr        #
+#    Updated: 2024/05/28 10:33:39 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -52,7 +52,7 @@ def login_user(request, login_in: LoginSchema):
                         password=login_in.password)
     if user is not None:
         login(request, user)
-        user.user.status = True
+        user.user.online = True
         user.save()
         return {"msg": "Login successful"}
     else:
@@ -63,7 +63,7 @@ def login_user(request, login_in: LoginSchema):
 @login_required
 def logout_user(request):
     user = request.user
-    user.status = False
+    user.online = False
     user.save()
     logout(request)
     return {"msg": "Logout successful"}
@@ -89,7 +89,7 @@ def get_users(request, user_id: Optional[int] = None):
         "username": user.username,
         "profilePicture": str(user.profilePicture),
         "totalPoints": user.totalPoints,
-        "status": user.status,
+        "online": user.online,
         "matchesTotal": user.matchesTotal,
         "matchesWon": user.matchesWon,
         "matchesLost": user.matchesLost,
@@ -238,6 +238,7 @@ def get_tournaments(request):
             "name": tournament.name,
             "date": tournament.date.isoformat(),
             "status": tournament.status,
+            "current_participants": UserTournament.objects.filter(tournament=tournament).count(),
             "number_participants": tournament.number_participants,
             "participants": populate_tournament_participants(tournament)
         })
@@ -252,6 +253,7 @@ def get_tournament(request, tournament_id: int):
         "name": tournament.name,
         "date": tournament.date.isoformat(),
         "status": tournament.status,
+        "current_participants": UserTournament.objects.filter(tournament=tournament).count(),
         "number_participants": tournament.number_participants,
         "participants": populate_tournament_participants(tournament),
         "standings": populate_standings(tournament),
@@ -275,6 +277,7 @@ def join_tournament(request, tournament_id: int):
     if UserTournament.objects.filter(tournament=tournament).count() >= tournament.number_participants:
         tournament.status = "In Progress"
         tournament.save()
+        doTournamentMatchmaking(tournament)
 
     user_tournament_data = {
         "user": user,
