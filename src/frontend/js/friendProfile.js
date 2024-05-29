@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/14 10:20:30 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/24 13:16:00 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/29 11:01:08 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ function renderFriendsList(friends) {
     return friends.map(friend => `
         <div class="friend-entry">
             <a data-id="${friend.id}">
-                <img src="https://localhost${friend.profilePicture}" alt="${friend.name}'s Avatar" class="friend-avatar">
+                <img src="https://localhost${friend.profilePicture}" alt="${friend.name}'s Avatar" class="friend-avatar ${friend.online ? 'online' : 'offline'}">
                 <span class="friend-username">${friend.name}</span>
             </a>
         </div>

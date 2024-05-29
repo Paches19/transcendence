@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/24 13:15:41 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/29 11:08:34 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,13 @@ async function fetchTournaments() {
     })
         .then(response => {
             if (!response.ok) {
-                showNotification('Network response was not ok');
+                showNotification('Network response was not ok', false);
             }
             return response.json();
         })
         .catch(error => {
             console.error('Error fetching tournaments:', error);
-            showNotification('Error fetching tournaments:', error);
+            showNotification('Error fetching tournaments:' + error, false);
             return [];
         });
 }
@@ -39,7 +39,7 @@ async function loadTournaments() {
         updateTournamentHTML(tournaments);
     } catch (error) {
         console.error('Error loading tournaments:', error);
-        showNotification('Error loading tournaments:', error);
+        showNotification('Error loading tournaments:' + error, false);
     }
 }
 
@@ -157,14 +157,26 @@ function addModalEventListeners() {
 
     document.getElementById('createTournamentForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        
         const tournamentName = document.getElementById('tournamentName').value;
         const numPlayers = document.getElementById('numPlayers').value;
+    
+        if (tournamentName.length > 30) {
+            showNotification('Error: Tournament name must be 30 characters or fewer.', false);
+            return;
+        }
+    
+        if (numPlayers > 20) {
+            showNotification('Error: Number of players must be 20 or fewer.', false);
+            return;
+        }
+    
         document.getElementById('createTournamentModal').style.display = 'none';
         const requestBody = {
             name: tournamentName,
             number_participants: numPlayers,
         };
-
+    
         const apiUrl = 'https://localhost/api/tournaments/create';
         fetch(apiUrl, {
             method: 'POST',
@@ -175,7 +187,7 @@ function addModalEventListeners() {
         })
         .then(response => {
             if (!response.ok) {
-                showNotification('Network response was not ok');
+                showNotification('Network response was not ok', false);
             }
             return response.json();
         })
@@ -186,7 +198,7 @@ function addModalEventListeners() {
         })
         .catch(error => {
             console.error('Error:', error);
-            showNotification('Error:', error)
+            showNotification('Error:' + error, false)
         });
     });
 }
