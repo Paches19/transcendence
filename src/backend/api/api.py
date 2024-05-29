@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/28 10:33:39 by alaparic         ###   ########.fr        #
+#    Updated: 2024/05/28 13:30:51 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -52,7 +52,7 @@ def login_user(request, login_in: LoginSchema):
                         password=login_in.password)
     if user is not None:
         login(request, user)
-        user.user.online = True
+        user.online = True
         user.save()
         return {"msg": "Login successful"}
     else:
