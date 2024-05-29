@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/12 12:46:57 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/14 16:45:22 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/05/29 10:56:16 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,6 +153,14 @@
     width: 50px;
     height: 50px;
     margin-right: 10px;
+}
+
+.friend-avatar.online {
+    border: 5px solid var(--neon-green);
+}
+
+.friend-avatar.offline {
+    border: 5px solid transparent;
 }
 
 .toggle-button {
