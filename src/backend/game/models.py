@@ -7,7 +7,7 @@ class MatchRemote(models.Model):
            return f"{self.id}"
      
 class GameStatus:
-     def __init__(self, id, x1, y1, score1, name1, x2, y2, score2, name2, ballX, ballY, ballSpeedX, ballSpeedY, state) -> None:
+     def __init__(self, id, x1, y1, score1, name1, x2, y2, score2, name2, ballX, ballY, ballSpeedX, ballSpeedY, boundX, boundY, state) -> None:
           self.id = id
           self.x1 = x1
           self.y1 = y1
@@ -21,6 +21,8 @@ class GameStatus:
           self.ballY = ballY
           self.ballSpeedX = ballSpeedX
           self.ballSpeedY = ballSpeedY
+          self.boundX = boundX
+          self.boundY = boundY
           self.state = state
 
      def getBallInfo(self):

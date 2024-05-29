@@ -35,6 +35,8 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
             ballY = 0,
             ballSpeedX = 0,
             ballSpeedY = 0,
+            boundX = 0,
+            boundY = 0,
             state = 'start'
         )
  
@@ -52,7 +54,7 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
         if 'event' in data and data['event'] == 'game_state':
             state = data['match']['state']
             modality = data['match']['modality']
-            print("Se ha recibido el evento "+ state)
+            print("BACKEND: recibido el evento "+ state)
             if state == 'quit':
                 self.game_state.state = 'quit'
                 await self.close()
@@ -66,6 +68,7 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
                 self.game_state.state = 'playing'
 
             elif state == 'playing':
+                self.game_state.state = 'playing'
                 if state == 'up1':
                     self.game_state.y1 = max(0, self.game_state.y1 - 5)
                 elif state == 'up2' and modality == 'local':
@@ -74,9 +77,6 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
                     self.game_state.y1 = min(100, self.game_state.y1 + 5)
                 elif state == 'down2' and modality == 'local':
                     self.game_state.y2 = min(100, self.game_state.y2 + 5)   
-     
-            elif state == 'gameover':
-                self.game_state.state = 'gameover'
 
             elif state == 'reset':
                 self.reset_game(data['match'])
@@ -85,10 +85,10 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
     async def game_loop(self):
         while self.game_state.state != 'gameover' and self.game_state.state != 'quit':
             self.update_ball_position()
-            print("Estoy en el bucle del juego")
             await self.channel_layer.group_send( self.room_group_name, {
                 "type": "gameState.send",
                 "data": {
+					"event": "game_update",
                     "stateMatch": self.serialize_game_state()
 				}
 			})
@@ -98,14 +98,14 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
         ballX, ballY = self.game_state.ballX, self.game_state.ballY
         ballSpeedX, ballSpeedY = self.game_state.ballSpeedX, self.game_state.ballSpeedY
 
-        print("Ball position before:", ballX, ballY)
+        print("Ball position before:", self.game_state.ballX, self.game_state.ballY)
         # Update ball position
         if self.game_state.state == 'playing':
             ballX += ballSpeedX
             ballY += ballSpeedY
 
         # Check for collisions with walls
-        if ballY <= 0 or ballY >= 100:
+        if ballY <= 0 or ballY >= self.game_state.boundY:
             ballSpeedY = -ballSpeedY
 
         # Check for collisions with paddles
@@ -117,7 +117,7 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
                
                 if self.game_state.score2 == POINTS_TO_WIN:
                     self.game_state.state = 'gameover'
-        elif ballX >= 100:  # Right wall (Paddle 2)
+        elif ballX >= self.game_state.x2:  # Right wall (Paddle 2)
             if self.game_state.y2 - 10 <= ballY <= self.game_state.y2 + 10:
                 ballSpeedX = -ballSpeedX
             else:
@@ -130,7 +130,7 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
         self.game_state.ballY = ballY
         self.game_state.ballSpeedX = ballSpeedX
         self.game_state.ballSpeedY = ballSpeedY
-        print("Ball position after:", ballX, ballY)
+        print("Ball position after:", self.game_state.ballX, self.game_state.ballY)
 
     def reset_game(self, match):
         self.game_state = GameStatus(
@@ -147,6 +147,8 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
             ballY = match['bally'],
             ballSpeedX = match['ballvx'],
             ballSpeedY = match['ballvy'],
+            boundX= match['boundX'],
+            boundY= match['boundY'],
             state = match['state']
         )
 
@@ -165,11 +167,12 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
             'ballY': self.game_state.ballY,
             'ballSpeedX': self.game_state.ballSpeedX,
             'ballSpeedY': self.game_state.ballSpeedY,
+            'boundX': self.game_state.boundX,
+            'boundY': self.game_state.boundY,
             'state': self.game_state.state
         }
 
     async def gameState_send(self, event):
-        print("Sending game state:", event['data'])
         await self.send(text_data=json.dumps( event['data']))
 
 
@@ -206,12 +209,22 @@ class PongConsumerRemote(AsyncJsonWebsocketConsumer):
 
             # Initialize game state
             self.game_state = GameStatus(
-                id=self.match_id,
-                x1=50, y1=50, score1=0, name1='Player1',
-                x2=50, y2=50, score2=0, name2='Player2',
-                ballX=50, ballY=50,
-                ballSpeedX=choice([-1, 1]), ballSpeedY=choice([-1, 1]),
-                state='start'
+				id = 0,
+				x1 = 0,
+				y1 = 0,
+				score1 = 0,
+				name1 = 'Player1',
+				x2 = 0,
+				y2 = 0,
+				score2 = 0,
+				name2 = 'Player2',
+				ballX = 0,
+				ballY = 0,
+				ballSpeedX = 0,
+				ballSpeedY = 0,
+				boundX = 0,
+				boundY = 0,
+            	state = 'start'
             )
 
     async def receive_json(self, content, **kwargs):

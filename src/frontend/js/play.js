@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/28 19:07:56 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/05/29 18:31:25 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,10 @@ let stateMatch = {
 	'bally': 0,
 	'ballvx': 0,
 	'ballvy': 0,
-	
+
+	'boundX': 0,
+	'boundY': 0,
+
 	'state': 'waiting',
 	'modality': '',
 }
@@ -189,6 +192,7 @@ function quitGame() {
 				stateMatch.state = 'quit';
 				sendState(); //enviar al servidor que se ha salido del juego
 				initPlayPage();
+				return;
 			}else if (result.isDenied){
 				stateMatch.state = 'playing';
 				isPaused = false;
@@ -256,11 +260,25 @@ async function sendState(){
 
 async function startLocal() {
 	socket = new WebSocket("ws://localhost:8000/ws/game/"+ username + "/");
+	socket.onopen = (e) => {
+        console.log("Connection established in local mode");
+    };
+
+    socket.onclose = (e) => {
+        console.error('Game socket closed unexpectedly: ', e);
+    };
+
+    socket.onerror = (e) => {
+        console.error('WebSocket error: ', e);
+    };
+
+    socket.onmessage = (e) => {
+        handleSocketMessage(e);
+    };
 	while (socket.readyState != WebSocket.OPEN){
 		await new Promise(resolve => setTimeout(resolve, 1000));
-		console.log("Connecting...");
 	}
-	console.log("Connected");
+	console.log("Socket connected in local mode");
 }
 
 async function startRemote() {
@@ -307,6 +325,7 @@ async function startRemote() {
 					icon: "success",
 					title: "Match created with code: " + randomId,
 				});
+				configureSocketEvents();
 			}else {
 				console.error("Error al guardar el id remoto: ", response.status);
 			}
@@ -347,6 +366,7 @@ async function startRemote() {
 					icon: "success",
 					title: "Joining to match code: " + code,
 				});
+				configureSocketEvents();
 			} else{
 				console.error("Match no encontrado: ", response.status);
 				Swal.fire({
@@ -393,6 +413,9 @@ function startPong(){
 		'ballvx': Math.floor(Math.random() * 7) - 3,
 		'ballvy': Math.floor(Math.random() * 7) - 3,
 	
+		'boundX': canvas.width,
+		'boundY': canvas.height,
+
 		'state': 'waiting',
 		'modality': modality,
 	}
@@ -406,32 +429,29 @@ function startPong(){
 		sendState(); // Enviar al servidor que se está jugando
 		isPaused = false;
 	}, 100); // Espera 100ms antes de cambiar a 'playing'
-	loop();
 }
-
-function loop() {
-	if (stateMatch.state == 'gameover' || stateMatch.state == 'quit'){
-		return;
-	}
-	drawElements();
-	requestAnimationFrame(loop);
-}
-
 
 function drawElements() {
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	
-	//draw ball
-	ctx.fillRect(stateMatch.ballx, stateMatch.bally, ballWidth, ballHeight);
-	//draw net
-	ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);
-	//draw paddles
-	ctx.fillRect(stateMatch.x1, stateMatch.y1, playerWidth, playerHeight);
-	ctx.fillRect(stateMatch.x2, stateMatch.y2, playerWidth, playerHeight);
-	//draw scores
-	document.getElementById('game-score').innerHTML = 
-		`${stateMatch.name1} ${stateMatch.score1} -
-		 ${stateMatch.score2} ${stateMatch.name2}`;
+    // Limpia el canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+   
+    // Dibuja la bola
+    ctx.fillRect(stateMatch.ballx, stateMatch.bally, ballWidth, ballHeight);
+    console.log(`2. Ball drawn at (${stateMatch.ballx}, ${stateMatch.bally})`);
+
+    // Dibuja la red
+    ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);
+   
+	// Dibuja las paletas
+    ctx.fillRect(stateMatch.x1, stateMatch.y1, playerWidth, playerHeight);
+    ctx.fillRect(stateMatch.x2, stateMatch.y2, playerWidth, playerHeight);
+    
+	// Actualiza el puntaje
+    const gameScore = document.getElementById('game-score');
+    if (gameScore) {
+        gameScore.innerHTML = 
+            `${stateMatch.name1} ${stateMatch.score1} - ${stateMatch.score2} ${stateMatch.name2}`;
+    }
 }
 
 function gameOver(){
@@ -462,99 +482,109 @@ function gameOver(){
 					startPong();
 				}else if (result.isDenied){
 					initPlayPage();
+					return;
 				}});
 		};
 	});
 }
 	
-if (socket){
-	socket.onopen = e => {
-		console.log("Connection established");
-	}
+function configureSocketEvents(){
+	socket.onopen = (e) => {
+        console.log("Connection established");
+    };
 
-	socket.onclose = e => {
-		if (e.wasClean){
-			alert(`[close] Conexión cerrada limpiamente, código=${e.code} motivo=${e.reason}`);
-	  	} else {
-	    	// ej. El proceso del servidor se detuvo o la red está caída
-	    	// event.code es usualmente 1006 en este caso
-	    	alert('[close] La conexión se cayó');
-  		}
-	}
+    socket.onclose = (e) => {
+        console.error('Game socket closed unexpectedly: ', e);
+    };
 
-	socket.onerror = e => {
-		alert(`[error] ${e.message}`);
+    socket.onerror = (e) => {
+        console.error('WebSocket error: ', e);
+    };
+
+    socket.onmessage = (e) => {
+        handleSocketMessage(e);
+    };
+}
+
+function handleSocketMessage(e) {
+	const data = JSON.parse(e.data);
+	
+	if (data.event == "show_error"){
+		Swal.fire({
+			icon: "error",
+			title: data.error,
+		}).then(e => window.location.href = "/");
+	}
+	else if(data.event == "write_names"){
+		if (stateMatch.name1 == "" || stateMatch.name1 == "Waiting...") 
+			stateMatch.name1 = data.name1;
+		if (stateMatch.name2 == "" || stateMatch.name2 == "Waiting...")
+			stateMatch.name2 = data.name2;
+		stateMatch.ballvy = data.ballvy;
 	}
 	
-	socket.onmessage = e => {
-		const data = JSON.parse(e.data);
-
-		console.log("Event received: ", data.event);
-		if (data.event == "show_error"){
-			Swal.fire({
-				icon: "error",
-				title: data.error,
-			}).then(e => window.location.href = "/");
-		}
-		else if(data.event == "write_names"){
-			if (stateMatch.name1 == "" || stateMatch.name1 == "Waiting...") 
-				stateMatch.name1 = data.name1;
-			if (stateMatch.name2 == "" || stateMatch.name2 == "Waiting...")
-				stateMatch.name2 = data.name2;
-			stateMatch.ballvy = data.ballvy;
-		}
-
-		else if(data.event == "game_start"){
-			player = data.player;
-			if (player == "1"){
-				stateMatch.name1 = playerName;
-				socket.send(JSON.stringify({
+	else if(data.event == "game_start"){
+		player = data.player;
+		if (player == "1"){
+			stateMatch.name1 = playerName;
+			socket.send(JSON.stringify({
+			"event": 'write_names',
+				"name1": playerName,
+				"name2": "Waiting...",
+				"ballvy" : 0,
+			}));
+		}else{
+			stateMatch.name2 = playerName;
+			socket.send(JSON.stringify({
 				"event": 'write_names',
-					"name1": playerName,
-					"name2": "Waiting...",
-					"ballvy" : 0,
-				}));
-			}else{
-				stateMatch.name2 = playerName;
-				socket.send(JSON.stringify({
-					"event": 'write_names',
-					"name1": "",
-					"name2": playerName,
-					"ballvy" : Math.floor(Math.random() * 7) - 3,
-				}));
-			}
-			drawElements();
-			loop();
-			setTimeout(waitMatch,3000);
+				"name1": "",
+				"name2": playerName,
+				"ballvy" : Math.floor(Math.random() * 7) - 3,
+			}));
 		}
+		drawElements();
+		loop();
+		setTimeout(waitMatch,3000);
+	}
 	
-		else if(data.event == "game_state"){
-			stateMatch = data.stateMatch;
-			drawElements();
-		}
-
-		else if(data.event == "opponent_left" && stateMatch.state != 'quit'){
-			stateMatch.state = 'quit';
-			drawElements();
-			setTimeout(() => {
-				Swal.fire({
-					icon:  "info",
-					title:  "Opponent Left",
-					confirmButtonText: "Ok",
-				}).then(e => window.location.href = "/")
-			}, 400);
-		}
-	
-		else if (data.event == "game_over"){
-			winner = data.winner;
+	else if(data.event == "game_update"){
+		updateStateMatch(data.stateMatch);
+		console.log("1. Ball in x: ", stateMatch.ballx, " y: ", stateMatch.bally);
+		drawElements();
+		if (stateMatch.state == 'gameover'){
 			gameOver();
-			Swal.fire({
-				icon: winner == currentName ?'success': "error",
-				title: winner == currentName ? "You win!" : "You lose!",
-				confirmButtonText: "Ok",
-			}).then((result) => { if (result.isConfirmed) {
-					window.location.href = "/";
-			}});
 		}
 	}
+
+	else if(data.event == "opponent_left" && stateMatch.state != 'quit'){
+		stateMatch.state = 'quit';
+		drawElements();
+		setTimeout(() => {
+			Swal.fire({
+				icon:  "info",
+				title:  "Opponent Left",
+				confirmButtonText: "Ok",
+			}).then(e => window.location.href = "/")
+		}, 400);
+	}
+	
+	else if (data.event == "game_over"){
+		winner = data.winner;
+		gameOver();
+		Swal.fire({
+			icon: winner == currentName ?'success': "error",
+			title: winner == currentName ? "You win!" : "You lose!",
+			confirmButtonText: "Ok",
+		}).then((result) => { if (result.isConfirmed) {
+				window.location.href = "/";
+		}});
+	}
+}
+
+function updateStateMatch(newState) {
+    Object.keys(newState).forEach(key => {
+        if (stateMatch.hasOwnProperty(key)) {
+            stateMatch[key] = newState[key];
+        }
+    });
 }
