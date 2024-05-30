@@ -4,7 +4,7 @@ from django.contrib.auth import authenticate, login, logout
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
 from ninja.params import Query
-from .models import User, Friend, Tournament, UserTournament, Match
+from .models import User, Friend, Tournament, UserTournament
 from .middleware import login_required, require_auth
 from .populate_data import *
 from typing import Optional
@@ -13,7 +13,7 @@ from .schema import (ErrorSchema, UserUpdateSchema,
                      AddFriendSchema, TournamentSchema, UserNameSchema,
                      UserSchema, SuccessSchema, TournamentCreateSchema, 
                      MatchCreateSchema)
-from game.models import MatchRemote
+from game.models import GameStatus
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -30,27 +30,27 @@ def game(request):
 @app.post("/newmatch", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
 def saveIdRemote(request, match: MatchCreateSchema):
     try:
-        MatchRemote.objects.get(id=match.id)
+        GameStatus.objects.get(id=match.id)
         return 400, {"error_msg": "Match already exists"}
-    except MatchRemote.DoesNotExist:
-        MatchRemote.objects.create(id=match.id)
+    except GameStatus.DoesNotExist:
+        GameStatus.objects.create(id=match.id)
         return {"msg": "Match created"}
     
 @app.post("/joinmatch", response=SuccessSchema, tags=['Match'])
 def getMatch(request, match: MatchCreateSchema):
 	try:
-		MatchRemote.objects.get(id=match.id)
+		GameStatus.objects.get(id=match.id)
 		return {"msg": "Match joined"}
-	except MatchRemote.DoesNotExist:
+	except GameStatus.DoesNotExist:
 		return 400, {"error_msg": "Match does not exist"}
 
 @app.post("/deletematch", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
 def deleteMatch(request, match: MatchCreateSchema):
 	try:
-		tmpmatch = MatchRemote.objects.get(id=match.id)
+		tmpmatch = GameStatus.objects.get(id=match.id)
 		tmpmatch.delete()
 		return 200, {"msg": "Match deleted"}
-	except MatchRemote.DoesNotExist:
+	except GameStatus.DoesNotExist:
 		return 400, {"error_msg": "Match does not exist"}
 
 """ Auth """

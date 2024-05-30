@@ -1,12 +1,7 @@
-import json
+import json, asyncio, contextlib, random
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.generic.websocket import AsyncWebsocketConsumer
-from random import choice
-import asyncio
 from .models import GameStatus
-import contextlib
-
-POINTS_TO_WIN = 3	# Number of points to win the game
 
 class PongConsumerLocal(AsyncWebsocketConsumer):
     async def connect(self):
@@ -22,7 +17,13 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
         print("Se ha conectado el jugador "+ self.room_name)
         # Initialize game state
         self.game_state = GameStatus(
-            id = 0,
+            v = 10,
+            key = 'up1',
+			ballWidth = 10,
+			ballHeight  = 10,
+			playerWidth = 15,
+			playerHeight = 80,
+			finalScore = 3,
             x1 = 0,
             y1 = 0,
             score1 = 0,
@@ -37,7 +38,8 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
             ballSpeedY = 0,
             boundX = 0,
             boundY = 0,
-            state = 'start'
+            state = 'start',
+            modality = 'local'
         )
  
     async def disconnect(self, code):
@@ -53,88 +55,126 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         if 'event' in data and data['event'] == 'game_state':
             state = data['match']['state']
-            modality = data['match']['modality']
-            print("BACKEND: recibido el evento "+ state)
+            self.game_state.state = state
+            keyboard = data['match']['key']
+
             if state == 'quit':
-                self.game_state.state = 'quit'
                 await self.close()
-
-            elif state == 'pause':
-                self.game_state.state = 'pause'
-
+                
             elif state == 'start':
                 self.reset_game(data['match'])
-                asyncio.create_task(self.game_loop())
                 self.game_state.state = 'playing'
+                asyncio.create_task(self.game_loop())
 
             elif state == 'playing':
-                self.game_state.state = 'playing'
-                if state == 'up1':
-                    self.game_state.y1 = max(0, self.game_state.y1 - 5)
-                elif state == 'up2' and modality == 'local':
-                    self.game_state.y2 = max(0, self.game_state.y2 - 5)
-                elif state == 'down1':
-                    self.game_state.y1 = min(100, self.game_state.y1 + 5)
-                elif state == 'down2' and modality == 'local':
-                    self.game_state.y2 = min(100, self.game_state.y2 + 5)   
+                print("Recibida la tecla "+ keyboard)
+                if keyboard == 'up1':
+                    self.game_state.y1 = max(0, self.game_state.y1 - self.game_state.v)
+                elif keyboard == 'up2':
+                    self.game_state.y2 = max(0, self.game_state.y2 - self.game_state.v)
+                elif keyboard == 'down1':
+                    self.game_state.y1 = min(self.game_state.boundY - self.game_state.playerHeight, self.game_state.y1 + self.game_state.v)
+                elif keyboard == 'down2':
+                    self.game_state.y2 = min(self.game_state.boundY - self.game_state.playerHeight, self.game_state.y2 + self.game_state.v)   
 
             elif state == 'reset':
                 self.reset_game(data['match'])
                 self.game_state.state = 'start'
 
     async def game_loop(self):
+        level = random.randint(3, 8)
+        print("Nivel de dificultad: "+ str(level))
         while self.game_state.state != 'gameover' and self.game_state.state != 'quit':
-            self.update_ball_position()
-            await self.channel_layer.group_send( self.room_group_name, {
-                "type": "gameState.send",
-                "data": {
-					"event": "game_update",
-                    "stateMatch": self.serialize_game_state()
-				}
-			})
+            if (self.game_state.state == 'playing'):
+                self.update_ball_position()
+                if (self.game_state.modality == 'solo'):
+                    self.player2_is_AI(level)
+                await self.channel_layer.group_send( self.room_group_name, {
+                   	"type": "gameState.send",
+                	"data": {
+						"event": "game_update",
+                    	"stateMatch": self.serialize_game_state()
+					}
+				})
             await asyncio.sleep(0.03)  # 30ms for ~33 FPS
 
+    def player2_is_AI(self, level):
+       if (self.game_state.ballX > (self.game_state.boundX // 2 - level * 25)):
+          if (self.game_state.ballY > (self.game_state.y2 + self.game_state.playerHeight)) :
+             self.game_state.y2 = min(self.game_state.boundY, self.game_state.y2 + level)
+          else:
+             self.game_state.y2 = max(0, self.game_state.y2 - level)
+
+
     def update_ball_position(self):
-        ballX, ballY = self.game_state.ballX, self.game_state.ballY
-        ballSpeedX, ballSpeedY = self.game_state.ballSpeedX, self.game_state.ballSpeedY
+        ballX = self.game_state.ballX
+        ballY = self.game_state.ballY
+        ballSpeedX = self.game_state.ballSpeedX
+        ballSpeedY = self.game_state.ballSpeedY
+        y1 = self.game_state.y1
+        y2 = self.game_state.y2
+        x1 = self.game_state.x1
+        x2 = self.game_state.x2
+        width = self.game_state.boundX
+        height = self.game_state.boundY
+        paddleWidth = self.game_state.playerWidth
+        paddleHeight = self.game_state.playerHeight
+        ballWidth = self.game_state.ballWidth
+        ballHeight = self.game_state.ballHeight
 
-        print("Ball position before:", self.game_state.ballX, self.game_state.ballY)
-        # Update ball position
-        if self.game_state.state == 'playing':
-            ballX += ballSpeedX
-            ballY += ballSpeedY
+	    # Update ball position
+        if (ballY + ballSpeedY <= 0 or ballY + ballSpeedY >= height):
+           ballSpeedY = -ballSpeedY
+        ballX += ballSpeedX
+        ballY += ballSpeedY
 
-        # Check for collisions with walls
-        if ballY <= 0 or ballY >= self.game_state.boundY:
-            ballSpeedY = -ballSpeedY
+	    # Check for collisions with walls
+        # Left wall (Paddle 1)
+        if ballX <= x1:
+              self.game_state.score2 += 1
+              if self.game_state.score2 == self.game_state.finalScore:
+                 self.game_state.state = 'gameover'
+              else:
+                 ballX = width // 2 - ballWidth // 2	
+                 ballY = height // 2 - ballHeight // 2
 
-        # Check for collisions with paddles
-        if ballX <= 0:  # Left wall (Paddle 1)
-            if self.game_state.y1 - 10 <= ballY <= self.game_state.y1 + 10:
-                ballSpeedX = -ballSpeedX
-            else:
-                self.game_state.score2 += 1  # Player 2 scores
-               
-                if self.game_state.score2 == POINTS_TO_WIN:
-                    self.game_state.state = 'gameover'
-        elif ballX >= self.game_state.x2:  # Right wall (Paddle 2)
-            if self.game_state.y2 - 10 <= ballY <= self.game_state.y2 + 10:
-                ballSpeedX = -ballSpeedX
-            else:
-                self.game_state.score1 += 1  # Player 1 scores
-               
-                if self.game_state.score1 == POINTS_TO_WIN:
-                    self.game_state.state = 'gameover'
+		# Right wall (Paddle 2)
+        elif ballX >= x2 + paddleWidth:
+              self.game_state.score1 += 1  # Player 1 scores
+              if self.game_state.score1 == self.game_state.finalScore:
+                 self.game_state.state = 'gameover'
+              else:
+                 ballX = width // 2 - ballWidth // 2
+                 ballY = height // 2 - ballHeight // 2
 
+        elif ((ballY <= y2 + paddleHeight and ballY >= y2 and ballX + ballWidth >= x2) or
+	  		  (ballY <= y1 + paddleHeight and ballY >= y1 and ballX - paddleWidth <= x1 )):
+                  ballSpeedX = -ballSpeedX
+                  if (ballX > x1 and ballX < x1 + paddleWidth):
+                         ballX = x1 + paddleWidth + 1
+
+                  if(ballX > x2 and ballX < x2 + paddleWidth):
+                         ballX = x2 - ballWidth - 1
+
+                  if((ballY > y1 + paddleHeight * 0.75 or ballY > y2 + paddleHeight * 0.75) and ballSpeedY < 3):
+                         ballSpeedY += 1
+
+                  if((ballY < y1 + paddleHeight * 0.25 or ballY < y2 + paddleHeight * 0.25) and ballSpeedY > -3):
+                         ballSpeedY -= 1
         self.game_state.ballX = ballX
         self.game_state.ballY = ballY
         self.game_state.ballSpeedX = ballSpeedX
         self.game_state.ballSpeedY = ballSpeedY
-        print("Ball position after:", self.game_state.ballX, self.game_state.ballY)
 
     def reset_game(self, match):
         self.game_state = GameStatus(
-            id = 0,
+            v = match['v'],
+            key = match['key'],
+			ballWidth = match['ballWidth'],
+			ballHeight  = match['ballHeight'],
+			playerWidth = match['playerWidth'],
+			playerHeight = match['playerHeight'],
+			finalScore = match['finalScore'],
             x1 = match['x1'],
             y1 = match['y1'],
             score1 = 0, 
@@ -149,12 +189,19 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
             ballSpeedY = match['ballvy'],
             boundX= match['boundX'],
             boundY= match['boundY'],
-            state = match['state']
+            state = match['state'],
+            modality = match['modality']
         )
 
     def serialize_game_state(self):
         return {
-            'id': self.game_state.id,
+            'v': self.game_state.v,
+            'key': self.game_state.key,
+            'ballWidth': self.game_state.ballWidth,
+            'ballHeight': self.game_state.ballHeight,
+            'playerWidth': self.game_state.playerWidth,
+            'playerHeight': self.game_state.playerHeight,
+            'finalScore': self.game_state.finalScore,
             'x1': self.game_state.x1,
             'y1': self.game_state.y1,
             'score1': self.game_state.score1,
@@ -169,7 +216,8 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
             'ballSpeedY': self.game_state.ballSpeedY,
             'boundX': self.game_state.boundX,
             'boundY': self.game_state.boundY,
-            'state': self.game_state.state
+            'state': self.game_state.state,
+            'modality': self.game_state.modality
         }
 
     async def gameState_send(self, event):
@@ -209,7 +257,12 @@ class PongConsumerRemote(AsyncJsonWebsocketConsumer):
 
             # Initialize game state
             self.game_state = GameStatus(
-				id = 0,
+				v = 10,
+				ballWidth = 10,
+				ballHeight  = 10,
+				playerWidth = 15,
+				playerHeight = 80,
+				finalScore = 3,
 				x1 = 0,
 				y1 = 0,
 				score1 = 0,
@@ -224,7 +277,8 @@ class PongConsumerRemote(AsyncJsonWebsocketConsumer):
 				ballSpeedY = 0,
 				boundX = 0,
 				boundY = 0,
-            	state = 'start'
+            	state = 'start', 
+				modality = 'remote'
             )
 
     async def receive_json(self, content, **kwargs):

@@ -74,7 +74,7 @@ re-django:
 re-nginx:
 			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) up -d --no-deps --build nginx
 
-re:			fclean
+re:			clean
 			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) up -d --build
 			@printf "$(BLUE)==> $(CYAN)Transcendence rebuilt. 🔄\n$(RESET)"
 			@printf "\n$(BLUE)==> $(CYAN)Transcendence is running. ✅\n$(RESET)"

@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/29 18:31:25 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/05/31 00:45:48 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ let username = "jose";  //para quitar el login en pruebas
 let modality = "";
 let ctx;
 let canvas;
+let speed = 10;
 
 function initPlayPage() {
     renderGameOptions();
@@ -137,7 +138,15 @@ function resetTime(){
 
 let stateMatch = {
 	'id': 0,
-		
+
+	'v': speed,
+	'key': '',
+	'ballWidth': 10,
+	'ballHeight': 10,
+	'playerWidth': 15,
+	'playerHeight': 80,
+	'finalScore': 3,
+
 	'x1': 10,
 	'y1': 0,
 	'score1': 0,
@@ -206,18 +215,19 @@ function handleKeyDown(e) {
     const key = e.key;
 	
 	if (key == 'ArrowUp'){
-		stateMatch.state = "up1";
+		stateMatch.key = 'up1';
 		sendState();
-	}else if (key == "w" || key == "W"){
-		stateMatch.state = "up2";
+	}else if (stateMatch.modality == "local" && (key == "w" || key == "W")){
+		stateMatch.key = 'up2';
 		sendState();
 	}else if (key == 'ArrowDown'){
-		stateMatch.state = "down1";
+		stateMatch.key= 'down1';
 		sendState();
-	}else if (key == 's' || key == 'S'){
-		stateMatch.state = "down2",
+	}else if (stateMatch.modality == "local" && (key == 's' || key == 'S')){
+		stateMatch.key = 'down2';
 		sendState();
-	};
+	}else
+		stateMatch.key = '';
 }
 
 function startTimer() {
@@ -239,7 +249,7 @@ function pad(number) {
 function attachGameControlEventListeners() {
    	document.getElementById('pause-game').addEventListener('click', pauseGame);
     document.getElementById('quit-game').addEventListener('click', quitGame);
-	document.getElementById('pong-game').addEventListener("keydown", handleKeyDown);
+	document.addEventListener('keydown', handleKeyDown);
 }
 
 export default initPlayPage;
@@ -255,7 +265,6 @@ async function sendState(){
 		"event": "game_state",
 		"match": stateMatch,
 	}));
-	console.log("State sent");
 }
 
 async function startLocal() {
@@ -384,19 +393,26 @@ async function startRemote() {
 	}
 }
 
-let v = 10;
-let ballWidth = 10;
-let ballHeight = 10;
-let playerWidth = 15;
-let playerHeight = 80;
-let finalScore = 3;
-
 function startPong(){
 	console.log('Game initialized');
 	let words = document.getElementById('game-score').textContent.split(' ');
-
+	let vx = Math.floor(Math.random() * 10) + 5;
+	let vy = Math.floor(Math.random() * 7) + 5;
+	let signo = Math.floor(Math.random() * 2);
+	if (signo == 0) vx = -vx;
+	signo = Math.floor(Math.random() * 2);
+	if (signo == 0) vy = -vy;
+	
 	stateMatch = {
 		'id' : 0,
+
+		'v': speed,
+		'key' : '',
+		'ballWidth': 10,
+		'ballHeight': 10,
+		'playerWidth': 15,
+		'playerHeight': 80,
+		'finalScore': 3,
 		
 		'x1': 10,
 		'y1': canvas.height / 2 - 40,
@@ -410,8 +426,8 @@ function startPong(){
 				
 		'ballx': canvas.width / 2 - 5,
 		'bally': canvas.height / 2 - 5,
-		'ballvx': Math.floor(Math.random() * 7) - 3,
-		'ballvy': Math.floor(Math.random() * 7) - 3,
+		'ballvx': vx,
+		'ballvy': vy,
 	
 		'boundX': canvas.width,
 		'boundY': canvas.height,
@@ -436,36 +452,31 @@ function drawElements() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
    
     // Dibuja la bola
-    ctx.fillRect(stateMatch.ballx, stateMatch.bally, ballWidth, ballHeight);
-    console.log(`2. Ball drawn at (${stateMatch.ballx}, ${stateMatch.bally})`);
+    ctx.fillRect(stateMatch.ballx, stateMatch.bally, stateMatch.ballWidth, stateMatch.ballHeight);
 
     // Dibuja la red
     ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);
    
-	// Dibuja las paletas
-    ctx.fillRect(stateMatch.x1, stateMatch.y1, playerWidth, playerHeight);
-    ctx.fillRect(stateMatch.x2, stateMatch.y2, playerWidth, playerHeight);
+	// Dibuja las palas
+    ctx.fillRect(stateMatch.x1, stateMatch.y1, stateMatch.playerWidth, stateMatch.playerHeight);
+    ctx.fillRect(stateMatch.x2, stateMatch.y2, stateMatch.playerWidth, stateMatch.playerHeight);
     
-	// Actualiza el puntaje
-    const gameScore = document.getElementById('game-score');
-    if (gameScore) {
-        gameScore.innerHTML = 
-            `${stateMatch.name1} ${stateMatch.score1} - ${stateMatch.score2} ${stateMatch.name2}`;
-    }
+	// Actualiza la puntuación
+    document.getElementById('game-score').innerHTML = 
+		`${stateMatch.name1} ${stateMatch.score1} - ${stateMatch.score2} ${stateMatch.name2}`;
 }
 
 function gameOver(){
 	console.log('Game Over');
 	isPaused = true;
-	stateMatch.state = 'gameover';
 	let texto;
-	if (stateMatch.score1 == finalScore)
-		texto = "YOU WIN";
-	else
-		texto = "YOU LOSE";
+	if (stateMatch.score1 == stateMatch.finalScore)
+		texto = stateMatch.name1;
+	else 
+		texto = stateMatch.name2;
 
 	Swal.fire({
-		title: texto,
+		title: texto + " WIN",
 		confirmButtonColor: '#32B974',
 	}).then((result) => {	
 		if (result.isConfirmed){
@@ -542,15 +553,10 @@ function handleSocketMessage(e) {
 				"ballvy" : Math.floor(Math.random() * 7) - 3,
 			}));
 		}
-		drawElements();
-		loop();
-		setTimeout(waitMatch,3000);
 	}
 	
 	else if(data.event == "game_update"){
 		updateStateMatch(data.stateMatch);
-		console.log("1. Ball in x: ", stateMatch.ballx, " y: ", stateMatch.bally);
-		drawElements();
 		if (stateMatch.state == 'gameover'){
 			gameOver();
 		}
@@ -558,12 +564,11 @@ function handleSocketMessage(e) {
 
 	else if(data.event == "opponent_left" && stateMatch.state != 'quit'){
 		stateMatch.state = 'quit';
-		drawElements();
 		setTimeout(() => {
 			Swal.fire({
 				icon:  "info",
 				title:  "Opponent Left",
-				confirmButtonText: "Ok",
+				confirmButtonText: "OK",
 			}).then(e => window.location.href = "/")
 		}, 400);
 	}
@@ -573,8 +578,8 @@ function handleSocketMessage(e) {
 		gameOver();
 		Swal.fire({
 			icon: winner == currentName ?'success': "error",
-			title: winner == currentName ? "You win!" : "You lose!",
-			confirmButtonText: "Ok",
+			title: winner == currentName ? "YOU WIN!" : "YOU LOSE!",
+			confirmButtonText: "OK",
 		}).then((result) => { if (result.isConfirmed) {
 				window.location.href = "/";
 		}});
@@ -582,9 +587,16 @@ function handleSocketMessage(e) {
 }
 
 function updateStateMatch(newState) {
-    Object.keys(newState).forEach(key => {
-        if (stateMatch.hasOwnProperty(key)) {
-            stateMatch[key] = newState[key];
-        }
-    });
+	stateMatch.x1 = newState.x1;
+	stateMatch.y1 = newState.y1;
+	stateMatch.score1 = newState.score1;
+	stateMatch.x2 = newState.x2;
+	stateMatch.y2 = newState.y2;
+	stateMatch.score2 = newState.score2;
+	stateMatch.ballx = newState.ballX;
+	stateMatch.bally = newState.ballY;
+	stateMatch.ballvx = newState.ballSpeedX;
+	stateMatch.ballvy = newState.ballSpeedY;
+	stateMatch.state = newState.state;
+	drawElements();
 }
