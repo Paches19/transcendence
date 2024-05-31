@@ -65,3 +65,19 @@ python manage.py migrate
 
 python manage.py runserver
 ```
+
+# Database schema
+
+In the project database we store the aplication information in 5 tables:
+
+-   `user`: Stores user information for their login credentials as well as user statistics from matches
+
+-   `match`: Record of all matches played, indicating what users participated, their respective score and if the match was from a tournament
+
+-   `userTournament`: Table that stores what users are participating in a tournament
+
+-   `tournament`: Table that stores the information of the tournaments, indicating the status of the tournament, the number of participants and the date of the tournament
+
+-   `friend`: Table that stores the relationships between users, indicating if they are friends or if they have a pending friend request
+
+![Untitled Diagram drawio](https://github.com/Paches19/transcendence/assets/21156058/0e5becb7-2ff0-4227-a7c8-8d8ecd153a66)

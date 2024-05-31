@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:10 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/28 10:04:57 by alaparic         ###   ########.fr        #
+#    Updated: 2024/05/31 08:03:56 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -27,7 +27,7 @@ class Match(models.Model):
     pointsUser1 = models.IntegerField(default=0)
     pointsUser2 = models.IntegerField(default=0)
     date = models.DateField()
-    tournamentId = models.ForeignKey(
+    tournament = models.ForeignKey(
         'Tournament', on_delete=models.CASCADE, null=True, blank=True, default=None)
 
 
