@@ -3,6 +3,34 @@ from django.contrib.auth.models import AbstractUser
 import datetime
 
 # Create your models here.
+class GameStatus(models.Model):
+    id = models.IntegerField(primary_key=True)
+    v = models.IntegerField(default=0)
+    key = models.CharField(max_length=10, default='')
+    ballWidth = models.IntegerField(default=10)
+    ballHeight = models.IntegerField(default=10)
+    playerWidth = models.IntegerField(default=15)
+    playerHeight = models.IntegerField(default=80)
+    finalScore = models.IntegerField(default=3)
+    x1 = models.IntegerField(default=0)
+    y1 = models.IntegerField(default=0)
+    score1 = models.IntegerField(default=0)
+    name1 = models.CharField(max_length=40, default='Player1')
+    x2 = models.IntegerField(default=0)
+    y2 = models.IntegerField(default=0)
+    score2 = models.IntegerField(default=0)
+    name2 = models.CharField(max_length=40, default='Player2')
+    ballX = models.IntegerField(default=0)
+    ballY = models.IntegerField(default=0)
+    ballSpeedX = models.IntegerField(default=0)
+    ballSpeedY = models.IntegerField(default=0)
+    boundX = models.IntegerField(default=0)
+    boundY = models.IntegerField(default=0)
+    state = models.CharField(max_length=40, default='waiting')
+    modality = models.CharField(default='')
+
+    def __str__(self):
+        return f"GameStatus {self.id}"
 
 class Match(models.Model):
     matchID = models.AutoField(primary_key=True)

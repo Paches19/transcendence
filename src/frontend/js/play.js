@@ -6,21 +6,16 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/02 12:57:43 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/03 00:14:24 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { isLoggedIn, getUsernameFromToken } from "./auth.js";
 //import router from "./main.js";
 
-let isPaused = true;
-let seconds = 0;
-let opponent;
-let username = "jose";  //para quitar el login en pruebas
 let modality = "";
 let ctx;
 let canvas;
-let speed = 10;
 
 function initPlayPage() {
     renderGameOptions();
@@ -43,13 +38,19 @@ function renderGameOptions() {
 }
 
 function startGame(m) {
-	console.log("mode = " + m);
+	console.log("play mode = " + m);
 	modality = m;
 
 	// Quitar comentarios para que pida login, de momento es para pruebas
-	
+
+	showGameScreen();
 	//if (isLoggedIn()) {
-		showGameScreen();
+		if (modality == 'remote'){
+			startPongRemote();
+		}else{
+			startPongLocal();
+			startTimer();
+		}
 	//}  else {
       //  router.route("/login");
    // }
@@ -63,15 +64,17 @@ function attachEventListeners() {
 }
 
 function showGameScreen() {
+	let opponent
 	if (modality == 'solo'){
 		opponent = "AI";
 	}else if (modality == 'remote'){
-		opponent = "Remote";
+		opponent = "(Waiting...)";
 	}else
 		opponent = "Human";
 		
     const mainContent = document.getElementById('main-content');
    // const username = getUsernameFromToken();
+   	const username = "jose" //para pruebas
     mainContent.innerHTML = `
     <div class="container mt-5 game-container">
         <div class="row align-items-center">
@@ -93,14 +96,8 @@ function showGameScreen() {
         </div>
     </div>
     `;
-    initializeGame();
+	initializeGame();
 	attachGameControlEventListeners();
-	if (modality == 'remote'){
-		startRemote();
-	}else{
-		startLocal();
-	}
-	startPong();
 }
 
 function initializeGame() {
@@ -109,10 +106,9 @@ function initializeGame() {
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
         ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#FFF';
+        ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 		resetTime();
-        startTimer();
     }
 }
 
@@ -127,111 +123,14 @@ function resizeCanvas() {
 }
 
 let gameInterval;
-
-function resetTime(){
-	const timerDisplay = document.getElementById("game-timer");
-	clearInterval(gameInterval);
-	seconds = 0;
-	timerDisplay.textContent = `00:00`;
-	isPaused = false;
-}
-
-let stateMatch = {
-	'id': 0,
-
-	'v': speed,
-	'key': '',
-	'ballWidth': 10,
-	'ballHeight': 10,
-	'playerWidth': 15,
-	'playerHeight': 80,
-	'finalScore': 3,
-
-	'x1': 10,
-	'y1': 0,
-	'score1': 0,
-	'name1': 'Player 1',
-
-	'x2': 0,
-	'y2': 0,
-	'score2': 0,
-	'name2': 'Player 2',
-
-	'ballx': 0,
-	'bally': 0,
-	'ballvx': 0,
-	'ballvy': 0,
-
-	'boundX': 0,
-	'boundY': 0,
-
-	'state': 'waiting',
-	'modality': '',
-}
-
-function pauseGame() {
-	let textButton = document.getElementById("pause-game");
-	if (textButton.textContent == "Pause"){
-		textButton.textContent = "Resume";
-		isPaused = true;
-		stateMatch.state = 'pause';
-		sendState(); //enviar al servidor que se ha pausado el juego
-	}
-	else{
-		textButton.textContent = "Pause";
-		isPaused = false;
-		stateMatch.state = 'playing';
-		sendState(); //enviar al servidor que se sigue jugando
-	}
-}
-
-function quitGame() {
-	stateMatch.state = 'pause';
-    sendState(); //enviar al servidor que se ha pausado el juego
-	isPaused = true;
-	Swal.fire({
-		confirmButtonColor: '#32B974',
-		title: "Are you sure ?",
-		showDenyButton: true,
-		showCancelButton: false,
-		confirmButtonText: "Yes",
-		denyButtonText: `No`
-	  }).then((result) => {
-			if (result.isConfirmed) {
-				stateMatch.state = 'quit';
-				sendState(); //enviar al servidor que se ha salido del juego
-				initPlayPage();
-				return;
-			}else if (result.isDenied){
-				stateMatch.state = 'playing';
-				isPaused = false;
-				sendState(); //enviar al servidor que se sigue jugando
-			}});
-
-}
-
-function handleKeyDown(e) {
-	console.log("Key pressed: ", e.key);
-    const key = e.key;
-	
-	if (key == 'ArrowUp'){
-		stateMatch.key = 'up1';
-		sendState();
-	}else if (stateMatch.modality == "local" && (key == "w" || key == "W")){
-		stateMatch.key = 'up2';
-		sendState();
-	}else if (key == 'ArrowDown'){
-		stateMatch.key= 'down1';
-		sendState();
-	}else if (stateMatch.modality == "local" && (key == 's' || key == 'S')){
-		stateMatch.key = 'down2';
-		sendState();
-	}else
-		stateMatch.key = '';
-}
+let isPaused = true;
+let seconds = 0;
 
 function startTimer() {
     const timerDisplay = document.getElementById("game-timer");
+	
+	function pad(number) {return number < 10 ? '0' + number : number;}
+	
     gameInterval = setInterval(() => {
 		if (!isPaused){
 	        seconds++;
@@ -242,8 +141,12 @@ function startTimer() {
 	}, 1000);
 }
 
-function pad(number) {
-    return number < 10 ? '0' + number : number;
+function resetTime(){
+	const timerDisplay = document.getElementById("game-timer");
+	clearInterval(gameInterval);
+	seconds = 0;
+	timerDisplay.textContent = `00:00`;
+	isPaused = false;
 }
 
 function attachGameControlEventListeners() {
@@ -255,44 +158,145 @@ function attachGameControlEventListeners() {
 export default initPlayPage;
 export {initPlayPage, resetTime};
 
-let socket;
+let speed = 10; //para mover las palas (desplazamiento vertical)
+let stateMatch;
 
-async function sendState(){
-	if (socket){
-		while (socket.readyState !== WebSocket.OPEN) {
-			await new Promise(resolve => setTimeout(resolve, 100));  // Esperar 100ms antes de volver a comprobar
+function handleKeyDown(e) {
+    const key = e.key;
+	
+	if (key == 'ArrowUp' || key == 'ArrowDown' ||
+	(stateMatch.modality == "local" && (key == "w" || key == "W")) ||
+	(stateMatch.modality == "local" && (key == "s" || key == "S"))){
+		sendKey(key);	
+	}
+
+}
+
+function pauseGame() {
+	let textButton = document.getElementById("pause-game");
+	if (textButton.textContent == "Pause"){
+		textButton.textContent = "Resume";
+		isPaused = true;
+		sendState('pause'); //enviar al servidor que se ha pausado el juego
+	}
+	else{
+		textButton.textContent = "Pause";
+		isPaused = false;
+		sendState('playing'); //enviar al servidor que se sigue jugando
+	}
+}
+
+function quitGame() {
+    isPaused = true;
+	sendState('pause'); //enviar al servidor que se ha pausado el juego
+	Swal.fire({
+		confirmButtonColor: '#32B974',
+		title: "Are you sure ?",
+		showDenyButton: true,
+		showCancelButton: false,
+		confirmButtonText: "Yes",
+		denyButtonText: `No`
+	  }).then((result) => {
+			if (result.isConfirmed) {
+				sendState('quit'); //enviar al servidor que se ha salido del juego
+				initPlayPage();
+				return;
+			}else if (result.isDenied){
+				isPaused = false;
+				sendState('playing'); //enviar al servidor que se sigue jugando
+			}});
+
+}
+
+function serializeStateMatch() {
+    return JSON.stringify({
+        id: stateMatch.id,
+        v: stateMatch.v || speed,
+        key: stateMatch.key || '',
+        ballWidth: stateMatch.ballWidth || 10,
+        ballHeight: stateMatch.ballHeight || 10,
+        playerWidth: stateMatch.playerWidth || 15,
+        playerHeight: stateMatch.playerHeight || 80,
+        finalScore: stateMatch.finalScore || 3,
+        x1: stateMatch.x1 || 0,
+        y1: stateMatch.y1 || 0,
+        score1: stateMatch.score1 || 0,
+        name1: stateMatch.name1 || 'Player1',
+        x2: stateMatch.x2 || 0,
+        y2: stateMatch.y2 || 0,
+        score2: stateMatch.score2 || 0,
+        name2: stateMatch.name2 || 'Player2',
+        ballX: stateMatch.ballX || 0,
+        ballY: stateMatch.ballY || 0,
+        ballSpeedX: stateMatch.ballSpeedX || 0,
+        ballSpeedY: stateMatch.ballSpeedY || 0,
+        boundX: stateMatch.boundX || 0,
+        boundY: stateMatch.boundY || 0,
+        state: stateMatch.state || 'waiting',
+        modality: stateMatch.modality || ''
+    });
+}
+
+async function sendKey(keypressed){
+	stateMatch.key = keypressed;
+	try {
+		const response = await fetch('http://localhost:8000/api/key_press', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json',},
+			body:JSON.stringify({key : keypressed}),
+		});
+		if (!response.ok) {
+			throw new Error('Failed to move paddles');
 		}
-		socket.send(JSON.stringify({
-			"event": "game_state",
-			"match": stateMatch,
-		}));
+		else{
+			console.log("Key sent: ", key);
+		}
+	} catch (error) {
+		console.error('Error moving paddles:', error);
 	}
 }
 
-async function startLocal() {
-	socket = new WebSocket("ws://localhost:8000/ws/game/"+ username + "/");
-	socket.onopen = (e) => {
-        console.log("Connection established in local mode");
-    };
-
-    socket.onclose = (e) => {
-        console.error('Game socket closed unexpectedly: ', e);
-    };
-
-    socket.onerror = (e) => {
-        console.error('WebSocket error: ', e);
-    };
-
-    socket.onmessage = (e) => {
-        handleSocketMessage(e);
-    };
-	while (socket.readyState != WebSocket.OPEN){
-		await new Promise(resolve => setTimeout(resolve, 1000));
+async function sendState(msg){
+	stateMatch.state = msg
+	try {
+		const response = await fetch('http://localhost:8000/api/state_game', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json',},
+			body: JSON.stringify({ match: stateMatch }),
+		});
+		if (!response.ok) {
+			throw new Error('Failed to start game');
+		}
+		else{
+			console.log("State sent: ", msg);
+		}
+	} catch (error) {
+		console.error('Error starting game:', error);
 	}
-	console.log("Socket connected in local mode");
 }
 
-async function startRemote() {
+async function sendStart(){
+	console.log("1. Sending start game");
+
+	try {
+		const response = await fetch('http://localhost:8000/api/start_game', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json',},
+			body: serializeStateMatch(),
+		});
+		if (!response.ok) {
+			throw new Error('Failed to start game');
+		}
+		else{
+			console.log("2. State sent ");
+		}
+	} catch (error) {
+		console.error('Error starting game:', error);
+	}
+}
+
+async function startPongRemote() {
+	//Preguntamos si queremos crear o unirnos a una partida
 	const inputOptions = new Promise((resolve) => {
 		setTimeout(() => {
 		  resolve({
@@ -300,9 +304,8 @@ async function startRemote() {
 			"join": "Join",
 		  });
 		}, 1000);
-	  });
-	  
-	  const { value: mode } = await Swal.fire({
+	});
+	const { value: mode } = await Swal.fire({
 		title: "Select mode",
 		input: "radio",
 		inputOptions,
@@ -311,37 +314,30 @@ async function startRemote() {
 			return "You need to choose something!";
 		  }
 		}
-	  });
+	});
 	  
-	  if (mode == "new") {
+	if (mode == "new") {
 		var randomId = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000);
-		
 		try {
-			const apiUrl = 'http://localhost:8000/api/newmatch';
+			const apiUrl = 'http://localhost:8000/api/new_match';
 			const response = await fetch(apiUrl, {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					id: randomId,
-				}),
+				headers: {'Content-Type': 'application/json',},
+				body: JSON.stringify({id: randomId,}),
 			});
-	
 			const data = await response.json();
-			
 			if (response.ok && data.msg == "Match created"){
-				socket = new WebSocket("ws://localhost:8000/ws/game/"+ randomId + "/");
 				Swal.fire({
 					icon: "success",
-					title: "Match created with code: " + randomId,
+					title: "New match code: " + randomId,
 				});
-				configureSocketEvents();
 			}else {
-				console.error("Error al guardar el id remoto: ", response.status);
+				Swal.fire({
+					icon: "error",
+					title: response.status + "Match already exist ",				});
 			}
 		} catch(error) {
-			console.error("Error en la solicitud fetch:", error);
+			console.error("Fetch error: ", error);
 			return false;
 		}
 	
@@ -352,51 +348,40 @@ async function startRemote() {
 			inputPlaceholder: "Match code",
 			inputValidator: (value) => {
 				if (!value) {
-					return "You need to write something!";
+					return "Please, write a code!";
 				}
 			}
 		});
 		
 		try{
-			const apiUrl = 'http://localhost:8000/api/joinmatch';
+			const apiUrl = 'http://localhost:8000/api/join_match';
 			const response = await fetch(apiUrl, {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					id: matchId,
-				}),
+				headers: {'Content-Type': 'application/json',},
+				body: JSON.stringify({id: matchId,}),
 			});
 	
 			const data = await response.json();
 		
 			if (response.ok && data.msg === "Match joined") {
-				socket = new WebSocket("ws://localhost:8000/ws/game/"+ randomId + "/");
-				Swal.fire({
-					icon: "success",
-					title: "Joining to match code: " + randomId,
-				});
-				configureSocketEvents();
+				Swal.fire("Joined !");
 			} else{
-				console.error("Match no encontrado: ", response.status);
 				Swal.fire({
 					icon: "error",
-					title: "Match not found",
+					title: "Match not found" + response.status,
 				});
 			}
 		} catch(error) {
-			console.error("Error en la solicitud fetch: ", error);
+			console.error("fetch request error: ", error);
 			return false;
 		}
-
-	} else {
-		console.log("No se ha seleccionado ninguna opción");
 	}
 }
 
-function startPong(){
-	console.log('Game initialized');
+function startPongLocal(){
+	console.log('game initialized');
+
+	ctx.fillStyle = '#FFF';
 	let words = document.getElementById('game-score').textContent.split(' ');
 	let vx = Math.floor(Math.random() * 10) + 5;
 	let vy = Math.floor(Math.random() * 7) + 5;
@@ -407,7 +392,6 @@ function startPong(){
 	
 	stateMatch = {
 		'id' : 0,
-
 		'v': speed,
 		'key' : '',
 		'ballWidth': 10,
@@ -426,10 +410,10 @@ function startPong(){
 		'score2': 0,
 		'name2': words[4],
 				
-		'ballx': canvas.width / 2 - 5,
-		'bally': canvas.height / 2 - 5,
-		'ballvx': vx,
-		'ballvy': vy,
+		'ballX': canvas.width / 2 - 5,
+		'ballY': canvas.height / 2 - 5,
+		'ballSpeedX': vx,
+		'ballSpeedY': vy,
 	
 		'boundX': canvas.width,
 		'boundY': canvas.height,
@@ -437,35 +421,29 @@ function startPong(){
 		'state': 'waiting',
 		'modality': modality,
 	}
-
 	drawElements();
-	stateMatch.state = 'start';
-	sendState();  //enviar al servidor que se ha iniciado el juego
-	// Aquí esperamos un breve momento antes de cambiar el estado a 'playing'
-	setTimeout(() => {
-		stateMatch.state = 'playing';
-		sendState(); // Enviar al servidor que se está jugando
-		isPaused = false;
-	}, 100); // Espera 100ms antes de cambiar a 'playing'
+	sendStart();
+	isPaused = false;
+	sendState('playing');
+	while (stateMatch.state != 'gameover' && stateMatch.state != 'quit'){
+		if (stateMatch.state == 'playing'){
+			updateStateMatch();
+			drawElements();
+		}
+	}
+	if (stateMatch.state == 'gameover'){
+		gameOver();
+	}
 }
 
 function drawElements() {
-    // Limpia el canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-   
-    // Dibuja la bola
-    ctx.fillRect(stateMatch.ballx, stateMatch.bally, stateMatch.ballWidth, stateMatch.ballHeight);
-
-    // Dibuja la red
-    ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);
-   
-	// Dibuja las palas
-    ctx.fillRect(stateMatch.x1, stateMatch.y1, stateMatch.playerWidth, stateMatch.playerHeight);
-    ctx.fillRect(stateMatch.x2, stateMatch.y2, stateMatch.playerWidth, stateMatch.playerHeight);
-    
-	// Actualiza la puntuación
+    ctx.clearRect(0, 0, canvas.width, canvas.height);// Limpia el canvas
+    ctx.fillRect(stateMatch.ballX, stateMatch.ballY, stateMatch.ballWidth, stateMatch.ballHeight);// Dibuja la bola
+    ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
+    ctx.fillRect(stateMatch.x1, stateMatch.y1, stateMatch.playerWidth, stateMatch.playerHeight);// Dibuja la pala izuierda
+    ctx.fillRect(stateMatch.x2, stateMatch.y2, stateMatch.playerWidth, stateMatch.playerHeight);// Dibuja la pala derecha
     document.getElementById('game-score').innerHTML = 
-		`${stateMatch.name1} ${stateMatch.score1} - ${stateMatch.score2} ${stateMatch.name2}`;
+		`${stateMatch.name1} ${stateMatch.score1} - ${stateMatch.score2} ${stateMatch.name2}`;// Actualiza la puntuación
 }
 
 function gameOver(){
@@ -492,7 +470,7 @@ function gameOver(){
 			  }).then((result) => {
 				if (result.isConfirmed) {
 					resetTime();
-					startPong();
+					startLocalPong();
 				}else if (result.isDenied){
 					initPlayPage();
 					return;
@@ -500,105 +478,31 @@ function gameOver(){
 		};
 	});
 }
-	
-function configureSocketEvents(){
-	socket.onopen = (e) => {
-        console.log("Connection established");
-    };
 
-    socket.onclose = (e) => {
-        console.error('Game socket closed unexpectedly: ', e);
-    };
-
-    socket.onerror = (e) => {
-        console.error('WebSocket error: ', e);
-    };
-
-    socket.onmessage = (e) => {
-        handleSocketMessage(e);
-    };
-}
-
-function handleSocketMessage(e) {
-	const data = JSON.parse(e.data);
-	
-	if (data.event == "show_error"){
-		Swal.fire({
-			icon: "error",
-			title: data.error,
-		}).then(e => window.location.href = "/");
+async function updateStateMatch() {
+	const apiUrl = 'http://localhost:8000/api/update_game';
+	try{
+		const response = await fetch(apiUrl, {
+			method: 'GET',
+			headers: {'Content-Type': 'application/json',},
+		});
+	if (!response.ok) {
+		throw new Error('Failed to update game');
 	}
-	else if(data.event == "write_names"){
-		if (stateMatch.name1 == "" || stateMatch.name1 == "Waiting...") 
-			stateMatch.name1 = data.name1;
-		if (stateMatch.name2 == "" || stateMatch.name2 == "Waiting...")
-			stateMatch.name2 = data.name2;
-		stateMatch.ballvy = data.ballvy;
+	const newState = await response.json();
+	} catch (error) {
+		console.error('Error updating game:', error);
 	}
 	
-	else if(data.event == "game_start"){
-		player = data.player;
-		if (player == "1"){
-			stateMatch.name1 = playerName;
-			socket.send(JSON.stringify({
-			"event": 'write_names',
-				"name1": playerName,
-				"name2": "Waiting...",
-				"ballvy" : 0,
-			}));
-		}else{
-			stateMatch.name2 = playerName;
-			socket.send(JSON.stringify({
-				"event": 'write_names',
-				"name1": "",
-				"name2": playerName,
-				"ballvy" : Math.floor(Math.random() * 7) - 3,
-			}));
-		}
-	}
-	
-	else if(data.event == "game_update"){
-		updateStateMatch(data.stateMatch);
-		if (stateMatch.state == 'gameover'){
-			gameOver();
-		}
-	}
-
-	else if(data.event == "opponent_left" && stateMatch.state != 'quit'){
-		stateMatch.state = 'quit';
-		setTimeout(() => {
-			Swal.fire({
-				icon:  "info",
-				title:  "Opponent Left",
-				confirmButtonText: "OK",
-			}).then(e => window.location.href = "/")
-		}, 400);
-	}
-	
-	else if (data.event == "game_over"){
-		winner = data.winner;
-		gameOver();
-		Swal.fire({
-			icon: winner == currentName ?'success': "error",
-			title: winner == currentName ? "YOU WIN!" : "YOU LOSE!",
-			confirmButtonText: "OK",
-		}).then((result) => { if (result.isConfirmed) {
-				window.location.href = "/";
-		}});
-	}
-}
-
-function updateStateMatch(newState) {
 	stateMatch.x1 = newState.x1;
 	stateMatch.y1 = newState.y1;
 	stateMatch.score1 = newState.score1;
 	stateMatch.x2 = newState.x2;
 	stateMatch.y2 = newState.y2;
 	stateMatch.score2 = newState.score2;
-	stateMatch.ballx = newState.ballX;
-	stateMatch.bally = newState.ballY;
-	stateMatch.ballvx = newState.ballSpeedX;
-	stateMatch.ballvy = newState.ballSpeedY;
+	stateMatch.ballX = newState.ballX;
+	stateMatch.ballY = newState.ballY;
+	stateMatch.ballSpeedX = newState.ballSpeedX;
+	stateMatch.ballSpeedY = newState.ballSpeedY;
 	stateMatch.state = newState.state;
-	drawElements();
 }

@@ -4,16 +4,15 @@ from django.contrib.auth import authenticate, login, logout
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
 from ninja.params import Query
-from .models import User, Friend, Tournament, UserTournament
+from .models import User, Friend, Tournament, UserTournament, GameStatus
 from .middleware import login_required, require_auth
 from .populate_data import *
 from typing import Optional
 from .schema import (ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema, SingleTournamentSchema,
                      AddFriendSchema, TournamentSchema, UserNameSchema,
-                     UserSchema, SuccessSchema, TournamentCreateSchema, 
-                     MatchCreateSchema)
-from game.models import MatchCreate, GameStatus
+                     UserSchema, SuccessSchema, TournamentCreateSchema, GameStatusSchema)
+from .game_logic import *
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -23,38 +22,66 @@ app = NinjaAPI(
     description="API for the ft_transcendence project made with the django-ninja library.",
 )
 
-@app.get("/game", tags=['Game'])
-def game(request):
-	return {"msg": "pong"}
+""" Game """
 
-@app.post("/newmatch", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
-def saveIdRemote(request, match: MatchCreateSchema):
+@app.post('key_press', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+def key_press(request, key: str):
+	try:
+		move_paddles(key)
+		return 200, {"msg": "Paddle moved"}
+	except Exception as e:
+		return 400, {"msg": "Error moving paddle : {str(e)}"}
+
+@app.post('start_game', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+def start_game(request, match: GameStatusSchema):
+	try:
+		reset_game(match)
+		return 200, {"msg": "Game started"}
+	except Exception as e:
+		return 400, {"msg": "Error starting game : {str(e)}"}
+ 
+@app.post('state_game',  response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+def state_game(request, msg: str):
     try:
-        MatchCreate.objects.get(id=match.id)
+        change_state(msg)
+        return 200, {"msg": "State game posted successfully"}
+    except:
+	    return {"msg": "Error posting state game"}
+
+@app.get('update_game', response=GameStatusSchema, tags=['Game'])
+def update_game(request):
+	return get_game_state()
+
+""" Match """
+
+@app.post("new_match", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
+def saveIdRemote(request, match: GameStatusSchema):
+    try:
+        print("Comprobando si existe Match ID: ", match.id)
+        GameStatus.objects.get(id=match.id)
         return 400, {"error_msg": "Match already exists"}
-    except MatchCreate.DoesNotExist:
-        MatchCreate.objects.create(id=match.id)
+    except GameStatus.DoesNotExist:
+        GameStatus.objects.create(id=match.id)
         return {"msg": "Match created"}
     
-@app.post("/joinmatch", response=SuccessSchema, tags=['Match'])
-def getMatch(request, match: MatchCreateSchema):
+@app.post("join_match", response=SuccessSchema, tags=['Match'])
+def getMatch(request, match:GameStatusSchema):
 	try:
-		MatchCreate.objects.get(id=match.id)
+		GameStatus.objects.get(id=match.id)
 		return {"msg": "Match joined"}
-	except MatchCreate.DoesNotExist:
+	except GameStatus.DoesNotExist:
 		return 400, {"error_msg": "Match does not exist"}
 
-@app.post("/deletematch", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
-def deleteMatch(request, match: MatchCreateSchema):
+@app.post("delete_match", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
+def deleteMatch(request, match: GameStatusSchema):
 	try:
-		tmpmatch = MatchCreate.objects.get(id=match.id)
+		tmpmatch = GameStatus.objects.get(id=match.id)
 		tmpmatch.delete()
 		return 200, {"msg": "Match deleted"}
-	except MatchCreate.DoesNotExist:
+	except GameStatus.DoesNotExist:
 		return 400, {"error_msg": "Match does not exist"}
 
 """ Auth """
-
 
 @app.post("auth/register", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Auth'])
 def create_user(request, user_in: UserRegisterSchema):

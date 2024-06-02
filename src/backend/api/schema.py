@@ -28,27 +28,33 @@ class FriendSchema(Schema):
 
 
 """ Match schemas """
-class MatchCreateSchema(Schema):
-    id: int
 
+class GameStatusSchema(Schema):
+	id: int
+	v: int = 0
+	key: str = ''
+	ballWidth: int = 10
+	ballHeight: int = 10
+	playerWidth: int = 15
+	playerHeight: int = 80
+	finalScore: int = 3
+	x1: int = 0
+	y1: int = 0
+	score1: int = 0
+	name1: str = 'Player1'
+	x2: int = 0
+	y2: int = 0
+	score2: int = 0
+	name2: str = 'Player2'
+	ballX: int = 0
+	ballY: int = 0
+	ballSpeedX: int = 0
+	ballSpeedY: int = 0
+	boundX: int = 0
+	boundY: int = 0
+	state: str = 'waiting'
+	modality: str = ''
 
-class MatchSchema(Schema):
-    user1: int
-    y1: int
-    pointsUser1: int = 0
-    
-    user2: int
-    y2: int
-    pointsUser2: int = 0
-
-    ball_x: int
-    ball_y: int
-    ball_speed_x: int
-    ball_speed_y: int
-    
-    date: str = datetime.date.today().isoformat()
-    tournamentId: int = None
-    
 """ User schemas """
 
 class UserSchema(Schema):
@@ -63,7 +69,7 @@ class UserSchema(Schema):
     tournamentsPlayed: int
     tournamentsWon: int
     friends: List[FriendSchema]
-    matches: List[MatchSchema]
+    matches: List[GameStatusSchema]
 
 
 class UserUpdateSchema(Schema):
