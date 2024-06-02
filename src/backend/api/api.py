@@ -13,7 +13,7 @@ from .schema import (ErrorSchema, UserUpdateSchema,
                      AddFriendSchema, TournamentSchema, UserNameSchema,
                      UserSchema, SuccessSchema, TournamentCreateSchema, 
                      MatchCreateSchema)
-from game.models import GameStatus
+from game.models import MatchCreate, GameStatus
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -30,27 +30,27 @@ def game(request):
 @app.post("/newmatch", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
 def saveIdRemote(request, match: MatchCreateSchema):
     try:
-        GameStatus.objects.get(id=match.id)
+        MatchCreate.objects.get(id=match.id)
         return 400, {"error_msg": "Match already exists"}
-    except GameStatus.DoesNotExist:
-        GameStatus.objects.create(id=match.id)
+    except MatchCreate.DoesNotExist:
+        MatchCreate.objects.create(id=match.id)
         return {"msg": "Match created"}
     
 @app.post("/joinmatch", response=SuccessSchema, tags=['Match'])
 def getMatch(request, match: MatchCreateSchema):
 	try:
-		GameStatus.objects.get(id=match.id)
+		MatchCreate.objects.get(id=match.id)
 		return {"msg": "Match joined"}
-	except GameStatus.DoesNotExist:
+	except MatchCreate.DoesNotExist:
 		return 400, {"error_msg": "Match does not exist"}
 
 @app.post("/deletematch", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
 def deleteMatch(request, match: MatchCreateSchema):
 	try:
-		tmpmatch = GameStatus.objects.get(id=match.id)
+		tmpmatch = MatchCreate.objects.get(id=match.id)
 		tmpmatch.delete()
 		return 200, {"msg": "Match deleted"}
-	except GameStatus.DoesNotExist:
+	except MatchCreate.DoesNotExist:
 		return 400, {"error_msg": "Match does not exist"}
 
 """ Auth """

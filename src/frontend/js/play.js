@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/31 00:45:48 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/02 12:57:43 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -258,13 +258,15 @@ export {initPlayPage, resetTime};
 let socket;
 
 async function sendState(){
-	while (socket.readyState !== WebSocket.OPEN) {
-		await new Promise(resolve => setTimeout(resolve, 100));  // Esperar 100ms antes de volver a comprobar
+	if (socket){
+		while (socket.readyState !== WebSocket.OPEN) {
+			await new Promise(resolve => setTimeout(resolve, 100));  // Esperar 100ms antes de volver a comprobar
+		}
+		socket.send(JSON.stringify({
+			"event": "game_state",
+			"match": stateMatch,
+		}));
 	}
-	socket.send(JSON.stringify({
-		"event": "game_state",
-		"match": stateMatch,
-	}));
 }
 
 async function startLocal() {
@@ -373,7 +375,7 @@ async function startRemote() {
 				socket = new WebSocket("ws://localhost:8000/ws/game/"+ randomId + "/");
 				Swal.fire({
 					icon: "success",
-					title: "Joining to match code: " + code,
+					title: "Joining to match code: " + randomId,
 				});
 				configureSocketEvents();
 			} else{

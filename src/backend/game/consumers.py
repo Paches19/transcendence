@@ -17,8 +17,9 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
         print("Se ha conectado el jugador "+ self.room_name)
         # Initialize game state
         self.game_state = GameStatus(
+            id = 0,
             v = 10,
-            key = 'up1',
+            key = '',
 			ballWidth = 10,
 			ballHeight  = 10,
 			playerWidth = 15,
@@ -168,6 +169,7 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
 
     def reset_game(self, match):
         self.game_state = GameStatus(
+            id = match['id'],
             v = match['v'],
             key = match['key'],
 			ballWidth = match['ballWidth'],
@@ -195,6 +197,7 @@ class PongConsumerLocal(AsyncWebsocketConsumer):
 
     def serialize_game_state(self):
         return {
+            'id': self.game_state.id,
             'v': self.game_state.v,
             'key': self.game_state.key,
             'ballWidth': self.game_state.ballWidth,
@@ -257,6 +260,7 @@ class PongConsumerRemote(AsyncJsonWebsocketConsumer):
 
             # Initialize game state
             self.game_state = GameStatus(
+                id = 0,
 				v = 10,
 				ballWidth = 10,
 				ballHeight  = 10,

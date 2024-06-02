@@ -1,10 +1,16 @@
 from django.db import models
 
-class GameStatus:
-     def __init__(self, v, key, ballWidth, ballHeight, playerWidth, playerHeight, finalScore, x1, y1, score1, name1,
+class MatchCreate(models.Model):
+	id = models.IntegerField(primary_key=True)
+    
+	def __str__(self) -> str:
+		return f"{self.id}"
+
+class GameStatus(models.Model):
+     def __init__(self, id, v, key, ballWidth, ballHeight, playerWidth, playerHeight, finalScore, x1, y1, score1, name1,
                   x2, y2, score2, name2, ballX, ballY, ballSpeedX, ballSpeedY, boundX, boundY, state, modality) -> None:
-          self.id = models.AutoField(primary_key=True)
-          self.v =  v
+          self.id = id
+          self.v = v
           self.key = key
           self.ballWidth = ballWidth
           self.ballHeight = ballHeight
@@ -30,12 +36,3 @@ class GameStatus:
 
      def __str__(self) -> str:
            return f"{self.id}"
-
-     def getBallInfo(self):
-          return {
-               "ballX": self.ballX,
-               "ballY": self.ballY,
-               "ballSpeedX": self.ballSpeedX,
-               "ballSpeedY": self.ballSpeedY
-          }
-
