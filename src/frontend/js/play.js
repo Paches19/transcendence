@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/03 17:48:25 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/04 00:00:52 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,6 @@ function startGame(m) {
 			startPongRemote();
 		}else{
 			startPongLocal();
-			startTimer();
 		}
 	//}  else {
       //  router.route("/login");
@@ -167,9 +166,9 @@ function handleKeyDown(e) {
 	if (key == 'ArrowUp' || key == 'ArrowDown' ||
 	(stateMatch.modality == "local" && (key == "w" || key == "W")) ||
 	(stateMatch.modality == "local" && (key == "s" || key == "S"))){
-		sendKey(key);	
+		movePaddles(key);	
+		drawElements();
 	}
-
 }
 
 function pauseGame() {
@@ -177,18 +176,18 @@ function pauseGame() {
 	if (textButton.textContent == "Pause"){
 		textButton.textContent = "Resume";
 		isPaused = true;
-		sendState('pause'); //enviar al servidor que se ha pausado el juego
+		stateMatch.state = 'pause'; //enviar al servidor que se ha pausado el juego
 	}
 	else{
 		textButton.textContent = "Pause";
 		isPaused = false;
-		sendState('playing'); //enviar al servidor que se sigue jugando
+		stateMatch.state = 'playing'; //enviar al servidor que se sigue jugando
 	}
 }
 
 function quitGame() {
     isPaused = true;
-	sendState('pause'); //enviar al servidor que se ha pausado el juego
+	stateMatch.state =  'pause'; //enviar al servidor que se ha pausado el juego
 	Swal.fire({
 		confirmButtonColor: '#32B974',
 		title: "Are you sure ?",
@@ -198,100 +197,182 @@ function quitGame() {
 		denyButtonText: `No`
 	  }).then((result) => {
 			if (result.isConfirmed) {
-				sendState('quit'); //enviar al servidor que se ha salido del juego
+				stateMatch.state = 'quit'; //enviar al servidor que se ha salido del juego
 				initPlayPage();
 				return;
 			}else if (result.isDenied){
 				isPaused = false;
-				sendState('playing'); //enviar al servidor que se sigue jugando
+				stateMatch.state = 'playing'; //enviar al servidor que se sigue jugando
 			}});
-
 }
 
 function serializeStateMatch() {
     return JSON.stringify({
         id: stateMatch.id,
-        v: stateMatch.v || speed,
-        key: stateMatch.key || '',
-        ballWidth: stateMatch.ballWidth || 10,
-        ballHeight: stateMatch.ballHeight || 10,
-        playerWidth: stateMatch.playerWidth || 15,
-        playerHeight: stateMatch.playerHeight || 80,
-        finalScore: stateMatch.finalScore || 3,
-        x1: stateMatch.x1 || 0,
-        y1: stateMatch.y1 || 0,
-        score1: stateMatch.score1 || 0,
-        name1: stateMatch.name1 || 'Player1',
-        x2: stateMatch.x2 || 0,
-        y2: stateMatch.y2 || 0,
-        score2: stateMatch.score2 || 0,
-        name2: stateMatch.name2 || 'Player2',
-        ballX: stateMatch.ballX || 0,
-        ballY: stateMatch.ballY || 0,
-        ballSpeedX: stateMatch.ballSpeedX || 0,
-        ballSpeedY: stateMatch.ballSpeedY || 0,
-        boundX: stateMatch.boundX || 0,
-        boundY: stateMatch.boundY || 0,
-        state: stateMatch.state || 'waiting',
-        modality: stateMatch.modality || ''
+        v: stateMatch.v,
+        key: stateMatch.key,
+        ballWidth: stateMatch.ballWidth,
+        ballHeight: stateMatch.ballHeight,
+        playerWidth: stateMatch.playerWidth,
+        playerHeight: stateMatch.playerHeight,
+        finalScore: stateMatch.finalScore,
+        x1: stateMatch.x1,
+        y1: stateMatch.y1,
+        score1: stateMatch.score1,
+        name1: stateMatch.name1,
+        x2: stateMatch.x2,
+        y2: stateMatch.y2,
+        score2: stateMatch.score2,
+        name2: stateMatch.name2,
+        ballX: stateMatch.ballX,
+        ballY: stateMatch.ballY,
+        ballSpeedX: stateMatch.ballSpeedX,
+        ballSpeedY: stateMatch.ballSpeedY,
+        boundX: stateMatch.boundX,
+        boundY: stateMatch.boundY,
+        state: stateMatch.state,
+        modality: stateMatch.modality
     });
 }
 
-async function sendKey(keypressed){
+async function movePaddles(keypressed){
 	stateMatch.key = keypressed;
+	const apiUrl = 'http://localhost:8000/api/move_paddles';
 	try {
-		const response = await fetch('http://localhost:8000/api/key_press', {
+		const response = await fetch(apiUrl, {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json',},
-			body:JSON.stringify({key : keypressed}),
+			body: { "key"   : JSON.stringify({key : keypressed,}),
+					"match" : serializeStateMatch(), 
+			},
 		});
 		if (!response.ok) {
 			throw new Error('Failed to move paddles');
 		}
-		else{
-			console.log("Key sent: ", keypressed);
-		}
+		const data = await response.json();
+		stateMatch = data.match;
 	} catch (error) {
 		console.error('Error moving paddles:', error);
 	}
 }
 
-async function sendState(msg){
-	stateMatch.state = msg
-	console.log("Estado para mandar:", msg);
-	try {
-		const response = await fetch('http://localhost:8000/api/state_game', {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json',},
-			body: JSON.stringify({state: msg}),
-		});
-		if (!response.ok) {
-			throw new Error('Failed to change the state game');
-		}
-		else{
-			console.log("State sent: ", msg);
-		}
-	} catch (error) {
-		console.error('Error at change state:', error);
-	}
-}
-
-async function sendStart(){
-	try {
-		const response = await fetch('http://localhost:8000/api/start_game', {
+async function updateState() {
+	const apiUrl = 'http://localhost:8000/api/move_ball';
+	try{
+		const response = await fetch(apiUrl, {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json',},
 			body: serializeStateMatch(),
 		});
 		if (!response.ok) {
-			throw new Error('Failed to start game');
+			throw new Error('Failed to update game');
 		}
-		else{
-			console.log("Start sent ");
-		}
+		const data = await response.json();
+		stateMatch = data.match;
 	} catch (error) {
-		console.error('Error starting game:', error);
+		console.error('Error updating game:', error);
 	}
+}
+
+function startPongLocal(){
+	ctx.fillStyle = '#FFF';
+	let words = document.getElementById('game-score').textContent.split(' ');
+	let vx = Math.floor(Math.random() * 10) + 5;
+	let vy = Math.floor(Math.random() * 7) + 5;
+	let signo = Math.floor(Math.random() * 2);
+	if (signo == 0) vx = -vx;
+	signo = Math.floor(Math.random() * 2);
+	if (signo == 0) vy = -vy;
+	
+	stateMatch = {
+		'id' : 0,
+		'v': speed,
+		'key' : '',
+		'ballWidth': 10,
+		'ballHeight': 10,
+		'playerWidth': 15,
+		'playerHeight': 80,
+		'finalScore': 3,
+		
+		'x1': 10,
+		'y1': canvas.height / 2 - 40,
+		'score1': 0,
+		'name1': words[0],
+		
+		'x2': canvas.width - 25,
+		'y2': canvas.height / 2 - 40,
+		'score2': 0,
+		'name2': words[4],
+				
+		'ballX': canvas.width / 2 - 5,
+		'ballY': canvas.height / 2 - 5,
+		'ballSpeedX': vx,
+		'ballSpeedY': vy,
+	
+		'boundX': canvas.width,
+		'boundY': canvas.height,
+
+		'state': 'waiting',
+		'modality': modality,
+	}
+	drawElements();
+	isPaused = false;
+	startTimer();
+	stateMatch.state = 'playing';
+
+	while (stateMatch.state != 'gameover' && stateMatch.state != 'quit'){
+		if (stateMatch.state == 'playing'){
+			getState();
+			console.log("New state: ", stateMatch);
+			drawElements();
+		}
+	}
+	if (stateMatch.state == 'gameover'){
+		gameOver();
+	}
+}
+
+function drawElements() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);// Limpia el canvas
+    ctx.fillRect(stateMatch.ballX, stateMatch.ballY, stateMatch.ballWidth, stateMatch.ballHeight);// Dibuja la bola
+    ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
+    ctx.fillRect(stateMatch.x1, stateMatch.y1, stateMatch.playerWidth, stateMatch.playerHeight);// Dibuja la pala izuierda
+    ctx.fillRect(stateMatch.x2, stateMatch.y2, stateMatch.playerWidth, stateMatch.playerHeight);// Dibuja la pala derecha
+    document.getElementById('game-score').innerHTML = 
+		`${stateMatch.name1} ${stateMatch.score1} - ${stateMatch.score2} ${stateMatch.name2}`;// Actualiza la puntuación
+}
+
+function gameOver(){
+	console.log('Game Over');
+	isPaused = true;
+	let texto;
+	if (stateMatch.score1 == stateMatch.finalScore)
+		texto = stateMatch.name1;
+	else 
+		texto = stateMatch.name2;
+
+	Swal.fire({
+		title: texto + " WIN",
+		confirmButtonColor: '#32B974',
+	}).then((result) => {	
+		if (result.isConfirmed){
+			Swal.fire({
+				confirmButtonColor: '#32B974',
+				title: "Play again ?",
+				showDenyButton: true,
+				showCancelButton: false,
+				confirmButtonText: "Yes",
+				denyButtonText: `No`
+			  }).then((result) => {
+				if (result.isConfirmed) {
+					resetTime();
+					startLocalPong();
+				}else if (result.isDenied){
+					initPlayPage();
+					return;
+				}});
+		};
+	});
 }
 
 async function startPongRemote() {
@@ -374,135 +455,5 @@ async function startPongRemote() {
 			console.error("fetch request error: ", error);
 			return false;
 		}
-	}
-}
-
-async function startPongLocal(){
-	console.log('game initialized');
-
-	ctx.fillStyle = '#FFF';
-	let words = document.getElementById('game-score').textContent.split(' ');
-	let vx = Math.floor(Math.random() * 10) + 5;
-	let vy = Math.floor(Math.random() * 7) + 5;
-	let signo = Math.floor(Math.random() * 2);
-	if (signo == 0) vx = -vx;
-	signo = Math.floor(Math.random() * 2);
-	if (signo == 0) vy = -vy;
-	
-	stateMatch = {
-		'id' : 0,
-		'v': speed,
-		'key' : '',
-		'ballWidth': 10,
-		'ballHeight': 10,
-		'playerWidth': 15,
-		'playerHeight': 80,
-		'finalScore': 3,
-		
-		'x1': 10,
-		'y1': canvas.height / 2 - 40,
-		'score1': 0,
-		'name1': words[0],
-		
-		'x2': canvas.width - 25,
-		'y2': canvas.height / 2 - 40,
-		'score2': 0,
-		'name2': words[4],
-				
-		'ballX': canvas.width / 2 - 5,
-		'ballY': canvas.height / 2 - 5,
-		'ballSpeedX': vx,
-		'ballSpeedY': vy,
-	
-		'boundX': canvas.width,
-		'boundY': canvas.height,
-
-		'state': 'waiting',
-		'modality': modality,
-	}
-	drawElements();
-	await sendStart();
-	isPaused = false;
-	await sendState('playing');
-	
-	while (stateMatch.state != 'gameover' && stateMatch.state != 'quit'){
-		if (stateMatch.state == 'playing'){
-			await updateStateMatch();
-			console.log("Match: ", stateMatch);
-		}
-	}
-	if (stateMatch.state == 'gameover'){
-		gameOver();
-	}
-}
-
-function drawElements() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);// Limpia el canvas
-    ctx.fillRect(stateMatch.ballX, stateMatch.ballY, stateMatch.ballWidth, stateMatch.ballHeight);// Dibuja la bola
-    ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
-    ctx.fillRect(stateMatch.x1, stateMatch.y1, stateMatch.playerWidth, stateMatch.playerHeight);// Dibuja la pala izuierda
-    ctx.fillRect(stateMatch.x2, stateMatch.y2, stateMatch.playerWidth, stateMatch.playerHeight);// Dibuja la pala derecha
-    document.getElementById('game-score').innerHTML = 
-		`${stateMatch.name1} ${stateMatch.score1} - ${stateMatch.score2} ${stateMatch.name2}`;// Actualiza la puntuación
-}
-
-function gameOver(){
-	console.log('Game Over');
-	isPaused = true;
-	let texto;
-	if (stateMatch.score1 == stateMatch.finalScore)
-		texto = stateMatch.name1;
-	else 
-		texto = stateMatch.name2;
-
-	Swal.fire({
-		title: texto + " WIN",
-		confirmButtonColor: '#32B974',
-	}).then((result) => {	
-		if (result.isConfirmed){
-			Swal.fire({
-				confirmButtonColor: '#32B974',
-				title: "Play again ?",
-				showDenyButton: true,
-				showCancelButton: false,
-				confirmButtonText: "Yes",
-				denyButtonText: `No`
-			  }).then((result) => {
-				if (result.isConfirmed) {
-					resetTime();
-					startLocalPong();
-				}else if (result.isDenied){
-					initPlayPage();
-					return;
-				}});
-		};
-	});
-}
-
-async function updateStateMatch() {
-	const apiUrl = 'http://localhost:8000/api/update_game';
-	try{
-		const response = await fetch(apiUrl, {
-			method: 'GET',
-			headers: {'Content-Type': 'application/json',},
-		});
-		if (!response.ok) {
-			throw new Error('Failed to update game');
-		}
-		console.log("New State: ", response);
-		// stateMatch.x1 = newState['x1'];
-		// stateMatch.y1 = newState['y1'];
-		// stateMatch.score1 = newState['score1'];
-		// stateMatch.x2 = newState['x2'];
-		// stateMatch.y2 = newState['y2'];
-		// stateMatch.score2 = newState['score2'];
-		// stateMatch.ballX = newState['ballX'];
-		// stateMatch.ballY = newState['ballY'];
-		// stateMatch.ballSpeedX = newState['ballSpeedX'];
-		// stateMatch.ballSpeedY = newState['ballSpeedY'];
-		// stateMatch.state = newState['state'];
-		drawElements();
-	} catch (error) {
-		console.error('Error updating game:', error);
 	}
 }

@@ -12,7 +12,7 @@ from .schema import (ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema, SingleTournamentSchema,
                      AddFriendSchema, TournamentSchema, UserNameSchema,
                      UserSchema, SuccessSchema, TournamentCreateSchema,
-                     GameStatusSchema, keySchema, stateSchema)
+                     GameStatusSchema, keySchema)
 from .game_logic import *
 
 
@@ -26,39 +26,23 @@ app = NinjaAPI(
 
 """ Game """
 
+@app.post('move_paddles', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+def movepaddles(request, key: keySchema, match:GameStatusSchema):
+	try:
+		newmatch = move_paddles(key.key, match)
+		return 200, {"msg": "Paddle moved", "match": newmatch}
+	except Exception as e:
+		return 400, {"error_msg": "Error moving paddle : {str(e)}"}
 
-@app.post('key_press', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
-def key_press(request, key: keySchema):
+
+@app.post('move_ball', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+def moveball(request, match:GameStatusSchema):
     try:
-        move_paddles(key.key)
-        return 200, {"msg": "Paddle moved"}
+       newmatch = get_state(match)
+       print(newmatch)
+       return 200, {"msg": "Ball moved", "match": newmatch}
     except Exception as e:
-        return 400, {"error_msg": "Error moving paddle : {str(e)}"}
-
-
-@app.post('start_game', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
-def start_game(request, match: GameStatusSchema):
-    try:
-        reset_game(match)
-        return 200, {"msg": "Game started"}
-    except Exception as e:
-        return 400, {"error_msg": "Error starting game : {str(e)}"}
-
-
-@app.post('state_game',  response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
-def state_game(request,state : stateSchema):
-    try:
-        update_state(state.state)
-        return 200, {"msg": "State game posted successfully"}
-    except:
-        return 400, {"error_msg": "Error posting state game"}
-
-
-@app.get('update_game', response=GameStatusSchema, tags=['Game'])
-def update_game(request):
-    game_state = get_game_state()
-    print ("game_state devuelto", game_state, "\n")
-    return game_state
+       return 400, {"error_msg": "Error moving ball : {str(e)}"}
 
 
 """ Match """

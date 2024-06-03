@@ -57,10 +57,7 @@ class GameStatusSchema(Schema):
 
 class keySchema(Schema):
 	key: str
-    
-class stateSchema(Schema):
-	state: str
-    
+
 """ User schemas """
 
 class UserSchema(Schema):
