@@ -1,5 +1,4 @@
 import asyncio, random
-from django.http import JsonResponse
 
 game_state = {
    'id': 0,
@@ -90,13 +89,11 @@ def player2_is_AI(level):
 
 async def game_loop():
 	level = random.randint(3, 8)
-	await asyncio.sleep(2)
 	while game_state['state'] != 'gameover' and game_state['state'] != 'quit':
 		if (game_state['state'] == 'playing'):
 			update_positions()
 			if (game_state['modality'] == 'solo'):
 				player2_is_AI(level)
-		await asyncio.sleep(0.03)
 
 def reset_game(match):
    game_state['id'] = match.id
@@ -129,4 +126,4 @@ def update_state(state):
    game_state['state'] = state
 
 def get_game_state():
-   return JsonResponse(game_state)
+   return game_state

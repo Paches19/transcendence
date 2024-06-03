@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/03 15:02:06 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/03 16:11:08 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -424,10 +424,13 @@ function startPongLocal(){
 	sendStart();
 	isPaused = false;
 	sendState('playing');
-	updateStateMatch();
+	for (let i = 0; i < 10; i++){
+		updateStateMatch();
+		
+	}
 	// while (stateMatch.state != 'gameover' && stateMatch.state != 'quit'){
 	// 	if (stateMatch.state == 'playing'){
-	// 		updateStateMatch();
+	// 		setTimeout(updateStateMatch(), 500);
 	// 		console.log("Match: ", stateMatch);
 	// 	}
 	// }
@@ -489,11 +492,8 @@ async function updateStateMatch() {
 	if (!response.ok) {
 		throw new Error('Failed to update game');
 	}
+	const newState = await response.json();
 	console.log("New State: ", newState);
-	} catch (error) {
-		console.error('Error updating game:', error);
-	}
-	let newState = await response.json();
 	stateMatch.x1 = newState['x1'];
 	stateMatch.y1 = newState['y1'];
 	stateMatch.score1 = newState['score1'];
@@ -506,4 +506,7 @@ async function updateStateMatch() {
 	stateMatch.ballSpeedY = newState['ballSpeedY'];
 	stateMatch.state = newState['state'];
 	drawElements();
+	} catch (error) {
+		console.error('Error updating game:', error);
+	}
 }
