@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/03 16:11:08 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/03 17:48:25 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -377,7 +377,7 @@ async function startPongRemote() {
 	}
 }
 
-function startPongLocal(){
+async function startPongLocal(){
 	console.log('game initialized');
 
 	ctx.fillStyle = '#FFF';
@@ -421,22 +421,19 @@ function startPongLocal(){
 		'modality': modality,
 	}
 	drawElements();
-	sendStart();
+	await sendStart();
 	isPaused = false;
-	sendState('playing');
-	for (let i = 0; i < 10; i++){
-		updateStateMatch();
-		
+	await sendState('playing');
+	
+	while (stateMatch.state != 'gameover' && stateMatch.state != 'quit'){
+		if (stateMatch.state == 'playing'){
+			await updateStateMatch();
+			console.log("Match: ", stateMatch);
+		}
 	}
-	// while (stateMatch.state != 'gameover' && stateMatch.state != 'quit'){
-	// 	if (stateMatch.state == 'playing'){
-	// 		setTimeout(updateStateMatch(), 500);
-	// 		console.log("Match: ", stateMatch);
-	// 	}
-	// }
-	// if (stateMatch.state == 'gameover'){
-	// 	gameOver();
-	// }
+	if (stateMatch.state == 'gameover'){
+		gameOver();
+	}
 }
 
 function drawElements() {
@@ -489,23 +486,22 @@ async function updateStateMatch() {
 			method: 'GET',
 			headers: {'Content-Type': 'application/json',},
 		});
-	if (!response.ok) {
-		throw new Error('Failed to update game');
-	}
-	const newState = await response.json();
-	console.log("New State: ", newState);
-	stateMatch.x1 = newState['x1'];
-	stateMatch.y1 = newState['y1'];
-	stateMatch.score1 = newState['score1'];
-	stateMatch.x2 = newState['x2'];
-	stateMatch.y2 = newState['y2'];
-	stateMatch.score2 = newState['score2'];
-	stateMatch.ballX = newState['ballX'];
-	stateMatch.ballY = newState['ballY'];
-	stateMatch.ballSpeedX = newState['ballSpeedX'];
-	stateMatch.ballSpeedY = newState['ballSpeedY'];
-	stateMatch.state = newState['state'];
-	drawElements();
+		if (!response.ok) {
+			throw new Error('Failed to update game');
+		}
+		console.log("New State: ", response);
+		// stateMatch.x1 = newState['x1'];
+		// stateMatch.y1 = newState['y1'];
+		// stateMatch.score1 = newState['score1'];
+		// stateMatch.x2 = newState['x2'];
+		// stateMatch.y2 = newState['y2'];
+		// stateMatch.score2 = newState['score2'];
+		// stateMatch.ballX = newState['ballX'];
+		// stateMatch.ballY = newState['ballY'];
+		// stateMatch.ballSpeedX = newState['ballSpeedX'];
+		// stateMatch.ballSpeedY = newState['ballSpeedY'];
+		// stateMatch.state = newState['state'];
+		drawElements();
 	} catch (error) {
 		console.error('Error updating game:', error);
 	}

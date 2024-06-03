@@ -126,4 +126,4 @@ def update_state(state):
    game_state['state'] = state
 
 def get_game_state():
-   return game_state
+   return (game_state) 
