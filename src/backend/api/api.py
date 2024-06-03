@@ -11,7 +11,8 @@ from typing import Optional
 from .schema import (ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema, SingleTournamentSchema,
                      AddFriendSchema, TournamentSchema, UserNameSchema,
-                     UserSchema, SuccessSchema, TournamentCreateSchema, GameStatusSchema)
+                     UserSchema, SuccessSchema, TournamentCreateSchema,
+                     GameStatusSchema, keySchema, stateSchema)
 from .game_logic import *
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
@@ -26,7 +27,7 @@ app = NinjaAPI(
 
 
 @app.post('key_press', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
-def key_press(request, key: str):
+def key_press(request, key: keySchema):
     try:
         move_paddles(key)
         return 200, {"msg": "Paddle moved"}
@@ -44,9 +45,9 @@ def start_game(request, match: GameStatusSchema):
 
 
 @app.post('state_game',  response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
-def state_game(request, msg: str):
+def state_game(request,state : stateSchema):
     try:
-        change_state(msg)
+        update_state(state)
         return 200, {"msg": "State game posted successfully"}
     except:
         return 400, {"error_msg": "Error posting state game"}

@@ -55,6 +55,12 @@ class GameStatusSchema(Schema):
 	state: str = 'waiting'
 	modality: str = ''
 
+class keySchema(Schema):
+	key: str
+    
+class stateSchema(Schema):
+	state: str
+    
 """ User schemas """
 
 class UserSchema(Schema):

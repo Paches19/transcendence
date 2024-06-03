@@ -1,5 +1,5 @@
 import asyncio, random
-from .models import GameStatus
+from django.http import JsonResponse
 
 game_state = {
    'id': 0,
@@ -109,11 +109,11 @@ def reset_game(match):
    game_state['finalScore'] = match.finalScore
    game_state['x1'] = match.x1
    game_state['y1'] = match.y1
-   game_state['score1'] = 0
+   game_state['score1'] = match.score1
    game_state['name1'] = match.name1
    game_state['x2'] = match.x2
    game_state['y2'] = match.y2
-   game_state['score2'] = 0
+   game_state['score2'] = match.score2
    game_state['name2'] = match.name2
    game_state['ballX'] = match.ballX
    game_state['ballY'] = match.ballY
@@ -122,11 +122,11 @@ def reset_game(match):
    game_state['boundX'] = match.boundX
    game_state['boundY'] = match.boundY
    game_state['state'] = match.state
-   game_state['modality'] = match.modality
+   game_state['modality'] = match.modality  
    game_loop()
 
-def change_state(newstate):
-   game_state['state'] = newstate
+def update_state(state):
+   game_state['state'] = state
 
 def get_game_state():
-   return game_state
+   return JsonResponse(game_state)

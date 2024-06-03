@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/03 00:14:24 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/03 15:02:06 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,7 +249,7 @@ async function sendKey(keypressed){
 			throw new Error('Failed to move paddles');
 		}
 		else{
-			console.log("Key sent: ", key);
+			console.log("Key sent: ", keypressed);
 		}
 	} catch (error) {
 		console.error('Error moving paddles:', error);
@@ -258,26 +258,25 @@ async function sendKey(keypressed){
 
 async function sendState(msg){
 	stateMatch.state = msg
+	console.log("Estado para mandar:", msg);
 	try {
 		const response = await fetch('http://localhost:8000/api/state_game', {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json',},
-			body: JSON.stringify({ match: stateMatch }),
+			body: JSON.stringify({state: msg}),
 		});
 		if (!response.ok) {
-			throw new Error('Failed to start game');
+			throw new Error('Failed to change the state game');
 		}
 		else{
 			console.log("State sent: ", msg);
 		}
 	} catch (error) {
-		console.error('Error starting game:', error);
+		console.error('Error at change state:', error);
 	}
 }
 
 async function sendStart(){
-	console.log("1. Sending start game");
-
 	try {
 		const response = await fetch('http://localhost:8000/api/start_game', {
 			method: 'POST',
@@ -288,7 +287,7 @@ async function sendStart(){
 			throw new Error('Failed to start game');
 		}
 		else{
-			console.log("2. State sent ");
+			console.log("Start sent ");
 		}
 	} catch (error) {
 		console.error('Error starting game:', error);
@@ -425,15 +424,16 @@ function startPongLocal(){
 	sendStart();
 	isPaused = false;
 	sendState('playing');
-	while (stateMatch.state != 'gameover' && stateMatch.state != 'quit'){
-		if (stateMatch.state == 'playing'){
-			updateStateMatch();
-			drawElements();
-		}
-	}
-	if (stateMatch.state == 'gameover'){
-		gameOver();
-	}
+	updateStateMatch();
+	// while (stateMatch.state != 'gameover' && stateMatch.state != 'quit'){
+	// 	if (stateMatch.state == 'playing'){
+	// 		updateStateMatch();
+	// 		console.log("Match: ", stateMatch);
+	// 	}
+	// }
+	// if (stateMatch.state == 'gameover'){
+	// 	gameOver();
+	// }
 }
 
 function drawElements() {
@@ -489,20 +489,21 @@ async function updateStateMatch() {
 	if (!response.ok) {
 		throw new Error('Failed to update game');
 	}
-	const newState = await response.json();
+	console.log("New State: ", newState);
 	} catch (error) {
 		console.error('Error updating game:', error);
 	}
-	
-	stateMatch.x1 = newState.x1;
-	stateMatch.y1 = newState.y1;
-	stateMatch.score1 = newState.score1;
-	stateMatch.x2 = newState.x2;
-	stateMatch.y2 = newState.y2;
-	stateMatch.score2 = newState.score2;
-	stateMatch.ballX = newState.ballX;
-	stateMatch.ballY = newState.ballY;
-	stateMatch.ballSpeedX = newState.ballSpeedX;
-	stateMatch.ballSpeedY = newState.ballSpeedY;
-	stateMatch.state = newState.state;
+	let newState = await response.json();
+	stateMatch.x1 = newState['x1'];
+	stateMatch.y1 = newState['y1'];
+	stateMatch.score1 = newState['score1'];
+	stateMatch.x2 = newState['x2'];
+	stateMatch.y2 = newState['y2'];
+	stateMatch.score2 = newState['score2'];
+	stateMatch.ballX = newState['ballX'];
+	stateMatch.ballY = newState['ballY'];
+	stateMatch.ballSpeedX = newState['ballSpeedX'];
+	stateMatch.ballSpeedY = newState['ballSpeedY'];
+	stateMatch.state = newState['state'];
+	drawElements();
 }
