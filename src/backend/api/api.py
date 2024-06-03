@@ -24,35 +24,41 @@ app = NinjaAPI(
 
 """ Game """
 
+
 @app.post('key_press', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
 def key_press(request, key: str):
-	try:
-		move_paddles(key)
-		return 200, {"msg": "Paddle moved"}
-	except Exception as e:
-		return 400, {"msg": "Error moving paddle : {str(e)}"}
+    try:
+        move_paddles(key)
+        return 200, {"msg": "Paddle moved"}
+    except Exception as e:
+        return 400, {"error_msg": "Error moving paddle : {str(e)}"}
+
 
 @app.post('start_game', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
 def start_game(request, match: GameStatusSchema):
-	try:
-		reset_game(match)
-		return 200, {"msg": "Game started"}
-	except Exception as e:
-		return 400, {"msg": "Error starting game : {str(e)}"}
- 
+    try:
+        reset_game(match)
+        return 200, {"msg": "Game started"}
+    except Exception as e:
+        return 400, {"error_msg": "Error starting game : {str(e)}"}
+
+
 @app.post('state_game',  response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
 def state_game(request, msg: str):
     try:
         change_state(msg)
         return 200, {"msg": "State game posted successfully"}
     except:
-	    return {"msg": "Error posting state game"}
+        return 400, {"error_msg": "Error posting state game"}
+
 
 @app.get('update_game', response=GameStatusSchema, tags=['Game'])
 def update_game(request):
-	return get_game_state()
+    return get_game_state()
+
 
 """ Match """
+
 
 @app.post("new_match", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
 def saveIdRemote(request, match: GameStatusSchema):
@@ -63,25 +69,29 @@ def saveIdRemote(request, match: GameStatusSchema):
     except GameStatus.DoesNotExist:
         GameStatus.objects.create(id=match.id)
         return {"msg": "Match created"}
-    
+
+
 @app.post("join_match", response=SuccessSchema, tags=['Match'])
-def getMatch(request, match:GameStatusSchema):
-	try:
-		GameStatus.objects.get(id=match.id)
-		return {"msg": "Match joined"}
-	except GameStatus.DoesNotExist:
-		return 400, {"error_msg": "Match does not exist"}
+def getMatch(request, match: GameStatusSchema):
+    try:
+        GameStatus.objects.get(id=match.id)
+        return {"msg": "Match joined"}
+    except GameStatus.DoesNotExist:
+        return 400, {"error_msg": "Match does not exist"}
+
 
 @app.post("delete_match", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
 def deleteMatch(request, match: GameStatusSchema):
-	try:
-		tmpmatch = GameStatus.objects.get(id=match.id)
-		tmpmatch.delete()
-		return 200, {"msg": "Match deleted"}
-	except GameStatus.DoesNotExist:
-		return 400, {"error_msg": "Match does not exist"}
+    try:
+        tmpmatch = GameStatus.objects.get(id=match.id)
+        tmpmatch.delete()
+        return 200, {"msg": "Match deleted"}
+    except GameStatus.DoesNotExist:
+        return 400, {"error_msg": "Match does not exist"}
+
 
 """ Auth """
+
 
 @app.post("auth/register", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Auth'])
 def create_user(request, user_in: UserRegisterSchema):
