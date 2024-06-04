@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:41 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/04 10:54:33 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/04 11:16:56 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -30,9 +30,9 @@ SECRET_KEY = SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 debugging = os.getenv("DEBUG")
 
-DEBUG = True if debugging is None or debugging == "" else False
+DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = []
 
 # Custom user model
 

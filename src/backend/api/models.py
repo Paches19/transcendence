@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:10 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/31 08:03:56 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/04 11:34:28 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -59,7 +59,7 @@ class Tournament(models.Model):
         ('ended', 'Ended'),
     ]
     tournamentID = models.AutoField(primary_key=True, unique=True)
-    name = models.CharField(max_length=30)
+    name = models.CharField(validators=[MinValueValidator(3), MaxValueValidator(30)])
     date = models.DateField(default=datetime.date.today)
     number_participants = models.IntegerField(validators=[MinValueValidator(2), MaxValueValidator(20)])
     status = models.CharField(
