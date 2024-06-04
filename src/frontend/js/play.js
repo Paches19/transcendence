@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/04 18:14:32 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/04 19:38:42 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -278,7 +278,7 @@ async function movePaddles(keypressed){
 			throw new Error('Failed to move paddles');
 		}
 		const data = await response.json();
-		console.log("Data: ", data);
+		stateMatch = data.match;
 	} catch (error) {
 		console.error('Error moving paddles:', error);
 	}
@@ -290,7 +290,7 @@ async function updateState() {
 		const response = await fetch(apiUrl, {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json',},
-			body: {"match" : serializeStateMatch(),}
+			body: serializeStateMatch(),
 		});
 		if (!response.ok) {
 			throw new Error('Failed to update game');
@@ -344,19 +344,16 @@ function startPongLocal(){
 		'modality': modality,
 	}
 	drawElements();
-	// isPaused = false;
-	// startTimer();
-	// stateMatch.state = 'playing';
-	// for (let i = 0; i < 100; i++) {
-	// 	updateState();
-	// 	console.log("New state: ", stateMatch);
-	// 	drawElements();
-
-	// }
+	isPaused = false;
+	startTimer();
+	stateMatch.state = 'playing';
+	for (let i = 0; i < 300; i++){
+		updateState();
+		drawElements();
+	}
 	// while (stateMatch.state != 'gameover' && stateMatch.state != 'quit'){
 	// 	if (stateMatch.state == 'playing'){
 	// 		updateState();
-	// 		console.log("New state: ", stateMatch);
 	// 		drawElements();
 	// 	}
 	// }

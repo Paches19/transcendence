@@ -12,7 +12,7 @@ from .schema import (ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema, SingleTournamentSchema,
                      AddFriendSchema, TournamentSchema, UserNameSchema,
                      UserSchema, SuccessSchema, TournamentCreateSchema,
-                     GameStatusSchema)
+                     GameStatusSchema, SuccessGameStatusSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -23,7 +23,7 @@ app = NinjaAPI(
 )
 
 """ Game """
-@app.post('play_ai', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+@app.post('play_ai', response={200: SuccessGameStatusSchema, 400: ErrorSchema}, tags=['Game'])
 def play_ai(request, match:GameStatusSchema):
 	try:
 		if match.ballX > match.boundX // 2 -  5 * 25:
@@ -36,19 +36,19 @@ def play_ai(request, match:GameStatusSchema):
 		return 400, {"error_msg": "Error playing AI : " + str(e)}
 
 
-@app.post('move_paddles', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+@app.post('move_paddles', response={200: SuccessGameStatusSchema, 400: ErrorSchema}, tags=['Game'])
 def move_paddles(request, match:GameStatusSchema):
 	try:
-		if match.key == 'up1':
+		if match.key == 'ArrowUp':
 			match.y1 = max(0, match.y1 - match.v)
 			msg = "Paddle1 moved up"
-		elif match.key == 'down1':
+		elif match.key == 'ArrowDown':
 			match.y1 = min(match.boundY - match.playerHeight, match.y1 + match.v)
 			msg = "Paddle1 moved down"
-		elif match.key == 'up2':
+		elif match.key == 'w' or match.key == 'W':
 			match.y2 = max(0, match.y2 - match.v)
 			msg = "Paddle2 moved up"
-		elif match.key == 'down2':
+		elif match.key == 's' or match.key == 'S':
 			match.y2 = min(match.boundY - match.playerHeight, match.y2 + match.v)
 			msg = "Paddle2 moved down"
 		return 200, {"msg": msg, "match": match}
@@ -56,7 +56,7 @@ def move_paddles(request, match:GameStatusSchema):
 		return 400, {"error_msg": "Error moving paddle : {str(e)}"}
 
 
-@app.post('move_ball', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+@app.post('move_ball', response={200: SuccessGameStatusSchema, 400: ErrorSchema}, tags=['Game'])
 def move_ball(request, match:GameStatusSchema):
 	try:
 		# Update ball position
