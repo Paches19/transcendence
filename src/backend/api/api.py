@@ -1,4 +1,4 @@
-#******************************************************************************#
+# ******************************************************************************#
 #                                                                              #
 #                                                         :::      ::::::::    #
 #    api.py                                             :+:      :+:    :+:    #
@@ -6,9 +6,9 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/04 11:44:42 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/04 12:58:45 by alaparic         ###   ########.fr        #
 #                                                                              #
-#******************************************************************************#
+# ******************************************************************************#
 
 import os
 from django.shortcuts import get_object_or_404
@@ -40,6 +40,14 @@ app = NinjaAPI(
 def create_user(request, user_in: UserRegisterSchema):
     if User.objects.filter(username=user_in.username).exists():
         return 400, {"error_msg": "User already exists"}
+
+    if (len(user_in.username.strip()) < 3 or len(user_in.username.strip()) > 20):
+        return 400, {"error_msg": "Invalid username length"}
+
+    user_in.username = user_in.username.strip()
+
+    if (len(user_in.password) <= 0 or len(user_in.password) > 128):
+        return 400, {"error_msg": "Invalid password"}
 
     user_data = user_in.model_dump()
     User.objects.create_user(**user_data)
@@ -107,14 +115,18 @@ def update_user(request, user_in: UserUpdateSchema):
     user = request.user
     user_data = user_in.dict()
 
-    if (user_data["username"] is not None and
-            user_data["username"] != user.username):
+    if (user_data["username"] != user.username):
         if User.objects.filter(username=user_data["username"]).exists():
             return 400, {"error_msg": "Username already exists"}
-        user.username = user_data["username"]
+        if (len(user_data["username"].strip()) < 3 or len(user_data["username"].strip()) > 20):
+            return 400, {"error_msg": "Invalid username length"}
+        user.username = user_data["username"].strip()
 
     if user_in.password is not None:
-        user.set_password(user_in.password)
+        if len(user_in.password) >= 0 and len(user_in.password) < 128:
+            user.set_password(user_in.password)
+        else:
+            return 400, {"error_msg": "Invalid password"}
     user.save()
     # Reauthenticate user
     login(request, user)
@@ -281,17 +293,18 @@ def join_tournament(request, tournament_id: int):
     if tournament.status != "Upcoming":
         return 400, {"error_msg": "Tournament is " + tournament.status}
 
-    if UserTournament.objects.filter(tournament=tournament).count() >= tournament.number_participants:
-        tournament.status = "In Progress"
-        tournament.save()
-        doTournamentMatchmaking(tournament)
-
     user_tournament_data = {
         "user": user,
         "tournament": tournament
     }
 
     UserTournament.objects.create(**user_tournament_data)
+
+    if UserTournament.objects.filter(tournament=tournament).count() >= tournament.number_participants:
+        tournament.status = "In Progress"
+        tournament.save()
+        doTournamentMatchmaking(tournament)
+
     return 200, {"msg": "User joined tournament"}
 
 

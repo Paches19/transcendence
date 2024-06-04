@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:12 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/28 10:34:19 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/04 12:10:06 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -70,7 +70,7 @@ def populate_tournament_participants(tournament):
 
 def matches_won(user, tournament):
     matches = Match.objects.filter(
-        user1=user, tournamentId=tournament) | Match.objects.filter(user2=user, tournamentId=tournament)
+        user1=user, tournament=tournament) | Match.objects.filter(user2=user, tournament=tournament)
     count = 0
     for match in matches:
         if ((match.user1 == user and match.pointsUser1 > match.pointsUser2) or
@@ -81,7 +81,7 @@ def matches_won(user, tournament):
 
 def populate_standings(tournament):
     participants = UserTournament.objects.filter(tournament=tournament)
-    tournament_matches = Match.objects.filter(tournamentId=tournament)
+    tournament_matches = Match.objects.filter(tournament=tournament)
     resp = []
     for participant in participants:
         user_matches = tournament_matches.filter(
@@ -98,7 +98,7 @@ def populate_standings(tournament):
 
 
 def populate_tournament_matches(tournament):
-    matches = Match.objects.filter(tournamentId=tournament)
+    matches = Match.objects.filter(tournament=tournament)
     resp = []
     for match in matches:
         resp.append({
@@ -129,7 +129,7 @@ def userTournamentsWon(user):
         # Initialize the dictionary with 0 wins
         for u in tournament_users:
             players[u.user.username] = 0
-        matches = Match.objects.filter(tournamentId=tournament.tournament)
+        matches = Match.objects.filter(tournament=tournament.tournament)
         # Count the wins of each player
         for match in matches:
             if match.pointsUser1 > match.pointsUser2:
