@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/28 13:30:51 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/04 10:59:36 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -224,6 +224,9 @@ def remove_friend(request, friend_username: AddFriendSchema):
 @app.post("tournaments/create", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Tournaments'])
 def create_tournament(request, tournament_in: TournamentCreateSchema):
     tournament_data = tournament_in.dict()
+    if (tournament_data["number_participants"] < 2 or
+            tournament_data["number_participants"] > 20):
+        return 400, {"error_msg": "Invalid number of participants"}
     Tournament.objects.create(**tournament_data)
     return {"msg": "Tournament created"}
 

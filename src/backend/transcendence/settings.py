@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:41 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/27 12:38:42 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/04 10:54:33 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -28,9 +28,11 @@ if SECRET_KEY is None or SECRET_KEY == '':
 SECRET_KEY = SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+debugging = os.getenv("DEBUG")
 
-ALLOWED_HOSTS = []
+DEBUG = True if debugging is None or debugging == "" else False
+
+ALLOWED_HOSTS = ["*"]
 
 # Custom user model
 
@@ -172,6 +174,6 @@ CORS_ORIGIN_WHITELIST = [
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_SSL_REDIRECT = True 
+SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True

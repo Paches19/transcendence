@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:26 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/27 12:38:27 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/04 10:56:43 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -107,7 +107,7 @@ def generate_matches_data(apps, schema_editor):
         count += 1
         Match.objects.create(user1=user1,
                              user2=user2,
-                             tournamentId=tournament,
+                             tournament=tournament,
                              pointsUser1=points1,
                              pointsUser2=points2,
                              date=datetime.date.today().isoformat())

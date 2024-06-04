@@ -29,6 +29,7 @@ services:
             - "PIP_DISABLE_PIP_VERSION_CHECK=1"
             - "PYTHONDONTWRITEBYTECODE=1"
             - "PYTHONUNBUFFERED=1"
+            - "DEBUG=0"
         expose:
             - "8000"
         networks:
