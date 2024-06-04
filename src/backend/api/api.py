@@ -62,11 +62,11 @@ def move_ball(request, match:GameStatusSchema):
 		# Update ball position
 		if match.ballY + match.ballSpeedY <= 0 or match.ballY + match.ballSpeedY >= match.boundY:
 			match.ballSpeedY = -match.ballSpeedY
-			match.ballSpeedX += match.ballSpeedX
-			match.ballSpeedY += match.ballSpeedY
+		match.ballX += match.ballSpeedX
+		match.ballY += match.ballSpeedY
 
-		# Check for collisions with walls
-		# Left wall (Paddle 1)
+		# # Check for collisions with walls
+		# # Left wall (Paddle 1)
 		if match.ballX <= match.x1:
 			match.score2 += 1
 			if match.score2 == match.finalScore:
@@ -75,7 +75,7 @@ def move_ball(request, match:GameStatusSchema):
 				match.ballX = match.boundX // 2 - match.ballWidth // 2
 				match.ballY = match.boundY // 2 - match.ballHeight // 2
 
-		# Right wall (Paddle 2)
+		# # Right wall (Paddle 2)
 		elif match.ballX >= match.x2 + match.playerWidth:
 			match.score1 += 1
 			if match.score1 == match.finalScore:
@@ -84,7 +84,7 @@ def move_ball(request, match:GameStatusSchema):
 				match.ballX = match.boundX // 2 - match.ballWidth // 2
 				match.ballY = match.boundY // 2 - match.ballHeight // 2
 
-		# Paddle collisions
+		# # Paddle collisions
 		elif (match.ballY <= match.ballHeight + match.y2 and match.ballY >= match.y2 and match.ballX + match.ballWidth >= match.x2) or \
 				(match.ballY <= match.ballHeight + match.y1 and match.ballY >= match.y1 and match.ballX - match.ballWidth <= match.x1):
 			match.ballSpeedX = -match.ballSpeedX

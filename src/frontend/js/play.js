@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/04 19:38:42 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/04 20:14:37 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,7 +197,6 @@ function handleKeyDown(e) {
 	(stateMatch.modality == "local" && (key == "w" || key == "W")) ||
 	(stateMatch.modality == "local" && (key == "s" || key == "S"))){
 		movePaddles(key);	
-		drawElements();
 	}
 }
 
@@ -279,12 +278,13 @@ async function movePaddles(keypressed){
 		}
 		const data = await response.json();
 		stateMatch = data.match;
+		drawElements();
 	} catch (error) {
 		console.error('Error moving paddles:', error);
 	}
 }
 
-async function updateState() {
+async function moveBall() {
 	const apiUrl = 'http://localhost:8000/api/move_ball';
 	try{
 		const response = await fetch(apiUrl, {
@@ -297,6 +297,8 @@ async function updateState() {
 		}
 		const data = await response.json();
 		stateMatch = data.match;
+		console.log("BALL : (", stateMatch.ballX, ", ", stateMatch.ballY, ")");
+		drawElements();
 	} catch (error) {
 		console.error('Error updating game:', error);
 	}
@@ -347,19 +349,7 @@ function startPongLocal(){
 	isPaused = false;
 	startTimer();
 	stateMatch.state = 'playing';
-	for (let i = 0; i < 300; i++){
-		updateState();
-		drawElements();
-	}
-	// while (stateMatch.state != 'gameover' && stateMatch.state != 'quit'){
-	// 	if (stateMatch.state == 'playing'){
-	// 		updateState();
-	// 		drawElements();
-	// 	}
-	// }
-	// if (stateMatch.state == 'gameover'){
-	// 	gameOver();
-	// }
+	setInterval(moveBall, 20);
 }
 
 function drawElements() {
