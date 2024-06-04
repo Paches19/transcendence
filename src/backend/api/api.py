@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/04 11:37:58 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/04 11:44:42 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -227,9 +227,9 @@ def create_tournament(request, tournament_in: TournamentCreateSchema):
     if (tournament_data["number_participants"] < 2 or
             tournament_data["number_participants"] > 20):
         return 400, {"error_msg": "Invalid number of participants"}
-    if (tournament_data["name"].strip() == "" or tournament_data["name"].strip().length < 3):
+    if (tournament_data["name"].strip() == "" or len(tournament_data["name"].strip()) < 3):
         return 400, {"error_msg": "Invalid name"}
-    if (tournament_data["name"].length < 3 or tournament_data["name"].length > 30):
+    if (len(tournament_data["name"]) < 3 or len(tournament_data["name"]) > 30):
         return 400, {"error_msg": "Invalid name length"}
     Tournament.objects.create(**tournament_data)
     return {"msg": "Tournament created"}
