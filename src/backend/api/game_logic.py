@@ -2,19 +2,6 @@ import random
 
 level = random.randint(5, 10)
 
-def move_paddles(key, match):
-	if key == 'up1':
-		match.y1 = max(0, match.y1 - match.v)
-	elif key == 'down1':
-		match.y1 = min(match.boundY - match.playerHeight, match.y1 + match.v)
-	elif key == 'up2':
-		match.y2 = max(0, match.y2 - match.v)
-	elif key == 'down2':
-		match.y2 = min(match.boundY - match.playerHeight, match.y2 + match.v)
-    
-	return match  
-     
-
 def moveball(match):
     # Update ball position
    if match.ballY + match.ballSpeedY <= 0 or match.ballY + match.ballSpeedY >= match.boundY:
@@ -72,5 +59,5 @@ def play_ai(match):
 def get_state(match):
 	newmatch = moveball(match)
 	if match.modality == 'solo':
-		match = play_ai(newmatch)
-	return match
+		return play_ai(newmatch)
+	return newmatch

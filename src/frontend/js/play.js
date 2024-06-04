@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/04 00:00:52 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/04 18:14:32 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,7 +158,37 @@ export default initPlayPage;
 export {initPlayPage, resetTime};
 
 let speed = 10; //para mover las palas (desplazamiento vertical)
-let stateMatch;
+let stateMatch = {
+	'id' : 0,
+	'v': speed,
+	'key' : '',
+	'ballWidth': 10,
+	'ballHeight': 10,
+	'playerWidth': 15,
+	'playerHeight': 80,
+	'finalScore': 3,
+	
+	'x1': 10,
+	'y1': 0,
+	'score1': 0,
+	'name1': "Player1",
+	
+	'x2': 0,
+	'y2': 0,
+	'score2': 0,
+	'name2': "Player2",
+			
+	'ballX': 0,
+	'ballY': 0,
+	'ballSpeedX': 0,
+	'ballSpeedY': 0,
+
+	'boundX': 0,
+	'boundY': 0,
+
+	'state': 'waiting',
+	'modality': modality,
+}
 
 function handleKeyDown(e) {
     const key = e.key;
@@ -187,7 +217,7 @@ function pauseGame() {
 
 function quitGame() {
     isPaused = true;
-	stateMatch.state =  'pause'; //enviar al servidor que se ha pausado el juego
+	stateMatch.state = 'pause'; //enviar al servidor que se ha pausado el juego
 	Swal.fire({
 		confirmButtonColor: '#32B974',
 		title: "Are you sure ?",
@@ -234,23 +264,21 @@ function serializeStateMatch() {
         modality: stateMatch.modality
     });
 }
-
+ 
 async function movePaddles(keypressed){
 	stateMatch.key = keypressed;
 	const apiUrl = 'http://localhost:8000/api/move_paddles';
 	try {
 		const response = await fetch(apiUrl, {
 			method: 'POST',
-			headers: {'Content-Type': 'application/json',},
-			body: { "key"   : JSON.stringify({key : keypressed,}),
-					"match" : serializeStateMatch(), 
-			},
+			headers: {'Content-Type': 'application/json'},
+			body: serializeStateMatch(),
 		});
 		if (!response.ok) {
 			throw new Error('Failed to move paddles');
 		}
 		const data = await response.json();
-		stateMatch = data.match;
+		console.log("Data: ", data);
 	} catch (error) {
 		console.error('Error moving paddles:', error);
 	}
@@ -262,7 +290,7 @@ async function updateState() {
 		const response = await fetch(apiUrl, {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json',},
-			body: serializeStateMatch(),
+			body: {"match" : serializeStateMatch(),}
 		});
 		if (!response.ok) {
 			throw new Error('Failed to update game');
@@ -316,20 +344,25 @@ function startPongLocal(){
 		'modality': modality,
 	}
 	drawElements();
-	isPaused = false;
-	startTimer();
-	stateMatch.state = 'playing';
+	// isPaused = false;
+	// startTimer();
+	// stateMatch.state = 'playing';
+	// for (let i = 0; i < 100; i++) {
+	// 	updateState();
+	// 	console.log("New state: ", stateMatch);
+	// 	drawElements();
 
-	while (stateMatch.state != 'gameover' && stateMatch.state != 'quit'){
-		if (stateMatch.state == 'playing'){
-			getState();
-			console.log("New state: ", stateMatch);
-			drawElements();
-		}
-	}
-	if (stateMatch.state == 'gameover'){
-		gameOver();
-	}
+	// }
+	// while (stateMatch.state != 'gameover' && stateMatch.state != 'quit'){
+	// 	if (stateMatch.state == 'playing'){
+	// 		updateState();
+	// 		console.log("New state: ", stateMatch);
+	// 		drawElements();
+	// 	}
+	// }
+	// if (stateMatch.state == 'gameover'){
+	// 	gameOver();
+	// }
 }
 
 function drawElements() {

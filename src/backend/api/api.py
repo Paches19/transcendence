@@ -12,9 +12,7 @@ from .schema import (ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema, SingleTournamentSchema,
                      AddFriendSchema, TournamentSchema, UserNameSchema,
                      UserSchema, SuccessSchema, TournamentCreateSchema,
-                     GameStatusSchema, keySchema)
-from .game_logic import *
-
+                     GameStatusSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -25,31 +23,89 @@ app = NinjaAPI(
 )
 
 """ Game """
+@app.post('play_ai', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+def play_ai(request, match:GameStatusSchema):
+	try:
+		if match.ballX > match.boundX // 2 -  5 * 25:
+			if match.ballY > match.y2 + match.playerHeight:
+				match.y2 = min(match.boundY - match.playerHeight, match.y2 + 5)
+			else:
+				match.y2 = max(0, match.y2 - 5)
+		return 200, {"msg": "AI played", "match": match}
+	except Exception as e:
+		return 400, {"error_msg": "Error playing AI : " + str(e)}
+
 
 @app.post('move_paddles', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
-def movepaddles(request, key: keySchema, match:GameStatusSchema):
+def move_paddles(request, match:GameStatusSchema):
 	try:
-		newmatch = move_paddles(key.key, match)
-		return 200, {"msg": "Paddle moved", "match": newmatch}
+		if match.key == 'up1':
+			match.y1 = max(0, match.y1 - match.v)
+			msg = "Paddle1 moved up"
+		elif match.key == 'down1':
+			match.y1 = min(match.boundY - match.playerHeight, match.y1 + match.v)
+			msg = "Paddle1 moved down"
+		elif match.key == 'up2':
+			match.y2 = max(0, match.y2 - match.v)
+			msg = "Paddle2 moved up"
+		elif match.key == 'down2':
+			match.y2 = min(match.boundY - match.playerHeight, match.y2 + match.v)
+			msg = "Paddle2 moved down"
+		return 200, {"msg": msg, "match": match}
 	except Exception as e:
 		return 400, {"error_msg": "Error moving paddle : {str(e)}"}
 
 
 @app.post('move_ball', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
-def moveball(request, match:GameStatusSchema):
-    try:
-       newmatch = get_state(match)
-       print(newmatch)
-       return 200, {"msg": "Ball moved", "match": newmatch}
-    except Exception as e:
-       return 400, {"error_msg": "Error moving ball : {str(e)}"}
+def move_ball(request, match:GameStatusSchema):
+	try:
+		# Update ball position
+		if match.ballY + match.ballSpeedY <= 0 or match.ballY + match.ballSpeedY >= match.boundY:
+			match.ballSpeedY = -match.ballSpeedY
+			match.ballSpeedX += match.ballSpeedX
+			match.ballSpeedY += match.ballSpeedY
 
+		# Check for collisions with walls
+		# Left wall (Paddle 1)
+		if match.ballX <= match.x1:
+			match.score2 += 1
+			if match.score2 == match.finalScore:
+				match.state = 'gameover'
+			else:
+				match.ballX = match.boundX // 2 - match.ballWidth // 2
+				match.ballY = match.boundY // 2 - match.ballHeight // 2
 
-""" Match """
+		# Right wall (Paddle 2)
+		elif match.ballX >= match.x2 + match.playerWidth:
+			match.score1 += 1
+			if match.score1 == match.finalScore:
+				match.state = 'gameover'
+			else:
+				match.ballX = match.boundX // 2 - match.ballWidth // 2
+				match.ballY = match.boundY // 2 - match.ballHeight // 2
+
+		# Paddle collisions
+		elif (match.ballY <= match.ballHeight + match.y2 and match.ballY >= match.y2 and match.ballX + match.ballWidth >= match.x2) or \
+				(match.ballY <= match.ballHeight + match.y1 and match.ballY >= match.y1 and match.ballX - match.ballWidth <= match.x1):
+			match.ballSpeedX = -match.ballSpeedX
+		if match.ballX > match.x1 and match.ballX < match.x1 + match.playerWidth:
+			match.ballX = match.x1 + match.playerWidth + 1
+
+		if match.ballX > match.x2 and match.ballX < match.x2 + match.playerWidth:
+			match.ballX = match.x2 - match.ballWidth - 1
+
+		if (match.ballY > match.y1 + match.playerHeight * 0.75 or match.ballY > match.y2 + match.playerHeight * 0.75) and match.ballSpeedY < 3:
+			match.ballSpeedY += 1
+
+		if (match.ballY < match.y1 + match.playerHeight * 0.25 or match.ballY < match.y2 + match.playerHeight * 0.25) and match.ballSpeedY > -3:
+			match.ballSpeedY -= 1
+		return 200, {"msg": "Ball moved", "match": match}
+	except Exception as e:
+		return 400, {"error_msg": "Error moving ball : " + str(e)}
 
 
 @app.post("new_match", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
-def saveIdRemote(request, match: GameStatusSchema):
+def new_match(request, match: GameStatusSchema):
     try:
         print("Comprobando si existe Match ID: ", match.id)
         GameStatus.objects.get(id=match.id)
@@ -60,7 +116,7 @@ def saveIdRemote(request, match: GameStatusSchema):
 
 
 @app.post("join_match", response=SuccessSchema, tags=['Match'])
-def getMatch(request, match: GameStatusSchema):
+def join_match(request, match: GameStatusSchema):
     try:
         GameStatus.objects.get(id=match.id)
         return {"msg": "Match joined"}
@@ -69,7 +125,7 @@ def getMatch(request, match: GameStatusSchema):
 
 
 @app.post("delete_match", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
-def deleteMatch(request, match: GameStatusSchema):
+def delete_match(request, match: GameStatusSchema):
     try:
         tmpmatch = GameStatus.objects.get(id=match.id)
         tmpmatch.delete()
