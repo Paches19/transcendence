@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/04 20:14:37 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/05 08:28:11 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -304,8 +304,28 @@ async function moveBall() {
 	}
 }
 
+async function playAI(){
+	const apiUrl = 'http://localhost:8000/api/play_ai';
+	try{
+		const response = await fetch(apiUrl, {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json',},
+			body: serializeStateMatch(),
+		});
+		if (!response.ok) {
+			throw new Error('Failed to play AI');
+		}
+		const data = await response.json();
+		stateMatch = data.match;
+		drawElements();
+	} catch (error) {
+		console.error('Error playing AI:', error);
+	}
+}
+
 function startPongLocal(){
 	ctx.fillStyle = '#FFF';
+	resetTime();
 	let words = document.getElementById('game-score').textContent.split(' ');
 	let vx = Math.floor(Math.random() * 10) + 5;
 	let vy = Math.floor(Math.random() * 7) + 5;
@@ -349,7 +369,37 @@ function startPongLocal(){
 	isPaused = false;
 	startTimer();
 	stateMatch.state = 'playing';
-	setInterval(moveBall, 20);
+	animate();
+}
+
+let animationInterval
+let aiInterval
+
+function animate(){
+	animationInterval = setInterval(() => {
+		moveBall();
+		checkGameOver();
+	}, 1000/60);
+	
+	if (stateMatch.modality == 'solo'){
+		aiInterval = setInterval(() => {
+			playAI();
+			checkGameOver();
+		}, 1000/60);
+	}
+}
+
+function checkGameOver(){
+	if (stateMatch.state == 'quit' || stateMatch.state == 'gameover'){
+		isPaused = true;
+		clearInterval(animationInterval);
+		if (stateMatch.modality == 'solo'){
+			clearInterval(aiInterval);
+		}
+		if (stateMatch.state == 'gameover'){
+			gameOver();
+		}
+	}
 }
 
 function drawElements() {
@@ -363,8 +413,6 @@ function drawElements() {
 }
 
 function gameOver(){
-	console.log('Game Over');
-	isPaused = true;
 	let texto;
 	if (stateMatch.score1 == stateMatch.finalScore)
 		texto = stateMatch.name1;

@@ -88,17 +88,17 @@ def move_ball(request, match:GameStatusSchema):
 		elif (match.ballY <= match.ballHeight + match.y2 and match.ballY >= match.y2 and match.ballX + match.ballWidth >= match.x2) or \
 				(match.ballY <= match.ballHeight + match.y1 and match.ballY >= match.y1 and match.ballX - match.ballWidth <= match.x1):
 			match.ballSpeedX = -match.ballSpeedX
-		if match.ballX > match.x1 and match.ballX < match.x1 + match.playerWidth:
-			match.ballX = match.x1 + match.playerWidth + 1
+			if match.ballX > match.x1 and match.ballX < match.x1 + match.playerWidth:
+				match.ballX = match.x1 + match.playerWidth + 1
 
-		if match.ballX > match.x2 and match.ballX < match.x2 + match.playerWidth:
-			match.ballX = match.x2 - match.ballWidth - 1
+			if match.ballX > match.x2 and match.ballX < match.x2 + match.playerWidth:
+				match.ballX = match.x2 - match.ballWidth - 1
 
-		if (match.ballY > match.y1 + match.playerHeight * 0.75 or match.ballY > match.y2 + match.playerHeight * 0.75) and match.ballSpeedY < 3:
-			match.ballSpeedY += 1
+			if (match.ballY > match.y1 + match.playerHeight * 0.75 or match.ballY > match.y2 + match.playerHeight * 0.75) and match.ballSpeedY < 3:
+				match.ballSpeedY += 1
 
-		if (match.ballY < match.y1 + match.playerHeight * 0.25 or match.ballY < match.y2 + match.playerHeight * 0.25) and match.ballSpeedY > -3:
-			match.ballSpeedY -= 1
+			if (match.ballY < match.y1 + match.playerHeight * 0.25 or match.ballY < match.y2 + match.playerHeight * 0.25) and match.ballSpeedY > -3:
+				match.ballSpeedY -= 1
 		return 200, {"msg": "Ball moved", "match": match}
 	except Exception as e:
 		return 400, {"error_msg": "Error moving ball : " + str(e)}
