@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:41 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/04 11:16:56 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/05 08:04:54 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -74,7 +74,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:8080',
-    'https://localhost:8080',
+    'https://localhost:8080'
 )
 
 TEMPLATES = [

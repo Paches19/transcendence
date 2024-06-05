@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:12 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/04 12:10:06 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/05 11:05:00 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -50,7 +50,7 @@ def populate_matches(user):
             matches.append({
                 "date": str(match.date),
                 "opponent": match.user2.username if is_user1 else match.user1.username,
-                "result": match.pointsUser1 > match.pointsUser2 if is_user1 else match.pointsUser2 > match.pointsUser1,
+                "result": match.winner == user,
                 "score": f"{match.pointsUser1} - {match.pointsUser2}" if is_user1 else f"{match.pointsUser2} - {match.pointsUser1}"
             })
     return matches
@@ -73,8 +73,7 @@ def matches_won(user, tournament):
         user1=user, tournament=tournament) | Match.objects.filter(user2=user, tournament=tournament)
     count = 0
     for match in matches:
-        if ((match.user1 == user and match.pointsUser1 > match.pointsUser2) or
-                (match.user2 == user and match.pointsUser2 > match.pointsUser1)):
+        if match.winner == user:
             count += 1
     return count
 
@@ -106,7 +105,7 @@ def populate_tournament_matches(tournament):
             "player2_username": match.user2.username,
             "player1_points": match.pointsUser1,
             "player2_points": match.pointsUser2,
-            "played": (match.pointsUser1 + match.pointsUser2) != 0
+            "played": match.winner != None
         })
     return resp
 
@@ -132,7 +131,7 @@ def userTournamentsWon(user):
         matches = Match.objects.filter(tournament=tournament.tournament)
         # Count the wins of each player
         for match in matches:
-            if match.pointsUser1 > match.pointsUser2:
+            if match.winner == match.user1:
                 players[match.user1.username] += 1
             else:
                 players[match.user2.username] += 1
@@ -140,5 +139,14 @@ def userTournamentsWon(user):
             count += 1
     return count
 
-def doTournamentMatchmaking(tournament): # TODO > Implement this function
-    pass
+def doTournamentMatchmaking(tournament):
+    # Round robin tournament matchmaking
+    players = UserTournament.objects.filter(tournament=tournament)
+    for i in range(len(players)):
+        for j in range(i+1, len(players)):
+            Match.objects.create(
+                user1=players[i].user,
+                user2=players[j].user,
+                tournament=tournament
+            )
+

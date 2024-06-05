@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:10 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/04 11:34:28 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/05 08:56:04 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -27,6 +27,8 @@ class Match(models.Model):
     pointsUser1 = models.IntegerField(default=0)
     pointsUser2 = models.IntegerField(default=0)
     date = models.DateField()
+    winner = models.ForeignKey('User', related_name='winner',
+                               on_delete=models.CASCADE, null=True, blank=True, default=None)
     tournament = models.ForeignKey(
         'Tournament', on_delete=models.CASCADE, null=True, blank=True, default=None)
 
@@ -34,7 +36,8 @@ class Match(models.Model):
 # User inherits from AbstractUser, which is a built-in Django model
 # this allows us to use the built-in Django authentication system
 class User(AbstractUser):
-    profilePicture = models.CharField(default='/api/static/avatars/default.jpg')
+    profilePicture = models.CharField(
+        default='/api/static/avatars/default.jpg')
     online = models.BooleanField(default=False)
     totalPoints = models.IntegerField(default=0)
     matchesTotal = models.IntegerField(default=0)
@@ -59,9 +62,11 @@ class Tournament(models.Model):
         ('ended', 'Ended'),
     ]
     tournamentID = models.AutoField(primary_key=True, unique=True)
-    name = models.CharField(validators=[MinValueValidator(3), MaxValueValidator(30)])
+    name = models.CharField(
+        validators=[MinValueValidator(3), MaxValueValidator(30)])
     date = models.DateField(default=datetime.date.today)
-    number_participants = models.IntegerField(validators=[MinValueValidator(2), MaxValueValidator(20)])
+    number_participants = models.IntegerField(
+        validators=[MinValueValidator(2), MaxValueValidator(20)])
     status = models.CharField(
         max_length=11, choices=TOURNAMENT_STATUS_CHOICES, default='Upcoming')
 

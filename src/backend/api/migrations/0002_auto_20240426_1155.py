@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:26 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/04 10:56:43 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/05 08:58:48 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -110,6 +110,7 @@ def generate_matches_data(apps, schema_editor):
                              tournament=tournament,
                              pointsUser1=points1,
                              pointsUser2=points2,
+                             winner=user1 if points1 > points2 else user2,
                              date=datetime.date.today().isoformat())
         # modify users to update their statistics with the match data
         user1.totalPoints += points1

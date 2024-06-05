@@ -1,4 +1,4 @@
-# ******************************************************************************#
+#******************************************************************************#
 #                                                                              #
 #                                                         :::      ::::::::    #
 #    api.py                                             :+:      :+:    :+:    #
@@ -6,9 +6,9 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/04 12:58:45 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/05 08:40:13 by alaparic         ###   ########.fr        #
 #                                                                              #
-# ******************************************************************************#
+#******************************************************************************#
 
 import os
 from django.shortcuts import get_object_or_404
@@ -316,6 +316,23 @@ def leave_tournament(request, tournament_id: int):
 
     if not UserTournament.objects.filter(user=user, tournament=tournament).exists():
         return 400, {"error_msg": "User not in tournament"}
+
+    if tournament.status == "Ended":
+        return 400, {"error_msg": "Tournament has ended"}
+
+    # If tournament is in progress, user looses unplayed matches
+    if tournament.status == "In Progress":
+        matches = Match.objects.filter(
+            tournament=tournament, user1=user) | Match.objects.filter(tournament=tournament, user2=user)
+        for match in matches:
+            if match.pointsUser1 == 0 and match.pointsUser2 == 0:
+                if match.user1 == user:
+                    match.winner = match.user2
+                else:
+                    match.winner = match.user1
+                match.pointsUser1 = 0
+                match.pointsUser2 = 0
+                match.save()
 
     user_tournament = get_object_or_404(
         UserTournament, user=user, tournament=tournament)
