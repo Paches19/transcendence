@@ -1,8 +1,7 @@
 from pydantic import BaseModel, ValidationError, model_validator
 import datetime
-from .models import User
 from typing import List
-from ninja import ModelSchema, Schema
+from ninja import  Schema
 
 """ Auth schemas """
 
@@ -29,36 +28,48 @@ class FriendSchema(Schema):
 
 """ Match schemas """
 
-class GameStatusSchema(Schema):
+class PaddlesSchema(Schema):
+	x1: int
+	y1: int
+	score1: int
+	x2: int
+	y2: int
+	score2: int
+
+class BallSchema(Schema):
+	x: int
+	y: int
+     
+class GameSchema(Schema):
 	id: int
-	v: int = 0
-	key: str = ''
-	ballWidth: int = 10
-	ballHeight: int = 10
-	playerWidth: int = 15
-	playerHeight: int = 80
-	finalScore: int = 3
-	x1: int = 0
-	y1: int = 0
-	score1: int = 0
-	name1: str = 'Player1'
-	x2: int = 0
-	y2: int = 0
-	score2: int = 0
-	name2: str = 'Player2'
-	ballX: int = 0
-	ballY: int = 0
-	ballSpeedX: int = 0
-	ballSpeedY: int = 0
-	boundX: int = 0
-	boundY: int = 0
-	state: str = 'waiting'
-	modality: str = ''
+	v: int
+	boundX: int
+	boundY: int
+	finalScore: int
+	playerWidth: int
+	playerHeight: int
+	ballWidth: int
+	ballHeight: int
+	name1: str
+	name2: str
 
-class SuccessGameStatusSchema(Schema):
-	msg: str
-	match: GameStatusSchema
 
+class InitGameSchema(Schema):
+	id : int
+	name1: str
+	name2: str
+	boundX: int
+	boundY: int
+
+class KeySchema(Schema):
+	key: str
+
+class StateSchema(Schema):
+	state: str
+
+class IdMatchSchema(Schema):
+	id: int
+    
 """ User schemas """
 
 class UserSchema(Schema):

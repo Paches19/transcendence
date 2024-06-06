@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/05 08:28:11 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/07 00:04:16 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,25 +62,26 @@ function attachEventListeners() {
     document.getElementById('join-tournament').addEventListener('click', () => startGame('tournament'));
 }
 
+let name1, name2;
 function showGameScreen() {
-	let opponent
+
 	if (modality == 'solo'){
-		opponent = "AI";
+		name2 = "AI";
 	}else if (modality == 'remote'){
-		opponent = "(Waiting...)";
+		name2 = "(Waiting...)";
 	}else
-		opponent = "Human";
+		name2 = "Human";
 		
     const mainContent = document.getElementById('main-content');
-   // const username = getUsernameFromToken();
-   	const username = "jose" //para pruebas
+   // const name1 = getUsernameFromToken();
+   	name1 = "jose" //para pruebas
     mainContent.innerHTML = `
     <div class="container mt-5 game-container">
         <div class="row align-items-center">
             <div class="col-12 col-lg-8 mx-auto">
                 <div class="bg-dark text-white p-3 rounded-3">
                     <div class="d-flex justify-content-between mb-2">
-                        <h2 id="game-score" class="mb-0">${username} 0 - 0 ${opponent}</h2>
+                        <h2 id="game-score" class="mb-0">${name1} 0 - 0 ${name2}</h2>
                         <h3 id="game-timer" class="mb-0">00:00</h3>
                     </div>
                     <canvas id="pong-game" class="w-100"></canvas>
@@ -157,46 +158,62 @@ function attachGameControlEventListeners() {
 export default initPlayPage;
 export {initPlayPage, resetTime};
 
-let speed = 10; //para mover las palas (desplazamiento vertical)
-let stateMatch = {
-	'id' : 0,
-	'v': speed,
-	'key' : '',
-	'ballWidth': 10,
-	'ballHeight': 10,
-	'playerWidth': 15,
-	'playerHeight': 80,
-	'finalScore': 3,
-	
+let statePaddles = {
 	'x1': 10,
-	'y1': 0,
+	'y1': canvas.height / 2 - 40,
 	'score1': 0,
-	'name1': "Player1",
-	
-	'x2': 0,
-	'y2': 0,
-	'score2': 0,
-	'name2': "Player2",
-			
-	'ballX': 0,
-	'ballY': 0,
-	'ballSpeedX': 0,
-	'ballSpeedY': 0,
-
-	'boundX': 0,
-	'boundY': 0,
-
-	'state': 'waiting',
-	'modality': modality,
+	'x2': canvas.width - 25,
+	'y2': canvas.height / 2 - 40,
+	'score2': 0,	
 }
 
-function handleKeyDown(e) {
+let stateBall = {
+	'x': canvas.width / 2 - 5,
+	'y': canvas.height / 2 - 5,
+}
+
+let stateGame = {
+	'id': 0,
+	'v': 10,
+	'boundX': canvas.width,
+	'boundY': canvas.height,
+	'finalScore': 3,
+	'playerWidth': 15,
+	'playerHeight': 80,
+	'ballWidth': 10,
+	'ballHeight': 10,
+	'name1': name1,
+	'name2': name2,
+}
+
+let state = '';
+
+async function handleKeyDown(e) {
     const key = e.key;
 	
 	if (key == 'ArrowUp' || key == 'ArrowDown' ||
-	(stateMatch.modality == "local" && (key == "w" || key == "W")) ||
-	(stateMatch.modality == "local" && (key == "s" || key == "S"))){
-		movePaddles(key);	
+		(modality == "local" && (key == "w" || key == "W")) ||
+		(modality == "local" && (key == "s" || key == "S")) ||
+		(modality == "solo" && key == "A") ||
+		(modality == "solo" && key == "D")){
+			const apiUrl = 'http://localhost:8000/api/move_paddles';
+			try {
+				const response = await fetch(apiUrl, {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({key:key}),
+				});
+				if (response.ok){
+					const responsedata = await response.json();
+					ctx.clearRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight);
+					ctx.clearRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight);
+					statePaddles = responsedata.paddles;
+					ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight);
+					ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight);
+				}
+			} catch (error) {
+				console.error('Error moving paddles:', error);
+			}
 	}
 }
 
@@ -205,18 +222,19 @@ function pauseGame() {
 	if (textButton.textContent == "Pause"){
 		textButton.textContent = "Resume";
 		isPaused = true;
-		stateMatch.state = 'pause'; //enviar al servidor que se ha pausado el juego
+		changeState('pause');  //enviar al servidor que se ha pausado el juego
 	}
 	else{
 		textButton.textContent = "Pause";
 		isPaused = false;
-		stateMatch.state = 'playing'; //enviar al servidor que se sigue jugando
+		changeState('playing'); //enviar al servidor que se sigue jugando
+		moveBall();
 	}
 }
 
 function quitGame() {
     isPaused = true;
-	stateMatch.state = 'pause'; //enviar al servidor que se ha pausado el juego
+	changeState('pause'); //enviar al servidor que se ha pausado el juego
 	Swal.fire({
 		confirmButtonColor: '#32B974',
 		title: "Are you sure ?",
@@ -226,62 +244,14 @@ function quitGame() {
 		denyButtonText: `No`
 	  }).then((result) => {
 			if (result.isConfirmed) {
-				stateMatch.state = 'quit'; //enviar al servidor que se ha salido del juego
+				changeState('quit'); //enviar al servidor que se ha salido del juego
 				initPlayPage();
 				return;
 			}else if (result.isDenied){
 				isPaused = false;
-				stateMatch.state = 'playing'; //enviar al servidor que se sigue jugando
+				changeState('playing'); //enviar al servidor que se sigue jugando
+				moveBall();
 			}});
-}
-
-function serializeStateMatch() {
-    return JSON.stringify({
-        id: stateMatch.id,
-        v: stateMatch.v,
-        key: stateMatch.key,
-        ballWidth: stateMatch.ballWidth,
-        ballHeight: stateMatch.ballHeight,
-        playerWidth: stateMatch.playerWidth,
-        playerHeight: stateMatch.playerHeight,
-        finalScore: stateMatch.finalScore,
-        x1: stateMatch.x1,
-        y1: stateMatch.y1,
-        score1: stateMatch.score1,
-        name1: stateMatch.name1,
-        x2: stateMatch.x2,
-        y2: stateMatch.y2,
-        score2: stateMatch.score2,
-        name2: stateMatch.name2,
-        ballX: stateMatch.ballX,
-        ballY: stateMatch.ballY,
-        ballSpeedX: stateMatch.ballSpeedX,
-        ballSpeedY: stateMatch.ballSpeedY,
-        boundX: stateMatch.boundX,
-        boundY: stateMatch.boundY,
-        state: stateMatch.state,
-        modality: stateMatch.modality
-    });
-}
- 
-async function movePaddles(keypressed){
-	stateMatch.key = keypressed;
-	const apiUrl = 'http://localhost:8000/api/move_paddles';
-	try {
-		const response = await fetch(apiUrl, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json'},
-			body: serializeStateMatch(),
-		});
-		if (!response.ok) {
-			throw new Error('Failed to move paddles');
-		}
-		const data = await response.json();
-		stateMatch = data.match;
-		drawElements();
-	} catch (error) {
-		console.error('Error moving paddles:', error);
-	}
 }
 
 async function moveBall() {
@@ -290,113 +260,101 @@ async function moveBall() {
 		const response = await fetch(apiUrl, {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json',},
-			body: serializeStateMatch(),
+			body: {},
 		});
-		if (!response.ok) {
-			throw new Error('Failed to update game');
+		if (response.ok){
+			const responsedata = await response.json();
+			console.log(responsedata.ball);
+			stateBall = responsedata.ball;
 		}
-		const data = await response.json();
-		stateMatch = data.match;
-		console.log("BALL : (", stateMatch.ballX, ", ", stateMatch.ballY, ")");
-		drawElements();
 	} catch (error) {
 		console.error('Error updating game:', error);
 	}
 }
 
-async function playAI(){
-	const apiUrl = 'http://localhost:8000/api/play_ai';
+function playAI(){
+	while (state == 'playing'){
+		if (ball.x > canvas.width / 2 - 5 * 25){
+			if (ball.y > statePaddles.y2 + stateGame.playerHeight){
+				handleKeyDown({key: 'A'});
+			}else{
+				handleKeyDown({key: 'D'});
+			}
+		}
+	}
+}
+
+async function changeState(s){
+	state = s;
+	const apiUrl = 'http://localhost:8000/api/change_state';
 	try{
 		const response = await fetch(apiUrl, {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json',},
-			body: serializeStateMatch(),
+			body: JSON.stringify({state:s}),
 		});
-		if (!response.ok) {
-			throw new Error('Failed to play AI');
+		if (response.ok){
+			const responsedata = await response.json();
+			console.log(responsedata);
 		}
-		const data = await response.json();
-		stateMatch = data.match;
-		drawElements();
 	} catch (error) {
-		console.error('Error playing AI:', error);
+		console.error('Error changing state:', error);
 	}
 }
 
+async function initGame(id, name1, name2, boundX, boundY){
+	const apiUrl = 'http://localhost:8000/api/init_game';
+	try{
+		const response = await fetch(apiUrl, {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json',},
+			body: JSON.stringify( { id:id,
+									name1: name1, 
+									name2: name2, 
+									boundX: boundX, 
+									boundY: boundY}
+								),
+		});
+		if (response.ok){
+			const responsedata = await response.json();
+			console.log(responsedata);
+		}
+	} catch (error) {
+		console.error('Error initializing game:', error);
+	}
+}
+			
 function startPongLocal(){
 	ctx.fillStyle = '#FFF';
 	resetTime();
-	let words = document.getElementById('game-score').textContent.split(' ');
-	let vx = Math.floor(Math.random() * 10) + 5;
-	let vy = Math.floor(Math.random() * 7) + 5;
-	let signo = Math.floor(Math.random() * 2);
-	if (signo == 0) vx = -vx;
-	signo = Math.floor(Math.random() * 2);
-	if (signo == 0) vy = -vy;
-	
-	stateMatch = {
-		'id' : 0,
-		'v': speed,
-		'key' : '',
-		'ballWidth': 10,
-		'ballHeight': 10,
-		'playerWidth': 15,
-		'playerHeight': 80,
-		'finalScore': 3,
-		
-		'x1': 10,
-		'y1': canvas.height / 2 - 40,
-		'score1': 0,
-		'name1': words[0],
-		
-		'x2': canvas.width - 25,
-		'y2': canvas.height / 2 - 40,
-		'score2': 0,
-		'name2': words[4],
-				
-		'ballX': canvas.width / 2 - 5,
-		'ballY': canvas.height / 2 - 5,
-		'ballSpeedX': vx,
-		'ballSpeedY': vy,
-	
-		'boundX': canvas.width,
-		'boundY': canvas.height,
-
-		'state': 'waiting',
-		'modality': modality,
-	}
-	drawElements();
-	isPaused = false;
-	startTimer();
-	stateMatch.state = 'playing';
+	let id = 0;
+	initGame(id, name1, name2, canvas.width, canvas.height);
 	animate();
 }
 
 let animationInterval
-let aiInterval
+let refreshTime = 1000/30;
 
 function animate(){
-	animationInterval = setInterval(() => {
-		moveBall();
-		checkGameOver();
-	}, 1000/60);
+	isPaused = false;
+	startTimer();
+	//changeState('playing');
+	//moveBall();
+	//if (modality == 'solo'){
+	//	playAI();
+	//}
 	
-	if (stateMatch.modality == 'solo'){
-		aiInterval = setInterval(() => {
-			playAI();
-			checkGameOver();
-		}, 1000/60);
-	}
+	animationInterval = setInterval(() => {
+		updateGame();
+	//	checkGameOver();
+	}, refreshTime);
 }
 
 function checkGameOver(){
-	if (stateMatch.state == 'quit' || stateMatch.state == 'gameover'){
+	if (state != 'playing'){
 		isPaused = true;
 		clearInterval(animationInterval);
-		if (stateMatch.modality == 'solo'){
-			clearInterval(aiInterval);
-		}
-		if (stateMatch.state == 'gameover'){
+		if (state == 'gameover'){
 			gameOver();
 		}
 	}
@@ -404,12 +362,12 @@ function checkGameOver(){
 
 function drawElements() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);// Limpia el canvas
-    ctx.fillRect(stateMatch.ballX, stateMatch.ballY, stateMatch.ballWidth, stateMatch.ballHeight);// Dibuja la bola
+    ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight);
+	ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight);
+	ctx.fillRect(ball.x, ball.y, game.ballWidth, game.ballHeight);// Dibuja la bola
     ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
-    ctx.fillRect(stateMatch.x1, stateMatch.y1, stateMatch.playerWidth, stateMatch.playerHeight);// Dibuja la pala izuierda
-    ctx.fillRect(stateMatch.x2, stateMatch.y2, stateMatch.playerWidth, stateMatch.playerHeight);// Dibuja la pala derecha
     document.getElementById('game-score').innerHTML = 
-		`${stateMatch.name1} ${stateMatch.score1} - ${stateMatch.score2} ${stateMatch.name2}`;// Actualiza la puntuación
+		`${name1} ${paddles.score1} - ${paddles.score2} ${name2}`;// Actualiza la puntuación
 }
 
 function gameOver(){
@@ -434,7 +392,7 @@ function gameOver(){
 			  }).then((result) => {
 				if (result.isConfirmed) {
 					resetTime();
-					startLocalPong();
+					startPongLocal();
 				}else if (result.isDenied){
 					initPlayPage();
 					return;

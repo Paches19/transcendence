@@ -1,10 +1,11 @@
 import os
+import random
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
 from ninja.params import Query
-from .models import User, Friend, Tournament, UserTournament, GameStatus
+from .models import User, Friend, Tournament, UserTournament, Game, Paddles, Ball
 from .middleware import login_required, require_auth
 from .populate_data import *
 from typing import Optional
@@ -12,9 +13,17 @@ from .schema import (ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema, SingleTournamentSchema,
                      AddFriendSchema, TournamentSchema, UserNameSchema,
                      UserSchema, SuccessSchema, TournamentCreateSchema,
-                     GameStatusSchema, SuccessGameStatusSchema)
+                     GameSchema, InitGameSchema, KeySchema, StateSchema,
+                     PaddlesSchema, BallSchema, IdMatchSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
+
+game = Game()
+paddles = Paddles()
+ball = Ball()
+vx = 0
+vy = 0
+state = "pause"
 
 app = NinjaAPI(
     title="ft_transcendence API",
@@ -23,114 +32,139 @@ app = NinjaAPI(
 )
 
 """ Game """
-@app.post('play_ai', response={200: SuccessGameStatusSchema, 400: ErrorSchema}, tags=['Game'])
-def play_ai(request, match:GameStatusSchema):
+
+@app.post('change_state', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+def change_state(request, data:StateSchema):
 	try:
-		if match.ballX > match.boundX // 2 -  5 * 25:
-			if match.ballY > match.y2 + match.playerHeight:
-				match.y2 = min(match.boundY - match.playerHeight, match.y2 + 5)
-			else:
-				match.y2 = max(0, match.y2 - 5)
-		return 200, {"msg": "AI played", "match": match}
+		state = data.state
+		return 200, {"msg": "State changed to: " + data.state}
 	except Exception as e:
-		return 400, {"error_msg": "Error playing AI : " + str(e)}
+		return 400, {"error_msg": "Error changing state" + str(e)}
 
 
-@app.post('move_paddles', response={200: SuccessGameStatusSchema, 400: ErrorSchema}, tags=['Game'])
-def move_paddles(request, match:GameStatusSchema):
+@app.post('move_paddles', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+def move_paddles(request, press:KeySchema):
 	try:
-		if match.key == 'ArrowUp':
-			match.y1 = max(0, match.y1 - match.v)
-			msg = "Paddle1 moved up"
-		elif match.key == 'ArrowDown':
-			match.y1 = min(match.boundY - match.playerHeight, match.y1 + match.v)
-			msg = "Paddle1 moved down"
-		elif match.key == 'w' or match.key == 'W':
-			match.y2 = max(0, match.y2 - match.v)
-			msg = "Paddle2 moved up"
-		elif match.key == 's' or match.key == 'S':
-			match.y2 = min(match.boundY - match.playerHeight, match.y2 + match.v)
-			msg = "Paddle2 moved down"
-		return 200, {"msg": msg, "match": match}
+		if press.key == 'ArrowUp':
+			paddles.y1 = max(0, paddles.y1 - game.v)
+		elif press.key == 'ArrowDown':
+			paddles.y1 = min(game.boundY - game.playerHeight, paddles.y1 + game.v)
+		elif press.key == 'w' or press.key == 'W':
+			paddles.y2 = max(0, paddles.y2 - game.v)
+		elif press.key == 's' or press.key == 'S':
+			paddles.y2 = min(game.boundY - game.playerHeight, paddles.y2 + game.v)
+		return 200, {"msg": "Paddle moved", "paddles": paddles}
 	except Exception as e:
-		return 400, {"error_msg": "Error moving paddle : {str(e)}"}
+		return 400, {"error_msg": "Error moving paddle" + str(e)}
 
 
-@app.post('move_ball', response={200: SuccessGameStatusSchema, 400: ErrorSchema}, tags=['Game'])
-def move_ball(request, match:GameStatusSchema):
+@app.post('init_game', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+def init_game(request, datagame: InitGameSchema):
 	try:
-		# Update ball position
-		if match.ballY + match.ballSpeedY <= 0 or match.ballY + match.ballSpeedY >= match.boundY:
-			match.ballSpeedY = -match.ballSpeedY
-		match.ballX += match.ballSpeedX
-		match.ballY += match.ballSpeedY
-
-		# # Check for collisions with walls
-		# # Left wall (Paddle 1)
-		if match.ballX <= match.x1:
-			match.score2 += 1
-			if match.score2 == match.finalScore:
-				match.state = 'gameover'
-			else:
-				match.ballX = match.boundX // 2 - match.ballWidth // 2
-				match.ballY = match.boundY // 2 - match.ballHeight // 2
-
-		# # Right wall (Paddle 2)
-		elif match.ballX >= match.x2 + match.playerWidth:
-			match.score1 += 1
-			if match.score1 == match.finalScore:
-				match.state = 'gameover'
-			else:
-				match.ballX = match.boundX // 2 - match.ballWidth // 2
-				match.ballY = match.boundY // 2 - match.ballHeight // 2
-
-		# # Paddle collisions
-		elif (match.ballY <= match.ballHeight + match.y2 and match.ballY >= match.y2 and match.ballX + match.ballWidth >= match.x2) or \
-				(match.ballY <= match.ballHeight + match.y1 and match.ballY >= match.y1 and match.ballX - match.ballWidth <= match.x1):
-			match.ballSpeedX = -match.ballSpeedX
-			if match.ballX > match.x1 and match.ballX < match.x1 + match.playerWidth:
-				match.ballX = match.x1 + match.playerWidth + 1
-
-			if match.ballX > match.x2 and match.ballX < match.x2 + match.playerWidth:
-				match.ballX = match.x2 - match.ballWidth - 1
-
-			if (match.ballY > match.y1 + match.playerHeight * 0.75 or match.ballY > match.y2 + match.playerHeight * 0.75) and match.ballSpeedY < 3:
-				match.ballSpeedY += 1
-
-			if (match.ballY < match.y1 + match.playerHeight * 0.25 or match.ballY < match.y2 + match.playerHeight * 0.25) and match.ballSpeedY > -3:
-				match.ballSpeedY -= 1
-		return 200, {"msg": "Ball moved", "match": match}
+		game.id = datagame.id
+		game.v = 10
+		game.ballWidth = 10
+		game.ballHeight = 10
+		game.playerWidth = 15
+		game.playerHeight = 80
+		game.finalScore = 3
+		game.name1 = datagame.name1
+		game.name2 = datagame.name2
+		game.boundX = datagame.boundX
+		game.boundY = datagame.boundY
+		
+		paddles.x1 = 10
+		paddles.y1 = datagame.boundY // 2 - game.playerHeight // 2
+		paddles.score1 = 0
+		
+		paddles.x2 = datagame.boundX - 10 - game.playerWidth
+		paddles.y2 = datagame.boundY // 2 - game.playerHeight // 2
+		paddles.score2 = 0
+		
+            
+		ball.x = datagame.boundX // 2 - game.ballWidth // 2
+		ball.y = datagame.boundY // 2 - game.ballHeight // 2
+		vx = random.randint(-5, 5)
+		vy = random.randint(-5, 5)
+		if vx == 0:
+			vx = 1
+		if vy == 0:
+			vy = 1
+		state = "pause"
+      
+		return 200, {"msg": "Game initialized"}
 	except Exception as e:
-		return 400, {"error_msg": "Error moving ball : " + str(e)}
+		return 400, {"error_msg": "Error initializing game" + str(e)}
 
+@app.post('move_ball', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+def move_ball(request):
+	try:
+		while (state == 'playing'):
+			# Update ball position
+			if ball.y + vy <= 0 or ball.y + vy >= game.boundY:
+				vy = -vy
+			ball.x += vx
+			ball.y += vy
 
+			# # Check for collisions with walls
+			# # Left wall (Paddle 1)
+			if ball.x <= paddles.x1:
+				paddles.score2 += 1
+				if paddles.score2 == game.finalScore:
+					state = "gameover"
+
+			# # Right wall (Paddle 2)
+			elif ball.x >= paddles.x2 + game.playerWidth:
+				paddles.score1 += 1
+				if paddles.score1 == game.finalScore:
+					state = "gameover"
+
+			# # Paddle collisions
+			elif (ball.y <= game.ballHeight + paddles.y2 and ball.y >= paddles.y2 and ball.x + game.ballWidth >= paddles.x2) or \
+					(ball.y <= game.ballHeight + paddles.y1 and ball.y >= paddles.y1 and ball.x - game.ballWidth <= paddles.x1):
+				vx = -vx
+				if ball.x > paddles.x1 and ball.x < paddles.x1 + game.playerWidth:
+					ball.x = paddles.x1 + game.playerWidth + 1
+
+				if ball.x > paddles.x2 and ball.x < paddles.x2 + game.playerWidth:
+					ball.x = paddles.x2 - game.ballWidth - 1
+
+				if (ball.y > paddles.y1 + game.playerHeight * 0.75 or ball.y > paddles.y2 + game.playerHeight * 0.75) and vy < 3:
+					vy += 1
+
+				if (ball.y < paddles.y1 + game.playerHeight * 0.25 or ball.y < paddles.y2 + game.playerHeight * 0.25) and vy > -3:
+					vy -= 1
+		return {"msg": "Ball moved", "ball": ball}
+	except Exception as e:
+		return 400, {"error_msg": "Error moving ball" + str(e)}
+   
 @app.post("new_match", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
-def new_match(request, match: GameStatusSchema):
+def new_match(request, match: IdMatchSchema):
     try:
         print("Comprobando si existe Match ID: ", match.id)
-        GameStatus.objects.get(id=match.id)
+        game.objects.get(id=match.id)
         return 400, {"error_msg": "Match already exists"}
-    except GameStatus.DoesNotExist:
-        GameStatus.objects.create(id=match.id)
+    except game.DoesNotExist:
+        game.objects.create(id=match.id)
         return {"msg": "Match created"}
 
 
 @app.post("join_match", response=SuccessSchema, tags=['Match'])
-def join_match(request, match: GameStatusSchema):
+def join_match(request, match: IdMatchSchema):
     try:
-        GameStatus.objects.get(id=match.id)
+        game.objects.get(id=match.id)
         return {"msg": "Match joined"}
-    except GameStatus.DoesNotExist:
+    except game.DoesNotExist:
         return 400, {"error_msg": "Match does not exist"}
 
 
 @app.post("delete_match", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
-def delete_match(request, match: GameStatusSchema):
+def delete_match(request, match:IdMatchSchema):
     try:
-        tmpmatch = GameStatus.objects.get(id=match.id)
+        tmpmatch = game.objects.get(id=match.id)
         tmpmatch.delete()
         return 200, {"msg": "Match deleted"}
-    except GameStatus.DoesNotExist:
+    except game.DoesNotExist:
         return 400, {"error_msg": "Match does not exist"}
 
 
