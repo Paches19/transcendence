@@ -6,17 +6,18 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:12 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/05 11:05:00 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/06 10:41:42 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
-from .models import User, Friend, Match, UserTournament
+from .models import User, Friend, Match, UserTournament, Tournament
+import datetime
 
 # Aux functions to populate response fields with data
 # They are imported and used in `api.py`
 
 
-def populate_friends(user):
+def populate_friends(user: User):
     all_friends = Friend.objects.all()
     friends = []
     for friend in all_friends:
@@ -39,13 +40,13 @@ def populate_friends(user):
     return friends
 
 
-def populate_matches(user):
+def populate_matches(user: User):
     all_matches = Match.objects.all()
     matches = []
     for match in all_matches:
         if len(matches) >= 10:
-            break
-        if match.user1.id == user.id or match.user2.id == user.id:
+            matches.pop(0)
+        if (match.user1.id == user.id or match.user2.id == user.id) and match.winner != None:
             is_user1 = match.user1.id == user.id
             matches.append({
                 "date": str(match.date),
@@ -56,7 +57,7 @@ def populate_matches(user):
     return matches
 
 
-def populate_tournament_participants(tournament):
+def populate_tournament_participants(tournament: Tournament):
     participants = UserTournament.objects.filter(tournament=tournament)
     resp = []
     for participant in participants:
@@ -68,7 +69,17 @@ def populate_tournament_participants(tournament):
     return resp
 
 
-def matches_won(user, tournament):
+def matches_played(user: User, tournament: Tournament):
+    matches = Match.objects.filter(
+        user1=user, tournament=tournament) | Match.objects.filter(user2=user, tournament=tournament)
+    count = 0
+    for match in matches:
+        if match.winner != None:
+            count += 1
+    return count
+
+
+def matches_won(user: User, tournament: Tournament):
     matches = Match.objects.filter(
         user1=user, tournament=tournament) | Match.objects.filter(user2=user, tournament=tournament)
     count = 0
@@ -78,7 +89,17 @@ def matches_won(user, tournament):
     return count
 
 
-def populate_standings(tournament):
+def matches_lost(user: User, tournament: Tournament):
+    matches = Match.objects.filter(
+        user1=user, tournament=tournament) | Match.objects.filter(user2=user, tournament=tournament)
+    count = 0
+    for match in matches:
+        if match.winner != user and match.winner != None:
+            count += 1
+    return count
+
+
+def populate_standings(tournament: Tournament):
     participants = UserTournament.objects.filter(tournament=tournament)
     tournament_matches = Match.objects.filter(tournament=tournament)
     resp = []
@@ -87,16 +108,16 @@ def populate_standings(tournament):
             user1=participant.user) | tournament_matches.filter(user2=participant.user)
         resp.append({
             "username": participant.user.username,
-            "games_played": user_matches.count(),
+            "games_played": matches_played(participant.user, tournament),
             "games_won": matches_won(participant.user, tournament),
-            "games_lost": user_matches.count() - matches_won(participant.user, tournament),
+            "games_lost": matches_lost(participant.user, tournament),
             "points_for": sum([match.pointsUser1 if match.user1 == participant.user else match.pointsUser2 for match in user_matches]),
             "points_against": sum([match.pointsUser2 if match.user1 == participant.user else match.pointsUser1 for match in user_matches])
         })
     return resp
 
 
-def populate_tournament_matches(tournament):
+def populate_tournament_matches(tournament: Tournament):
     matches = Match.objects.filter(tournament=tournament)
     resp = []
     for match in matches:
@@ -110,12 +131,13 @@ def populate_tournament_matches(tournament):
     return resp
 
 
-def userTournamentsPlayed(user):
+def userTournamentsPlayed(user: User):
     tournaments = UserTournament.objects.filter(user=user)
     return len(tournaments)
 
-# Count of the tournaments the user has won, most won games in the tournament
-def userTournamentsWon(user):
+
+# Count of the tournaments the user has won, most won games in the tournament is the overall winner
+def userTournamentsWon(user: User):
     tournaments = UserTournament.objects.filter(user=user)
     count = 0
     for tournament in tournaments:
@@ -139,7 +161,8 @@ def userTournamentsWon(user):
             count += 1
     return count
 
-def doTournamentMatchmaking(tournament):
+
+def doTournamentMatchmaking(tournament: Tournament):
     # Round robin tournament matchmaking
     players = UserTournament.objects.filter(tournament=tournament)
     for i in range(len(players)):
@@ -147,6 +170,17 @@ def doTournamentMatchmaking(tournament):
             Match.objects.create(
                 user1=players[i].user,
                 user2=players[j].user,
+                date=datetime.date.today(),
                 tournament=tournament
             )
 
+
+def checkTournamentFinished(tournament: Tournament):
+    # Check if all matches in the tournament have been played
+    matches = Match.objects.filter(tournament=tournament)
+    for match in matches:
+        if match.winner == None:
+            return False
+    tournament.status = 'ended'
+    tournament.save()
+    return True

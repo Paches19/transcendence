@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/05 08:40:13 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/06 09:19:31 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -337,4 +337,6 @@ def leave_tournament(request, tournament_id: int):
     user_tournament = get_object_or_404(
         UserTournament, user=user, tournament=tournament)
     user_tournament.delete()
+
+    checkTournamentFinished(tournament)
     return 200, {"msg": "User left tournament"}
