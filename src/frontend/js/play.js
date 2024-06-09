@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/09 17:43:52 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/10 00:12:23 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -158,33 +158,34 @@ function attachGameControlEventListeners() {
 export default initPlayPage;
 export {initPlayPage, resetTime};
 
-let statePaddles = {x1: 0, y1: 0, x2: 0, y2: 0, score1: 0, score2: 0};
-let stateBall = {x: 0, y: 0, vx: 0, vy: 0, state: ""};
-let stateGame = {id: 0, v: 0, finalScore: 0, name1: "", name2: "", playerWidth: 10, playerHeight: 100, ballWidth: 10, ballHeight: 10, boundX: 0, boundY: 0};
+let statePaddles = { x1: 0, y1: 0, score1: 0, x2: 0, y2: 0, score2: 0 };
+let stateBall = { x: 0, y: 0, vx: 0, vy: 0, state: '' };
+let stateGame = { id: 0, v: 0, ballWidth: 0, ballHeight: 0, playerWidth: 0, playerHeight: 0, finalScore: 0, name1: '', name2: '', boundX: 0, boundY: 0 };
 
 async function handleKeyDown(e) {
-    const key = e.key;
-	
-	if (key == 'ArrowUp' || key == 'ArrowDown' ||
-		(modality == "local" && (key == "w" || key == "W")) ||
-		(modality == "local" && (key == "s" || key == "S")) ||
-		(modality == "solo" && key == "A") ||
-		(modality == "solo" && key == "D")){
+    const pressed = e.key;
+	console.log("key pressed = " + pressed);
+	if (pressed == 'ArrowUp' || pressed == 'ArrowDown' ||
+		(modality == "local" && (pressed == "w" || pressed == "W")) ||
+		(modality == "local" && (pressed == "s" || pressed == "S")) ||
+		(modality == "solo" && pressed == "A") ||
+		(modality == "solo" && pressed == "D")){
 			const apiUrl = 'http://localhost:8000/api/move_paddles';
 			try {
 				const response = await fetch(apiUrl, {
 					method: 'POST',
 					headers: {'Content-Type': 'application/json'},
-					body: JSON.stringify({key:key}),
+					body: JSON.stringify({keypressed: pressed,}),
 				});
 				if (response.ok){
 					const responsedata = await response.json();
+					console.log(responsedata.msg);
 					ctx.fillStyle = '#000';
 					ctx.fillRect(statePaddles.x1, 0, stateGame.playerWidth, stateGame.boundY); //Borra la paleta 1
 					ctx.fillRect(statePaddles.x2, 0, stateGame.playerWidth, stateGame.boundY); //Borra la paleta 2
 	
-					statePaddles = responsedata.paddles; //Obtiene la nueva posición de las paletas
-					
+					statePaddles = responsedata.paddles;
+		
 					ctx.fillStyle = '#FFF';
 					ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
 					ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
@@ -204,8 +205,6 @@ function pauseGame() {
 	}
 	else{
 		textButton.textContent = "Pause";
-		isPaused = false;
-		changeState('playing');
 		animate();
 	}
 }
@@ -226,8 +225,6 @@ function quitGame() {
 				initPlayPage();
 				return;
 			}else if (result.isDenied){
-				isPaused = false;
-				changeState('playing');
 				animate();
 			}});
 }
@@ -235,8 +232,8 @@ function quitGame() {
 async function playAI(){
 	//AI debe simular entrada por teclado
 	if (stateBall.state == 'playing' && modality == 'solo'){
-		if (ball.x > canvas.width / 2 - 5 * 25){
-			if (ball.y > statePaddles.y2 + stateGame.playerHeight){
+		if (stateBall.x > canvas.width / 2 - 5 * 25){
+			if (stateBall.y > statePaddles.y2 + stateGame.playerHeight){
 				handleKeyDown({key: 'A'});
 			}else{
 				handleKeyDown({key: 'D'});
@@ -343,13 +340,11 @@ async function changeState(s){
 
 }
 async function moveBall() {
-	console.log("intento mandar : " + stateBall.state);
 	const apiUrl = 'http://localhost:8000/api/move_ball';
 	try{
 		const response = await fetch(apiUrl, {
 			method: 'POST',
 			headers: {'Content-Type': 'application/json',},
-			body: JSON.stringify({state: stateBall.state,}),
 		});
 		if (response.ok){
 			const responsedata = await response.json();
@@ -359,15 +354,8 @@ async function moveBall() {
 			ctx.fillStyle = '#FFF';
 			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
 			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
-			if (stateBall.state != 'playing')
-				clearInterval(animationInterval);
-			if (stateBall.state == 'gameover')
-				gameOver();
-			else if (stateBall.state == 'score'){
-				updateScores();
-				resetBall(); //Reinicia la bola
-				setTimeout(animate, 1000);
-			}
+			ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+			ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
 		}
 	} catch (error) {
 		console.error('Error moving ball:', error);
@@ -377,16 +365,38 @@ async function moveBall() {
 function animate(){
 	isPaused = false;
 	changeState('playing');
-	animationInterval = setInterval(moveBall, refreshTime);
+	sleep(40);
+	animationInterval = setInterval(() => {
+		playAI();
+		moveBall();
+		checkFinish();
+	}, refreshTime);
+}
+
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function checkFinish(){
+	if (stateBall.state != 'playing'){
+		isPaused = true;
+		clearInterval(animationInterval);
+	}
+	if (stateBall.state == 'gameover')
+		gameOver();
+	else if (stateBall.state == 'score'){
+		updateScores();
+		resetBall(); //Reinicia la bola
+		setTimeout(animate, 1000);
+	}
 }
 
 function gameOver(){
 	let texto;
-	if (stateMatch.score1 == stateMatch.finalScore)
-		texto = stateMatch.name1;
+	if (statePaddles.score1 == stateGame.finalScore)
+		texto = stateGame.name1;
 	else 
-		texto = stateMatch.name2;
-
+		texto = stateGame.name2;
 	Swal.fire({
 		title: texto + " WIN",
 		confirmButtonColor: '#32B974',
@@ -401,7 +411,7 @@ function gameOver(){
 				denyButtonText: `No`
 			  }).then((result) => {
 				if (result.isConfirmed) {
-					resetTime();
+					showGameScreen();
 					startPongLocal();
 				}else if (result.isDenied){
 					initPlayPage();

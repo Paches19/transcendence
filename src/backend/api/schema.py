@@ -1,4 +1,3 @@
-from pydantic import BaseModel, ValidationError, model_validator
 import datetime
 from typing import List
 from ninja import  Schema
@@ -36,6 +35,10 @@ class PaddlesSchema(Schema):
 	y2: int
 	score2: int
 
+class MovePaddlesSchema(Schema):
+     msg: str
+     paddles: PaddlesSchema
+
 class BallSchema(Schema):
 	x: int
 	y: int
@@ -43,6 +46,11 @@ class BallSchema(Schema):
 	vy: int
 	state: str
      
+class MoveBallSchema(Schema):
+     msg: str
+     ball: BallSchema
+
+
 class GameSchema(Schema):
 	id: int
 	v: int
@@ -65,7 +73,7 @@ class InitGameSchema(Schema):
 	boundY: int
 
 class KeySchema(Schema):
-	key: str
+	keypressed: str
 
 class IdMatchSchema(Schema):
 	id: int
