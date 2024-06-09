@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/07 00:04:16 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/09 17:43:52 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,10 +71,10 @@ function showGameScreen() {
 		name2 = "(Waiting...)";
 	}else
 		name2 = "Human";
-		
-    const mainContent = document.getElementById('main-content');
-   // const name1 = getUsernameFromToken();
-   	name1 = "jose" //para pruebas
+	name1 = "jose" //para pruebas	
+
+	const mainContent = document.getElementById('main-content');
+   // const name1 = getUsernameFromToken();   
     mainContent.innerHTML = `
     <div class="container mt-5 game-container">
         <div class="row align-items-center">
@@ -158,35 +158,9 @@ function attachGameControlEventListeners() {
 export default initPlayPage;
 export {initPlayPage, resetTime};
 
-let statePaddles = {
-	'x1': 10,
-	'y1': canvas.height / 2 - 40,
-	'score1': 0,
-	'x2': canvas.width - 25,
-	'y2': canvas.height / 2 - 40,
-	'score2': 0,	
-}
-
-let stateBall = {
-	'x': canvas.width / 2 - 5,
-	'y': canvas.height / 2 - 5,
-}
-
-let stateGame = {
-	'id': 0,
-	'v': 10,
-	'boundX': canvas.width,
-	'boundY': canvas.height,
-	'finalScore': 3,
-	'playerWidth': 15,
-	'playerHeight': 80,
-	'ballWidth': 10,
-	'ballHeight': 10,
-	'name1': name1,
-	'name2': name2,
-}
-
-let state = '';
+let statePaddles = {x1: 0, y1: 0, x2: 0, y2: 0, score1: 0, score2: 0};
+let stateBall = {x: 0, y: 0, vx: 0, vy: 0, state: ""};
+let stateGame = {id: 0, v: 0, finalScore: 0, name1: "", name2: "", playerWidth: 10, playerHeight: 100, ballWidth: 10, ballHeight: 10, boundX: 0, boundY: 0};
 
 async function handleKeyDown(e) {
     const key = e.key;
@@ -205,11 +179,15 @@ async function handleKeyDown(e) {
 				});
 				if (response.ok){
 					const responsedata = await response.json();
-					ctx.clearRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight);
-					ctx.clearRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight);
-					statePaddles = responsedata.paddles;
-					ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight);
-					ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight);
+					ctx.fillStyle = '#000';
+					ctx.fillRect(statePaddles.x1, 0, stateGame.playerWidth, stateGame.boundY); //Borra la paleta 1
+					ctx.fillRect(statePaddles.x2, 0, stateGame.playerWidth, stateGame.boundY); //Borra la paleta 2
+	
+					statePaddles = responsedata.paddles; //Obtiene la nueva posición de las paletas
+					
+					ctx.fillStyle = '#FFF';
+					ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+					ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
 				}
 			} catch (error) {
 				console.error('Error moving paddles:', error);
@@ -222,19 +200,19 @@ function pauseGame() {
 	if (textButton.textContent == "Pause"){
 		textButton.textContent = "Resume";
 		isPaused = true;
-		changeState('pause');  //enviar al servidor que se ha pausado el juego
+		changeState('pause');
 	}
 	else{
 		textButton.textContent = "Pause";
 		isPaused = false;
-		changeState('playing'); //enviar al servidor que se sigue jugando
-		moveBall();
+		changeState('playing');
+		animate();
 	}
 }
 
 function quitGame() {
     isPaused = true;
-	changeState('pause'); //enviar al servidor que se ha pausado el juego
+	changeState('pause');
 	Swal.fire({
 		confirmButtonColor: '#32B974',
 		title: "Are you sure ?",
@@ -244,36 +222,19 @@ function quitGame() {
 		denyButtonText: `No`
 	  }).then((result) => {
 			if (result.isConfirmed) {
-				changeState('quit'); //enviar al servidor que se ha salido del juego
+				changeState('quit');
 				initPlayPage();
 				return;
 			}else if (result.isDenied){
 				isPaused = false;
-				changeState('playing'); //enviar al servidor que se sigue jugando
-				moveBall();
+				changeState('playing');
+				animate();
 			}});
 }
 
-async function moveBall() {
-	const apiUrl = 'http://localhost:8000/api/move_ball';
-	try{
-		const response = await fetch(apiUrl, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json',},
-			body: {},
-		});
-		if (response.ok){
-			const responsedata = await response.json();
-			console.log(responsedata.ball);
-			stateBall = responsedata.ball;
-		}
-	} catch (error) {
-		console.error('Error updating game:', error);
-	}
-}
-
-function playAI(){
-	while (state == 'playing'){
+async function playAI(){
+	//AI debe simular entrada por teclado
+	if (stateBall.state == 'playing' && modality == 'solo'){
 		if (ball.x > canvas.width / 2 - 5 * 25){
 			if (ball.y > statePaddles.y2 + stateGame.playerHeight){
 				handleKeyDown({key: 'A'});
@@ -281,24 +242,6 @@ function playAI(){
 				handleKeyDown({key: 'D'});
 			}
 		}
-	}
-}
-
-async function changeState(s){
-	state = s;
-	const apiUrl = 'http://localhost:8000/api/change_state';
-	try{
-		const response = await fetch(apiUrl, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json',},
-			body: JSON.stringify({state:s}),
-		});
-		if (response.ok){
-			const responsedata = await response.json();
-			console.log(responsedata);
-		}
-	} catch (error) {
-		console.error('Error changing state:', error);
 	}
 }
 
@@ -312,62 +255,129 @@ async function initGame(id, name1, name2, boundX, boundY){
 									name1: name1, 
 									name2: name2, 
 									boundX: boundX, 
-									boundY: boundY}
-								),
+									boundY: boundY}),
 		});
 		if (response.ok){
 			const responsedata = await response.json();
-			console.log(responsedata);
+			stateGame = responsedata.game
+			stateBall = responsedata.ball
+			statePaddles = responsedata.paddles
+			ctx.fillStyle = '#FFF';
+			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
+			ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+			ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
+			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
+			console.log("Game initialized");
 		}
 	} catch (error) {
 		console.error('Error initializing game:', error);
 	}
 }
+
+async function resetBall(){
+	const apiUrl = 'http://localhost:8000/api/reset_ball';
+	try{
+		const response = await fetch(apiUrl, {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json',},
+		});
+		if (response.ok){
+			const responsedata = await response.json();
+			ctx.fillStyle = '#000';
+			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight); //Borra la bola
+			stateBall = responsedata.ball; //Obtiene la nueva posición de la bola
+			ctx.fillStyle = '#FFF';
+			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
+			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
+		}
+	} catch (error) {
+		console.error('Error reseting ball:', error);
+	}
+}
 			
 function startPongLocal(){
-	ctx.fillStyle = '#FFF';
 	resetTime();
 	let id = 0;
 	initGame(id, name1, name2, canvas.width, canvas.height);
+	startTimer();
 	animate();
 }
 
 let animationInterval
-let refreshTime = 1000/30;
+let refreshTime = 1000/60;
 
-function animate(){
-	isPaused = false;
-	startTimer();
-	//changeState('playing');
-	//moveBall();
-	//if (modality == 'solo'){
-	//	playAI();
-	//}
-	
-	animationInterval = setInterval(() => {
-		updateGame();
-	//	checkGameOver();
-	}, refreshTime);
-}
-
-function checkGameOver(){
-	if (state != 'playing'){
-		isPaused = true;
-		clearInterval(animationInterval);
-		if (state == 'gameover'){
-			gameOver();
+async function updateScores(){
+	const apiUrl = 'http://localhost:8000/api/get_scores';
+	try{
+		const response = await fetch(apiUrl, {
+			method: 'GET',
+			headers: {'Content-Type': 'application/json',},
+		});
+		if (response.ok){
+			const responsedata = await response.json();
+			statePaddles = responsedata.paddles;
+			document.getElementById('game-score').innerHTML = 
+				`${stateGame.name1} ${statePaddles.score1} - ${statePaddles.score2} ${stateGame.name2}`;// Actualiza la puntuación
 		}
+	} catch (error) {
+		console.error('Error getting scores:', error);
 	}
 }
 
-function drawElements() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);// Limpia el canvas
-    ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight);
-	ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight);
-	ctx.fillRect(ball.x, ball.y, game.ballWidth, game.ballHeight);// Dibuja la bola
-    ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
-    document.getElementById('game-score').innerHTML = 
-		`${name1} ${paddles.score1} - ${paddles.score2} ${name2}`;// Actualiza la puntuación
+async function changeState(s){
+	stateBall.state = s;
+	const apiUrl = 'http://localhost:8000/api/change_state';
+	try{
+		const response = await fetch(apiUrl, {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json',},
+			body: JSON.stringify({state: s}),
+		});
+		if (response.ok){
+			const responsedata = await response.json();
+			console.log(responsedata.msg);
+		}
+	} catch (error) {
+		console.error('Error changing state:', error);
+	}
+
+}
+async function moveBall() {
+	console.log("intento mandar : " + stateBall.state);
+	const apiUrl = 'http://localhost:8000/api/move_ball';
+	try{
+		const response = await fetch(apiUrl, {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json',},
+			body: JSON.stringify({state: stateBall.state,}),
+		});
+		if (response.ok){
+			const responsedata = await response.json();
+			ctx.fillStyle = '#000';
+			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight); //Borra la bola
+			stateBall = responsedata.ball; //Obtiene la nueva posición de la bola
+			ctx.fillStyle = '#FFF';
+			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
+			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
+			if (stateBall.state != 'playing')
+				clearInterval(animationInterval);
+			if (stateBall.state == 'gameover')
+				gameOver();
+			else if (stateBall.state == 'score'){
+				updateScores();
+				resetBall(); //Reinicia la bola
+				setTimeout(animate, 1000);
+			}
+		}
+	} catch (error) {
+		console.error('Error moving ball:', error);
+	}
+}
+
+function animate(){
+	isPaused = false;
+	changeState('playing');
+	animationInterval = setInterval(moveBall, refreshTime);
 }
 
 function gameOver(){

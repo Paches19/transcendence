@@ -11,11 +11,12 @@ class Paddles(models.Model):
 	y2 = models.IntegerField(default=0)
 	score2 = models.IntegerField(default=0)
 
-
 class Ball(models.Model):
 	x = models.IntegerField(default=0)
 	y = models.IntegerField(default=0)
-
+	vx = models.IntegerField(default=0)
+	vy = models.IntegerField(default=0)
+	state = models.CharField(max_length=40, default='pause')
 
 class Game(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -29,7 +30,6 @@ class Game(models.Model):
     name2 = models.CharField(max_length=40, default='Player2')
     boundX = models.IntegerField(default=0)
     boundY = models.IntegerField(default=0)
-
 
 class Match(models.Model):
     matchID = models.AutoField(primary_key=True)

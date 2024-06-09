@@ -13,17 +13,14 @@ from .schema import (ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema, SingleTournamentSchema,
                      AddFriendSchema, TournamentSchema, UserNameSchema,
                      UserSchema, SuccessSchema, TournamentCreateSchema,
-                     GameSchema, InitGameSchema, KeySchema, StateSchema,
-                     PaddlesSchema, BallSchema, IdMatchSchema)
+                     StateSchema, InitGameSchema, KeySchema,
+                     PaddlesSchema, BallSchema, IdMatchSchema, SuccessInitSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
 game = Game()
 paddles = Paddles()
 ball = Ball()
-vx = 0
-vy = 0
-state = "pause"
 
 app = NinjaAPI(
     title="ft_transcendence API",
@@ -34,31 +31,37 @@ app = NinjaAPI(
 """ Game """
 
 @app.post('change_state', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
-def change_state(request, data:StateSchema):
+def change_state(request, state:StateSchema):
 	try:
-		state = data.state
-		return 200, {"msg": "State changed to: " + data.state}
+		ball.state = state.state
+		return 200, {"msg": "State changed"}
 	except Exception as e:
 		return 400, {"error_msg": "Error changing state" + str(e)}
 
+@app.get('get_scores', response={200: PaddlesSchema, 400: ErrorSchema}, tags=['Game'])
+def get_scores(request):
+	try:
+		return 200, {"paddles": paddles}
+	except Exception as e:
+		return 400, {"error_msg": "Error getting scores" + str(e)}
 
-@app.post('move_paddles', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+@app.post('move_paddles', response={200: PaddlesSchema, 400: ErrorSchema}, tags=['Game'])
 def move_paddles(request, press:KeySchema):
 	try:
 		if press.key == 'ArrowUp':
 			paddles.y1 = max(0, paddles.y1 - game.v)
 		elif press.key == 'ArrowDown':
 			paddles.y1 = min(game.boundY - game.playerHeight, paddles.y1 + game.v)
-		elif press.key == 'w' or press.key == 'W':
+		elif press.key == 'w' or press.key == 'W' or press.key == 'A':
 			paddles.y2 = max(0, paddles.y2 - game.v)
-		elif press.key == 's' or press.key == 'S':
+		elif press.key == 's' or press.key == 'S' or press.key == 'D':
 			paddles.y2 = min(game.boundY - game.playerHeight, paddles.y2 + game.v)
-		return 200, {"msg": "Paddle moved", "paddles": paddles}
+		return 200, {"paddles": paddles}
 	except Exception as e:
 		return 400, {"error_msg": "Error moving paddle" + str(e)}
 
 
-@app.post('init_game', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
+@app.post('init_game', response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Game'])
 def init_game(request, datagame: InitGameSchema):
 	try:
 		game.id = datagame.id
@@ -76,68 +79,89 @@ def init_game(request, datagame: InitGameSchema):
 		paddles.x1 = 10
 		paddles.y1 = datagame.boundY // 2 - game.playerHeight // 2
 		paddles.score1 = 0
-		
 		paddles.x2 = datagame.boundX - 10 - game.playerWidth
 		paddles.y2 = datagame.boundY // 2 - game.playerHeight // 2
 		paddles.score2 = 0
-		
-            
+
+		ball.state = "pause"
 		ball.x = datagame.boundX // 2 - game.ballWidth // 2
 		ball.y = datagame.boundY // 2 - game.ballHeight // 2
-		vx = random.randint(-5, 5)
-		vy = random.randint(-5, 5)
-		if vx == 0:
-			vx = 1
-		if vy == 0:
-			vy = 1
-		state = "pause"
+		ball.vx = random.randint(-5, 5)
+		ball.vy = random.randint(-5, 5)
+		if ball.vx == 0:
+			ball.vx = 1
+		if ball.vy == 0:
+			ball.vy = 1
       
-		return 200, {"msg": "Game initialized"}
+		return 200, {"game": game, "paddles": paddles, "ball": ball}
 	except Exception as e:
 		return 400, {"error_msg": "Error initializing game" + str(e)}
 
-@app.post('move_ball', response={200: SuccessSchema, 400: ErrorSchema}, tags=['Game'])
-def move_ball(request):
+@app.post('move_ball', response={200: BallSchema, 400: ErrorSchema}, tags=['Game'])
+def move_ball(request, state: StateSchema):
 	try:
-		while (state == 'playing'):
-			# Update ball position
-			if ball.y + vy <= 0 or ball.y + vy >= game.boundY:
-				vy = -vy
-			ball.x += vx
-			ball.y += vy
+		ball.state = state.state
+		# Update ball position
+		if ball.y + ball.vy <= 0 or ball.y + ball.vy >= game.boundY:
+			ball.vy = -ball.vy
+		ball.x += ball.vx
+		ball.y += ball.vy
 
-			# # Check for collisions with walls
-			# # Left wall (Paddle 1)
-			if ball.x <= paddles.x1:
-				paddles.score2 += 1
-				if paddles.score2 == game.finalScore:
-					state = "gameover"
+		# # Check for collisions with walls
+		# # Left wall (Paddle 1)
+		if ball.x <= paddles.x1:
+			ball.vx = -ball.vx
+			# paddles.score2 += 1
+			# if paddles.score2 == game.finalScore:
+			# 	ball.state = "gameover"
+			# else:
+			# 	ball.state = "score"
 
 			# # Right wall (Paddle 2)
-			elif ball.x >= paddles.x2 + game.playerWidth:
-				paddles.score1 += 1
-				if paddles.score1 == game.finalScore:
-					state = "gameover"
+		elif ball.x >= paddles.x2 + game.playerWidth:
+			ball.vx = -ball.vx
+			# paddles.score1 += 1
+			# if paddles.score1 == game.finalScore:
+			# 	ball.state = "gameover"
+			# else:
+			# 	ball.state = "score"
 
-			# # Paddle collisions
-			elif (ball.y <= game.ballHeight + paddles.y2 and ball.y >= paddles.y2 and ball.x + game.ballWidth >= paddles.x2) or \
-					(ball.y <= game.ballHeight + paddles.y1 and ball.y >= paddles.y1 and ball.x - game.ballWidth <= paddles.x1):
-				vx = -vx
-				if ball.x > paddles.x1 and ball.x < paddles.x1 + game.playerWidth:
-					ball.x = paddles.x1 + game.playerWidth + 1
+		# # Paddle collisions
+		elif (ball.y <= game.ballHeight + paddles.y2 and ball.y >= paddles.y2 and ball.x + game.ballWidth >= paddles.x2) or \
+				(ball.y <= game.ballHeight + paddles.y1 and ball.y >= paddles.y1 and ball.x - game.ballWidth <= paddles.x1):
+			ball.vx = -ball.vx
+			if ball.x > paddles.x1 and ball.x < paddles.x1 + game.playerWidth:
+				ball.x = paddles.x1 + game.playerWidth + 1
 
-				if ball.x > paddles.x2 and ball.x < paddles.x2 + game.playerWidth:
-					ball.x = paddles.x2 - game.ballWidth - 1
+			if ball.x > paddles.x2 and ball.x < paddles.x2 + game.playerWidth:
+				ball.x = paddles.x2 - game.ballWidth - 1
 
-				if (ball.y > paddles.y1 + game.playerHeight * 0.75 or ball.y > paddles.y2 + game.playerHeight * 0.75) and vy < 3:
-					vy += 1
+			if (ball.y > paddles.y1 + game.playerHeight * 0.75 or ball.y > paddles.y2 + game.playerHeight * 0.75) and ball.vy < 3:
+				ball.vy += 1
 
-				if (ball.y < paddles.y1 + game.playerHeight * 0.25 or ball.y < paddles.y2 + game.playerHeight * 0.25) and vy > -3:
-					vy -= 1
-		return {"msg": "Ball moved", "ball": ball}
+			if (ball.y < paddles.y1 + game.playerHeight * 0.25 or ball.y < paddles.y2 + game.playerHeight * 0.25) and ball.vy > -3:
+				ball.vy -= 1
+		return 200, {"ball": ball}
+
 	except Exception as e:
 		return 400, {"error_msg": "Error moving ball" + str(e)}
    
+@app.post('reset_ball', response={200: BallSchema, 400: ErrorSchema}, tags=['Game'])
+def reset_ball(request):
+	try:
+		ball.x = game.boundX // 2 - game.ballWidth // 2
+		ball.y = game.boundY // 2 - game.ballHeight // 2
+		ball.vx = random.randint(-5, 5)
+		ball.vy = random.randint(-5, 5)
+		if ball.vx == 0:
+			ball.vx = 1
+		if ball.vy == 0:
+			ball.vy = 1
+		ball.state = "pause"
+		return 200, {"ball": ball}
+	except Exception as e:
+		return 400, {"error_msg": "Error resetting ball" + str(e)}
+
 @app.post("new_match", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
 def new_match(request, match: IdMatchSchema):
     try:

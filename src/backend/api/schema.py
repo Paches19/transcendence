@@ -39,6 +39,9 @@ class PaddlesSchema(Schema):
 class BallSchema(Schema):
 	x: int
 	y: int
+	vx: int
+	vy: int
+	state: str
      
 class GameSchema(Schema):
 	id: int
@@ -64,12 +67,17 @@ class InitGameSchema(Schema):
 class KeySchema(Schema):
 	key: str
 
-class StateSchema(Schema):
-	state: str
-
 class IdMatchSchema(Schema):
 	id: int
     
+class SuccessInitSchema(Schema):
+	game: GameSchema
+	paddles: PaddlesSchema
+	ball: BallSchema
+
+class StateSchema(Schema):
+	state: str
+ 
 """ User schemas """
 
 class UserSchema(Schema):
@@ -84,7 +92,7 @@ class UserSchema(Schema):
     tournamentsPlayed: int
     tournamentsWon: int
     friends: List[FriendSchema]
-    matches: List[GameStatusSchema]
+    matches: List[GameSchema]
 
 
 class UserUpdateSchema(Schema):
