@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 13:04:35 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/10 16:51:00 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/06/10 17:29:47 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -159,6 +159,38 @@ function loadHtmlEditProfile(currentUser) {
         });
 }
 
+async function updateUserProfile(newUsername, newPassword) {
+  const apiUrl = 'https://localhost/api/users/update';
+  const requestBody = {
+      username: newUsername,
+      password: newPassword,
+  };
+
+  const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+      credentials: 'include'
+  };
+
+  try {
+      const response = await fetch(apiUrl, requestOptions);
+
+      if (response.ok) {
+          const data = await response.json();
+          showNotification('Profile updated successfully.', "success");
+          updateNavbar();
+      } else if (response.status === 400) {
+          const errorData = await response.json();
+          throw new Error(`Error: ${errorData.error_msg}`);
+      } else {
+          throw new Error('Unexpected error occurred. Please try again later.');
+      }
+  } catch (error) {
+      showNotification(error.message, "error");
+  }
+}
+
 function showNotification(message, type) {
     let notification = document.getElementById('notification');
     if (notification) {
@@ -184,33 +216,6 @@ function showNotification(message, type) {
             notification.remove();
         }, 500);
     }, 4000);
-}
-  
-  function updateUserProfile(newUsername, newPassword) {
-    const apiUrl = 'https://localhost/api/users/update';
-    const requestBody = {
-		    username: newUsername,
-        password: newPassword,
-    };
+}  
 
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-		credentials: 'include'
-    };
-
-    fetch(apiUrl, requestOptions)
-        .then(response => response.json())
-        .then(data => {
-            console.log('Success:', data);
-			showNotification('Profile updated successfully.');
-			updateNavbar();
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-			showNotification('Error: ' + error);
-        });
-	}
-  
-  export default loadEditProfile;
+export default loadEditProfile;
