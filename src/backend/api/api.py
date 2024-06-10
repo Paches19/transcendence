@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/06 09:19:31 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/10 18:16:50 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -23,7 +23,8 @@ from typing import Optional
 from .schema import (ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema, SingleTournamentSchema,
                      AddFriendSchema, TournamentSchema, UserNameSchema,
-                     UserSchema, SuccessSchema, TournamentCreateSchema)
+                     UserSchema, SuccessSchema, TournamentCreateSchema,
+                     localMatchSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -52,6 +53,26 @@ def create_user(request, user_in: UserRegisterSchema):
     user_data = user_in.model_dump()
     User.objects.create_user(**user_data)
     return {"msg": "User created"}
+
+
+@app.post("auth/login/local_match", tags=['Auth'])
+@login_required
+def local_match(request, formData: localMatchSchema):
+    user1 = request.user
+    user2 = get_object_or_404(User, id=formData.user2_id)
+    if user1 == user2:
+        return {"error_msg": "Can't play against yourself"}
+    # if match is tournament check if match between user1 and user2 exists and has not been played
+    if formData.match_id != None:
+        match = get_object_or_404(Match, matchID=formData.match_id)
+        if (match.user1 != user1 or match.user2 != user2) and (match.user1 != user2 or match.user2 != user1):
+            return {"error_msg": "Match not found"}
+        if match.winner != None:
+            return {"error_msg": "Match already played"}
+    else:
+        match = Match(user1=user1, user2=user2)
+        match.save()
+    return {"msg": "ok"}
 
 
 @app.post("auth/login", tags=['Auth'])
@@ -234,6 +255,7 @@ def remove_friend(request, friend_username: AddFriendSchema):
 
 
 @app.post("tournaments/create", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Tournaments'])
+@login_required
 def create_tournament(request, tournament_in: TournamentCreateSchema):
     tournament_data = tournament_in.dict()
     if (tournament_data["number_participants"] < 2 or
