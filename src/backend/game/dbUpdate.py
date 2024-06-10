@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 18:42:57 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/27 18:42:58 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/07 14:21:49 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -18,6 +18,7 @@ def updateMatchData(UpdateMatchSchema: UpdateMatchSchema):
     match = Match.objects.get(matchID=UpdateMatchSchema.matchID)
     match.pointsUser1 = UpdateMatchSchema.pointsUser1
     match.pointsUser2 = UpdateMatchSchema.pointsUser2
+    match.winner = UpdateMatchSchema.winner
     match.save()
 
 

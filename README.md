@@ -80,4 +80,10 @@ In the project database we store the aplication information in 5 tables:
 
 -   `friend`: Table that stores the relationships between users, indicating if they are friends or if they have a pending friend request
 
-![Untitled Diagram drawio](https://github.com/Paches19/transcendence/assets/21156058/0e5becb7-2ff0-4227-a7c8-8d8ecd153a66)
+![DB schema image](https://github.com/Paches19/transcendence/assets/21156058/0e5becb7-2ff0-4227-a7c8-8d8ecd153a66)
+
+# API routes
+
+The documentation for the API, it's routes as well as the schemas each route expects and returns can be found in the `/api/docs` route of the project.
+
+[Link to the API documentation.](https://localhost/api/docs)
