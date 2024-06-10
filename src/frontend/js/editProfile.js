@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 13:04:35 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/24 13:16:01 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/06/10 16:51:00 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ function loadHtmlEditProfile(currentUser) {
   
   function addEditProfileEventListeners() {
 	document.getElementById('save-profile').addEventListener('click', function() {
-	  const password = document.getElementById('profile-password').value;
+	  let password = document.getElementById('profile-password').value;
 	  if (!password)
 			password = "pass123";
 	  const username = document.getElementById('profile-name').value;
@@ -189,8 +189,8 @@ function showNotification(message, type) {
   function updateUserProfile(newUsername, newPassword) {
     const apiUrl = 'https://localhost/api/users/update';
     const requestBody = {
-		username: newUsername,
-        password: newPassword, 
+		    username: newUsername,
+        password: newPassword,
     };
 
     const requestOptions = {

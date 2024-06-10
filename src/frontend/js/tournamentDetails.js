@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 18:11:12 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/27 18:11:07 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/06/10 16:45:13 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,6 @@ async function loadTournamentDetails(id) {
                             ${upcomingMatches.map(match => `
                                 <li class="list-group-item custom-list-item">
                                     <span class="match-title">${match.player1_username} vs ${match.player2_username}</span>
-                                    <span class="match-result">${match.date}</span>
                                 </li>
                             `).join('')}
                         ` : '<li class="list-group-item custom-list-item">No upcoming matches</li>'}
@@ -155,8 +154,6 @@ function attachEventListenersForTournamentDetails() {
             joinTournament(tournamentId);
         });
     }
-
-
 }
 
 async function joinTournament(tournamentId) {
@@ -178,23 +175,18 @@ async function joinTournament(tournamentId) {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Join tournament successful:', data);
                 showNotification(data.msg, true);
-                loadTournamentDetails(tournamentId); // Recargar los detalles del torneo para reflejar los cambios
+                loadTournamentDetails(tournamentId);
             } else if (response.status === 400) {
                 const errorData = await response.json();
-                console.error('Error joining tournament:', errorData.error_msg);
                 showNotification(`Error: ${errorData.error_msg}`, false);
             } else {
-                console.error('Unexpected error:', response.status);
                 showNotification('Unexpected error occurred. Please try again later.', false);
             }
         } catch (error) {
-            console.error('Error joining tournament:', error);
             showNotification('Error joining tournament. Please try again later.', false);
         }
     } else {
-        console.log('User not logged in. Please log in to join a tournament.');
         showNotification('Please log in to join a tournament.', false);
     }
 }
@@ -202,10 +194,7 @@ async function joinTournament(tournamentId) {
 async function leaveTournament(tournamentId) {
     const username = localStorage.getItem('userToken');
     if (username) {
-        console.log(`${username} logged in. Leaving tournament with ID: ${tournamentId}`);
-
         const apiUrl = `https://localhost/api/tournaments/${tournamentId}/leave`;
-
         try {
             const response = await fetch(apiUrl, {
                 method: 'POST',
@@ -218,23 +207,18 @@ async function leaveTournament(tournamentId) {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Leave tournament successful:', data);
                 showNotification(data.msg, true);
                 loadTournamentDetails(tournamentId);
             } else if (response.status === 400) {
                 const errorData = await response.json();
-                console.error('Error leaving tournament:', errorData.error_msg);
                 showNotification(`Error: ${errorData.error_msg}`, false);
             } else {
-                console.error('Unexpected error:', response.status);
                 showNotification('Unexpected error occurred. Please try again later.', false);
             }
         } catch (error) {
-            console.error('Error leaving tournament:', error);
             showNotification('Error leaving tournament. Please try again later.', false);
         }
     } else {
-        console.log('User not logged in. Please log in to leave a tournament.');
         showNotification('Please log in to leave a tournament.', false);
     }
 }

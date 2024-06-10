@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/29 11:08:34 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/06/10 16:31:06 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,12 +77,10 @@ function handleDocumentClick(e) {
     if (viewBtn) {
         e.preventDefault();
         const tournamentId = viewBtn.getAttribute('data-id');
-        console.log("id: " + tournamentId);
         router.route(`/tournaments/${tournamentId}`);
     } else if (e.target.classList.contains('join-tournament-btn')) {
         e.preventDefault();
         const tournamentId = e.target.getAttribute('data-id');
-        console.log("id: " + tournamentId);
         joinTournament(tournamentId);
     }
 }
@@ -166,8 +164,8 @@ function addModalEventListeners() {
             return;
         }
     
-        if (numPlayers > 20) {
-            showNotification('Error: Number of players must be 20 or fewer.', false);
+        if (numPlayers > 20 || numPlayers <= 1) {
+            showNotification('Error: Number of players must be 20 or fewer and more than 1', false);
             return;
         }
     

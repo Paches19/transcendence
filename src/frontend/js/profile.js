@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:18 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/29 10:56:07 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/06/10 16:48:10 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,11 +161,9 @@ async function acceptFriendRequest(friend_username) {
             loadProfile();
         } else {
             const errorData = await response.json();
-            console.error('Error accepting friend request:', errorData.error_msg);
             showNotification(`Error: ${errorData.error_msg}`, 'error');
         }
     } catch (error) {
-        console.error('Error accepting friend request:', error);
         showNotification('Error accepting friend request. Please try again later.', 'error');
     }
 }
@@ -267,21 +265,17 @@ async function sendFriendRequest() {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Friend request successful:', data);
                 showNotification(`Friend request sent to ${friendUsername}`, 'success');
                 friendUsernameInput.value = "";
                 loadProfile();
                 toggleFriendSection();
             } else if (response.status === 400) {
                 const errorData = await response.json();
-                console.error('Error sending friend request:', errorData.error_msg);
                 showNotification(`Error: ${errorData.error_msg}`, 'error');
             } else {
-                console.error('Unexpected error:', response.status);
                 showNotification('Unexpected error occurred. Please try again later.', 'error');
             }
         } catch (error) {
-            console.error('Error sending friend request:', error);
             showNotification('Error sending friend request. Please try again later.', 'error');
         }
     } else {
