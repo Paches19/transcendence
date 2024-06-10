@@ -16,7 +16,6 @@ class Ball(models.Model):
 	y = models.IntegerField(default=0)
 	vx = models.IntegerField(default=0)
 	vy = models.IntegerField(default=0)
-	state = models.CharField(max_length=40, default='pause')
 
 class Game(models.Model):
     id = models.IntegerField(primary_key=True)

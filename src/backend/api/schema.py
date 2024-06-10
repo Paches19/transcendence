@@ -44,7 +44,6 @@ class BallSchema(Schema):
 	y: int
 	vx: int
 	vy: int
-	state: str
      
 class MoveBallSchema(Schema):
      msg: str

@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/10 00:12:23 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/10 20:26:20 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,9 +105,6 @@ function initializeGame() {
     if (canvas) {
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
-        ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
 		resetTime();
     }
 }
@@ -119,6 +116,9 @@ function resizeCanvas() {
         const height = Math.max(width * 0.5, 300);
         canvas.width = width;
         canvas.height = height;
+		ctx = canvas.getContext('2d');
+		ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 }
 
@@ -150,6 +150,7 @@ function resetTime(){
 }
 
 function attachGameControlEventListeners() {
+	console.log("attachGameControlEventListeners");
    	document.getElementById('pause-game').addEventListener('click', pauseGame);
     document.getElementById('quit-game').addEventListener('click', quitGame);
 	document.addEventListener('keydown', handleKeyDown);
@@ -159,12 +160,15 @@ export default initPlayPage;
 export {initPlayPage, resetTime};
 
 let statePaddles = { x1: 0, y1: 0, score1: 0, x2: 0, y2: 0, score2: 0 };
-let stateBall = { x: 0, y: 0, vx: 0, vy: 0, state: '' };
+let stateBall = { x: 0, y: 0, vx: 0, vy: 0 };
 let stateGame = { id: 0, v: 0, ballWidth: 0, ballHeight: 0, playerWidth: 0, playerHeight: 0, finalScore: 0, name1: '', name2: '', boundX: 0, boundY: 0 };
+const levelAI = Math.floor(Math.random() * 3); //Determina el nivel de anticipación de la IA
+let animationInterval;
+let aiInterval;
+let refreshTime = 1000/60;
 
 async function handleKeyDown(e) {
     const pressed = e.key;
-	console.log("key pressed = " + pressed);
 	if (pressed == 'ArrowUp' || pressed == 'ArrowDown' ||
 		(modality == "local" && (pressed == "w" || pressed == "W")) ||
 		(modality == "local" && (pressed == "s" || pressed == "S")) ||
@@ -179,7 +183,6 @@ async function handleKeyDown(e) {
 				});
 				if (response.ok){
 					const responsedata = await response.json();
-					console.log(responsedata.msg);
 					ctx.fillStyle = '#000';
 					ctx.fillRect(statePaddles.x1, 0, stateGame.playerWidth, stateGame.boundY); //Borra la paleta 1
 					ctx.fillRect(statePaddles.x2, 0, stateGame.playerWidth, stateGame.boundY); //Borra la paleta 2
@@ -197,21 +200,23 @@ async function handleKeyDown(e) {
 }
 
 function pauseGame() {
+	console.log("isPaused");
 	let textButton = document.getElementById("pause-game");
 	if (textButton.textContent == "Pause"){
 		textButton.textContent = "Resume";
 		isPaused = true;
-		changeState('pause');
+		console.log("pauseGame");
+		checkFinish('pause'); //debe parar el movimiento de la bola
 	}
 	else{
 		textButton.textContent = "Pause";
-		animate();
+		animate(); //debe reanudar el movimiento de la bola
 	}
 }
 
 function quitGame() {
     isPaused = true;
-	changeState('pause');
+	checkFinish('pause');
 	Swal.fire({
 		confirmButtonColor: '#32B974',
 		title: "Are you sure ?",
@@ -221,24 +226,55 @@ function quitGame() {
 		denyButtonText: `No`
 	  }).then((result) => {
 			if (result.isConfirmed) {
-				changeState('quit');
 				initPlayPage();
 				return;
 			}else if (result.isDenied){
+				textButton.textContent = "Pause";
 				animate();
-			}});
+			}
+		});
 }
 
-async function playAI(){
-	//AI debe simular entrada por teclado
-	if (stateBall.state == 'playing' && modality == 'solo'){
-		if (stateBall.x > canvas.width / 2 - 5 * 25){
-			if (stateBall.y > statePaddles.y2 + stateGame.playerHeight){
-				handleKeyDown({key: 'A'});
-			}else{
-				handleKeyDown({key: 'D'});
+function playAI(){
+	if (stateBall.vx > 0 && modality == "solo") {
+		let xp;
+
+    	// Ajustar el factor de anticipación basado en el nivel
+    	switch (levelAI) {
+    		case 0:
+        	    xp = 0.25 * stateGame.boundX; // Poco anticipación
+        	    break;
+        	case 1:
+        	    xp = 0.5  * stateGame.boundX; // Moderada anticipación
+        	    break;
+        	default:
+        	    xp = 0.75 * stateGame.boundX; // Mucha anticipación
+	   	 }
+
+	    // Calcular la posición anticipada de la bola
+	    const t = (xp - stateBall.x) / stateBall.vx;
+		let yp = stateBall.y + t * stateBall.vy;
+		while (yp < 0 || yp > stateGame.boundY) {
+			if (yp < 0) {
+				yp = -yp;
+			} else {
+				yp = 2 * stateGame.boundY - yp;
 			}
 		}
+		const paddleCenter = statePaddles.y2 + stateGame.playerHeight / 2;
+
+	    let event;
+
+	    // Simular eventos de teclado para mover la pala
+    	if (yp < paddleCenter) {
+        	event = new KeyboardEvent('keydown', { key: 'A' });
+			sleep(50);
+			document.dispatchEvent(event);
+    	} else if (yp > paddleCenter) {
+        	event = new KeyboardEvent('keydown', { key: 'D' });
+			sleep(50);
+			document.dispatchEvent(event);
+    	}
 	}
 }
 
@@ -300,45 +336,11 @@ function startPongLocal(){
 	animate();
 }
 
-let animationInterval
-let refreshTime = 1000/60;
-
-async function updateScores(){
-	const apiUrl = 'http://localhost:8000/api/get_scores';
-	try{
-		const response = await fetch(apiUrl, {
-			method: 'GET',
-			headers: {'Content-Type': 'application/json',},
-		});
-		if (response.ok){
-			const responsedata = await response.json();
-			statePaddles = responsedata.paddles;
-			document.getElementById('game-score').innerHTML = 
-				`${stateGame.name1} ${statePaddles.score1} - ${statePaddles.score2} ${stateGame.name2}`;// Actualiza la puntuación
-		}
-	} catch (error) {
-		console.error('Error getting scores:', error);
-	}
+function drawScores(){
+	document.getElementById('game-score').innerHTML =
+		`${stateGame.name1} ${statePaddles.score1} - ${statePaddles.score2} ${stateGame.name2}`;// Actualiza la puntuación
 }
 
-async function changeState(s){
-	stateBall.state = s;
-	const apiUrl = 'http://localhost:8000/api/change_state';
-	try{
-		const response = await fetch(apiUrl, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json',},
-			body: JSON.stringify({state: s}),
-		});
-		if (response.ok){
-			const responsedata = await response.json();
-			console.log(responsedata.msg);
-		}
-	} catch (error) {
-		console.error('Error changing state:', error);
-	}
-
-}
 async function moveBall() {
 	const apiUrl = 'http://localhost:8000/api/move_ball';
 	try{
@@ -356,6 +358,9 @@ async function moveBall() {
 			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
 			ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
 			ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
+			if (responsedata.msg == 'scored'){
+				checkFinish('score');
+			}
 		}
 	} catch (error) {
 		console.error('Error moving ball:', error);
@@ -364,31 +369,30 @@ async function moveBall() {
 
 function animate(){
 	isPaused = false;
-	changeState('playing');
 	sleep(40);
-	animationInterval = setInterval(() => {
-		playAI();
-		moveBall();
-		checkFinish();
-	}, refreshTime);
+	animationInterval = setInterval(moveBall, refreshTime);
+	aiInterval = setInterval(playAI, refreshTime);
 }
 
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function checkFinish(){
-	if (stateBall.state != 'playing'){
-		isPaused = true;
-		clearInterval(animationInterval);
+function checkFinish(msg){
+	console.log("checkFinish for = " + msg);
+	isPaused = true;
+	clearInterval(animationInterval);
+	clearInterval(aiInterval);
+	if (msg == 'score'){
+		drawScores();
+		if (statePaddles.score1 == stateGame.finalScore || statePaddles.score2 == stateGame.finalScore){
+			gameOver();
+		}else{
+			resetBall(); //Reinicia la bola
+			setTimeout(animate, 1000);
+		}
 	}
-	if (stateBall.state == 'gameover')
-		gameOver();
-	else if (stateBall.state == 'score'){
-		updateScores();
-		resetBall(); //Reinicia la bola
-		setTimeout(animate, 1000);
-	}
+	//si es pause no hace nada
 }
 
 function gameOver(){
