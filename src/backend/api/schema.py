@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:15 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/10 18:14:36 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/11 07:55:29 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -75,6 +75,7 @@ class UserNameSchema(Schema):
 class AddFriendSchema(Schema):
     friend_username: str
 
+
 class localMatchSchema(Schema):
     player2_username: str
     player2_password: str
@@ -139,6 +140,13 @@ class TournamentNameSchema(Schema):
     name: str
 
 
+class UserTournamentMatchesSchema(Schema):
+    matchID: int
+    tournamentID: int
+    player1_username: str
+    player2_username: str
+
+
 """ General schemas """
 
 
@@ -149,7 +157,9 @@ class ErrorSchema(Schema):
 class SuccessSchema(Schema):
     msg: str
 
+
 """ Game update schemas """
+
 
 class MatchUpdateSchema(Schema):
     matchID: int
@@ -157,8 +167,10 @@ class MatchUpdateSchema(Schema):
     player2_points: int
     winner: int
 
+
 class TournamentEndedSchema(Schema):
     tournamentID: int
+
 
 class UserStatsUpdateSchema(Schema):
     userID: int

@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/10 18:16:50 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/11 07:55:20 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -24,7 +24,7 @@ from .schema import (ErrorSchema, UserUpdateSchema,
                      UserRegisterSchema, LoginSchema, SingleTournamentSchema,
                      AddFriendSchema, TournamentSchema, UserNameSchema,
                      UserSchema, SuccessSchema, TournamentCreateSchema,
-                     localMatchSchema)
+                     localMatchSchema, UserTournamentMatchesSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -362,3 +362,25 @@ def leave_tournament(request, tournament_id: int):
 
     checkTournamentFinished(tournament)
     return 200, {"msg": "User left tournament"}
+
+
+@app.get("tournaments/{tournament_id}/user/matches", response=list[UserTournamentMatchesSchema], tags=['Tournaments'])
+@login_required
+def get_user_matches(request, tournament_id: int):
+    user = request.user
+    tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
+    matches = Match.objects.filter(tournament=tournament, user1=user) | Match.objects.filter(
+        tournament=tournament, user2=user)
+    resp = []
+    for match in matches:
+        if match.user1 == user:
+            opponent = match.user2
+        else:
+            opponent = match.user1
+        resp.append({
+            "matchID": match.matchID,
+            "tournamentID": tournament_id,
+            "player1_username": user.username,
+            "player2_username": opponent.username
+        })
+    return resp
