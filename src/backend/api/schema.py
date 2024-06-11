@@ -49,6 +49,9 @@ class MoveBallSchema(Schema):
      msg: str
      ball: BallSchema
 
+class ScoreSchema(Schema):
+	score1: int
+	score2: int
 
 class GameSchema(Schema):
 	id: int

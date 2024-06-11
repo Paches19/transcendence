@@ -1,5 +1,6 @@
 import os
 import random
+from random import choice
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from ninja import NinjaAPI, File
@@ -14,7 +15,7 @@ from .schema import (ErrorSchema, UserUpdateSchema,
                      AddFriendSchema, TournamentSchema, UserNameSchema,
                      UserSchema, SuccessSchema, TournamentCreateSchema,
                      InitGameSchema, KeySchema, MovePaddlesSchema, MoveBallSchema,
-                     IdMatchSchema, SuccessInitSchema)
+                     IdMatchSchema, SuccessInitSchema, ScoreSchema)
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -29,6 +30,13 @@ app = NinjaAPI(
 )
 
 """ Game """
+
+@app.get('update_scores', response={200: ScoreSchema, 400: ErrorSchema}, tags=['Game'])
+def update_scores(request):
+	try:
+		return 200, {"score1": paddles.score1, "score2": paddles.score2}
+	except Exception as e:
+		return 400, {"error_msg": "Error getting current scores" + str(e)}
 
 @app.post('move_paddles', response={200: MovePaddlesSchema, 400: ErrorSchema}, tags=['Game'])
 def move_paddles(request, pressed:KeySchema):
@@ -70,12 +78,8 @@ def init_game(request, datagame: InitGameSchema):
 
 		ball.x = datagame.boundX // 2 - game.ballWidth // 2
 		ball.y = datagame.boundY // 2 - game.ballHeight // 2
-		ball.vx = random.randint(-5, 5)
-		ball.vy = random.randint(-5, 5)
-		if ball.vx == 0:
-			ball.vx = 1
-		if ball.vy == 0:
-			ball.vy = 1
+		ball.vx = random.choice([-10, -9, -8, 8, 9, 10])
+		ball.vy = random.choice([-3, -2, -1, 1, 2, 3])
 
 		return 200, {"game": game, "paddles": paddles, "ball": ball}
 	except Exception as e:
@@ -125,12 +129,8 @@ def reset_ball(request):
 	try:
 		ball.x = game.boundX // 2 - game.ballWidth // 2
 		ball.y = game.boundY // 2 - game.ballHeight // 2
-		ball.vx = random.randint(-5, 5)
-		ball.vy = random.randint(-5, 5)
-		if ball.vx == 0:
-			ball.vx = 3
-		if ball.vy == 0:
-			ball.vy = 3
+		ball.vx = random.choice([-10, -9, -8, 8, 9, 10])
+		ball.vy = random.choice([-3, -2,-1, 1, 2, 3])
 		return 200, {"msg": "reset", "ball": ball}
 
 	except Exception as e:
