@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/11 19:41:15 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/11 20:00:07 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ let statePaddles = { x1: 0, y1: 0, score1: 0, x2: 0, y2: 0, score2: 0 };
 let stateBall = { x: 0, y: 0, vx: 0, vy: 0 };
 let stateGame = { id: 0, v: 0, ballWidth: 0, ballHeight: 0, playerWidth: 0, playerHeight: 0, finalScore: 0, name1: '', name2: '', boundX: 0, boundY: 0 };
 
-let animationInterval;
+let ballInterval;
 let aiInterval;
 let gameInterval;
 let refreshTime = 1000/30;
@@ -381,13 +381,13 @@ async function moveBall() {
 
 function animate(){
 	isPaused = false;
-	animationInterval = setInterval(moveBall, refreshTime);
+	ballInterval = setInterval(moveBall, refreshTime);
 	aiInterval = setInterval(playAI, refreshTime);
 }
 
 function stopAnimation(){
 	isPaused = true;
-	clearInterval(animationInterval);
+	clearInterval(ballInterval);
 	clearInterval(aiInterval);	//si es pause no hace nada
 }
 
