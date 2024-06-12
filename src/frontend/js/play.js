@@ -3,22 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   play.js                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/06 23:56:32 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/12 13:24:34 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { isLoggedIn, getUsernameFromToken } from "./auth.js";
-import router from "./main.js";
-import { initGameAI, quitAI, pauseAI, playAI } from "./pongAI.js";
-import { initGameHuman, quitHuman, pauseHuman, playHuman } from "./pongHuman.js";
-import { initGameRemote, quitRemote, pauseRemote, playRemote } from "./pongRemote.js";
+//import router from "./main.js";
 
-let mode = '';
-let isPaused = true;
-let seconds = 0;
+let selectedMatchID = null;
 
 function initPlayPage() {
     renderGameOptions();
@@ -28,252 +23,186 @@ function initPlayPage() {
 function renderGameOptions() {
     const mainContent = document.getElementById('main-content');
     mainContent.innerHTML = `
-    <div class="play-options-container text-center mt-5">
-        <h1 class="play-title mb-4">Elige tu Modo de Juego</h1>
-        <div class="game-options btn-group">
-            <button id="solo-vs-ia" class="btn btn-light game-option-button">Solo vs IA</button>
-            <button id="local-vs-human" class="btn btn-light game-option-button">Local vs Human</button>
-            <button id="remote-vs-human" class="btn btn-success game-option-button">Remote vs Human</button>
-            <button id="join-tournament" class="btn btn-info game-option-button">Tournament Game</button>
+        <div class="play-wrapper">
+            <div class="play-options-container text-center mt-5">
+                <h1 class="play-title mb-4">Elige tu Modo de Juego</h1>
+                <div class="play-btn-group">
+                    <button id="solo-vs-ai" class="play-btn play-btn-primary">Solo vs AI</button>
+                    <button id="local-vs-human" class="play-btn play-btn-light">Local vs Human</button>
+                    <button id="remote-vs-human" class="play-btn play-btn-success">Remote vs Human</button>
+                </div>
+            </div>
         </div>
-    </div>
     `;
-}
-
-function startGame(m) {
-	console.log("mode = " + m);
-    mode = m;
-	switch (m){
-       case 'solo':
-           startSoloVsIA()
-           break;
-	   case 'local':
-		   startLocalVsHuman()
-		   break;
-		case 'remote':
-			startRemoteVsHuman()
-			break;
-       default:
-           console.log(`Sorry ${m} not configured`);
-    }       
 }
 
 function attachEventListeners() {
-    document.getElementById('solo-vs-ia').addEventListener('click', () => startGame('solo'));
-    document.getElementById('local-vs-human').addEventListener('click', () => startGame('local'));
-    document.getElementById('remote-vs-human').addEventListener('click', () => startGame('remote'));
-    document.getElementById('join-tournament').addEventListener('click', () => startGame('tournament'));
-	startGame();
+    document.getElementById('local-vs-human').addEventListener('click', showMatchTypeOptions);
 }
 
-function startSoloVsIA() {
-    if (isLoggedIn()) {
-        console.log("Starting game: Solo vs IA");
-        showGameAIScreen();
-    } else {
-        router.route("/login");
-    }
-}
-
-function startLocalVsHuman() {
-    if (isLoggedIn()) {
-        console.log("Starting game: Local vs Human");
-        showGameHumanScreen();
-    } else {
-        router.route("/login");
-    }
-}
-
-function startRemoteVsHuman() {
-	if (isLoggedIn()) {
-		console.log("Starting game: Remote vs Human");
-		showGameRemoteScreen();
-	} else {
-		router.route("/login");
-	}
-}
-
-function showGameAIScreen() {
+function showMatchTypeOptions() {
     const mainContent = document.getElementById('main-content');
-    const username = getUsernameFromToken();
     mainContent.innerHTML = `
-    <div class="container mt-5 game-container">
-        <div class="row align-items-center">
-            <div class="col-12 col-lg-8 mx-auto">
-                <div class="bg-dark text-white p-3 rounded-3">
-                    <div class="d-flex justify-content-between mb-2">
-                        <h2 id="game-score" class="mb-0">${username} 0 - 0 Mark (IA)</h2>
-                        <h3 id="game-timer" class="mb-0">00:00</h3>
-                    </div>
-                    <canvas id="pong-game" class="w-100"></canvas>
-                </div>
+        <div class="play-wrapper">
+            <div class="play-title">Select Match Type</div>
+            <div class="play-btn-group">
+                <button id="normal-match" class="play-btn play-btn-primary">Normal Match</button>
+                <button id="tournament-match" class="play-btn play-btn-success">Tournament Match</button>
             </div>
         </div>
-        <div class="row mt-3">
-            <div class="col-12 text-center">
-                <button class="btn btn-success btn-lg mx-2" id="restart-game">Pause</button>
-                <button class="btn btn-danger btn-lg mx-2" id="quit-game">Quit</button>
-            </div>
-        </div>
-    </div>
     `;
-    initializeGame();
-	initGameAI();
-    attachGameControlEventListeners();
+
+    document.getElementById('normal-match').addEventListener('click', loadLogin);
+    document.getElementById('tournament-match').addEventListener('click', handleLocalVsHumanClick);
 }
 
-function showGameHumanScreen() {
+async function handleLocalVsHumanClick() {
+    try {
+        const response = await fetch('/api/tournaments/user/matches');
+        if (response.ok) {
+            const matches = await response.json();
+            showMatchOptions(matches);
+        } else {
+            showNotification('Error fetching matches. Please try again later.', false);
+        }
+    } catch (error) {
+        showNotification('Error fetching matches. Please try again later.', false);
+    }
+}
+
+function showMatchOptions(matches) {
     const mainContent = document.getElementById('main-content');
-    const username = getUsernameFromToken();
     mainContent.innerHTML = `
-    <div class="container mt-5 game-container">
-        <div class="row align-items-center">
-            <div class="col-12 col-lg-8 mx-auto">
-                <div class="bg-dark text-white p-3 rounded-3">
-                    <div class="d-flex justify-content-between mb-2">
-                        <h2 id="game-score" class="mb-0">${username} 0 - 0 Opponent</h2>
-                        <h3 id="game-timer" class="mb-0">00:00</h3>
-                    </div>
-                    <canvas id="pong-game" class="w-100"></canvas>
-                </div>
-            </div>
+        <div class="play-wrapper">
+            <div class="play-title">Select a Match</div>
+            <ul id="match-list" class="match-list">
+                ${matches.map(match => `
+                    <li class="match-item">
+                        <div class="match-header">
+                            <div class="tournament-name">${match.tournamentName}</div>
+                        </div>
+                        <div class="match-details">
+                            <span class="match-info">${match.player1_username} vs ${match.player2_username}</span>
+                            <button class="play-btn play-btn-primary select-match-btn" data-match-id="${match.matchID}">Select</button>
+                        </div>
+                    </li>
+                `).join('')}
+            </ul>
         </div>
-        <div class="row mt-3">
-            <div class="col-12 text-center">
-                <button class="btn btn-success btn-lg mx-2" id="restart-game">Pause</button>
-                <button class="btn btn-danger btn-lg mx-2" id="quit-game">Quit</button>
-            </div>
-        </div>
-    </div>
     `;
-    initializeGame();
-	initGameHuman();
-    attachGameControlEventListeners();
+
+    const matchButtons = document.querySelectorAll('.select-match-btn');
+    matchButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            selectedMatchID = event.target.getAttribute('data-match-id');
+            loadLogin();
+        });
+    });
 }
 
-function showGameRemoteScreen() {
-	const mainContent = document.getElementById('main-content');
-	const username = getUsernameFromToken();
-	mainContent.innerHTML = `
-    <div class="container mt-5 game-container">
-        <div class="row align-items-center">
-            <div class="col-12 col-lg-8 mx-auto">
-                <div class="bg-dark text-white p-3 rounded-3">
-                    <div class="d-flex justify-content-between mb-2">
-                        <h2 id="game-score" class="mb-0">${username} 0 - 0 Opponent</h2>
-                        <h3 id="game-timer" class="mb-0">00:00</h3>
-                    </div>
-                    <canvas id="pong-game" class="w-100"></canvas>
+function loadLogin() {
+    const mainContent = document.getElementById('main-content');
+    mainContent.innerHTML = `
+        <div class="wrapper">
+            <div class="flip-card__inner">
+                <div class="flip-card__front">
+                    <div class="title">Log in</div>
+                        <form action="" class="flip-card__form" id="login-form">
+                            <input type="text" placeholder="Name" id="username" class="flip-card__input">
+                            <input type="password" placeholder="Password" id="password" class="flip-card__input">
+                            <button type="submit" class="flip-card__btn" id="login-btn">Start Game!</button>
+                            <div class="text" id="login-msg"> </div>
+                        </form>
                 </div>
-            </div>
+            </div>   
         </div>
-        <div class="row mt-3">
-            <div class="col-12 text-center">
-                <button class="btn btn-success btn-lg mx-2" id="restart-game">Pause</button>
-                <button class="btn btn-danger btn-lg mx-2" id="quit-game">Quit</button>
-            </div>
-        </div>
-    </div>
     `;
-    initializeGame();
-	initGameRemote();
-    attachGameControlEventListeners();
+
+    const loginForm = document.getElementById('login-form');
+    loginForm.addEventListener('submit', handleLoginSubmit);
 }
 
-function initializeGame() {
-    const canvas = document.getElementById("pong-game");
-    if (canvas) {
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-        const context = canvas.getContext('2d');
-        context.fillStyle = '#000';
-        context.fillRect(0, 0, canvas.width, canvas.height);
-		resetTime();
-        startTimer();
+async function handleLoginSubmit(event) {
+    event.preventDefault();
+
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    const loginData = selectedMatchID ? { player2_username: username, player2_password: password, matchID: selectedMatchID } : { player2_username: username, player2_password: password, matchID: -1 };
+
+    try {
+        const response = await fetch('/api/auth/login/local_match', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(loginData)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            showStartGameButton();
+        } else {
+            const errorData = await response.json();
+            document.getElementById('login-msg').textContent = `Error: ${errorData.message}`;
+        }
+    } catch (error) {
+        document.getElementById('login-msg').textContent = 'Error logging in. Please try again later.';
     }
 }
 
-function resizeCanvas() {
-    const canvas = document.getElementById("pong-game");
-    const container = document.querySelector('.game-container');
-    if (canvas && container) {
-        const width = container.clientWidth;
-        const height = Math.max(width * 0.5, 300);
-        canvas.width = width;
-        canvas.height = height;
+function showStartGameButton() {
+    const mainContent = document.getElementById('main-content');
+    mainContent.innerHTML += `
+        <button id="start-game-btn" class="flip-card__btn btn btn-success play-btn mt-3">Start Game</button>
+    `;
+
+    const startGameButton = document.getElementById('start-game-btn');
+    startGameButton.addEventListener('click', startGameBtn);
+}
+
+async function startGameBtn() {
+    const endpoint = selectedMatchID ? `/api/tournaments/${selectedMatchID}/start` : `/api/matches/start`;
+    
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            // Initialize the game with the match ID if available
+            console.log('Starting game with match ID:', selectedMatchID || 'Normal match');
+        } else {
+            const errorData = await response.json();
+            showNotification(`Error: ${errorData.message}`, false);
+        }
+    } catch (error) {
+        showNotification('Error starting game. Please try again later.', false);
     }
 }
 
-let gameInterval;
+function showNotification(message, isSuccess = true) {
+    let notification = document.getElementById('notification');
+    if (notification) {
+        notification.remove();
+    }
+    notification = document.createElement('div');
+    notification.id = 'notification';
+    notification.textContent = message;
+    notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
 
-function resetTime(){
-	const timerDisplay = document.getElementById("game-timer");
-	clearInterval(gameInterval);
-	seconds = 0;
-	timerDisplay.textContent = `00:00`;
-	isPaused = false;
-}
-
-function restartGame() {
-	let textButton = document.getElementById("restart-game");
-	if (textButton.textContent == "Pause"){
-		textButton.textContent = "Resume";
-		isPaused = true;
-		if (mode == 'solo')
-			pauseAI();
-		else if (mode == 'local')
-			pauseHuman();
-		else if (mode == 'remote')
-			pauseRemote();
-	}
-	else{
-		textButton.textContent = "Pause";
-		isPaused = false;
-		if (mode == 'solo')
-			playAI();
-		else if (mode == 'local')
-			playHuman();
-		else if (mode == 'remote')
-			playRemote();
-	}
-}
-
-function quitGame() {
-    resetTime();
-    console.log("Game quit.");
-    // Aquí se implementaría la lógica para salir del juego.
-	if (mode == 'solo')
-		quitAI();
-	else if (mode == 'local')
-		quitHuman();
-	else if (mode == 'remote')
-		quitRemote();
-	mode = '';
-	initPlayPage();
-}
-
-function startTimer() {
-    const timerDisplay = document.getElementById("game-timer");
-    gameInterval = setInterval(() => {
-		if (!isPaused){
-	        seconds++;
-    	    let minutes = Math.floor(seconds / 60);
-    	    let remainingSeconds = seconds % 60;
-    	    timerDisplay.textContent = `${pad(minutes)}:${pad(remainingSeconds)}`;
-		}
-	}, 1000);
-}
-
-function pad(number) {
-    return number < 10 ? '0' + number : number;
-}
-
-function attachGameControlEventListeners() {
-    const restartBtn = document.getElementById('restart-game');
-    const quitBtn = document.getElementById('quit-game');
-    restartBtn.addEventListener('click', restartGame);
-    quitBtn.addEventListener('click', quitGame);
+    document.body.appendChild(notification);
+    notification.classList.add('show');
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 500);
+    }, 5000);
 }
 
 export default initPlayPage;
-export {initPlayPage, resetTime};
