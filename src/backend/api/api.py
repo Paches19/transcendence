@@ -1,4 +1,4 @@
-#******************************************************************************#
+# ******************************************************************************#
 #                                                                              #
 #                                                         :::      ::::::::    #
 #    api.py                                             :+:      :+:    :+:    #
@@ -6,9 +6,9 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/11 07:55:20 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/11 14:07:18 by alaparic         ###   ########.fr        #
 #                                                                              #
-#******************************************************************************#
+# ******************************************************************************#
 
 import os
 from django.shortcuts import get_object_or_404
@@ -364,23 +364,24 @@ def leave_tournament(request, tournament_id: int):
     return 200, {"msg": "User left tournament"}
 
 
-@app.get("tournaments/{tournament_id}/user/matches", response=list[UserTournamentMatchesSchema], tags=['Tournaments'])
+@app.get("tournaments/user/matches", response=list[UserTournamentMatchesSchema], tags=['Tournaments'])
 @login_required
-def get_user_matches(request, tournament_id: int):
+def get_user_matches(request):
     user = request.user
-    tournament = get_object_or_404(Tournament, tournamentID=tournament_id)
-    matches = Match.objects.filter(tournament=tournament, user1=user) | Match.objects.filter(
-        tournament=tournament, user2=user)
+    matches = Match.objects.filter(user1=user, matchID__isnull=False) | Match.objects.filter(
+        user2=user, matchID__isnull=False)
     resp = []
     for match in matches:
         if match.user1 == user:
             opponent = match.user2
         else:
             opponent = match.user1
-        resp.append({
-            "matchID": match.matchID,
-            "tournamentID": tournament_id,
-            "player1_username": user.username,
-            "player2_username": opponent.username
-        })
+        if match.tournament is not None:
+            resp.append({
+                "matchID": match.matchID,
+                "tournamentID": match.tournament.tournamentID,
+                "tournamentName": match.tournament.name,
+                "player1_username": user.username,
+                "player2_username": opponent.username
+            })
     return resp

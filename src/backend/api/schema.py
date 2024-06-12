@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:15 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/11 07:55:29 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/11 14:08:43 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -143,6 +143,7 @@ class TournamentNameSchema(Schema):
 class UserTournamentMatchesSchema(Schema):
     matchID: int
     tournamentID: int
+    tournamentName: str
     player1_username: str
     player2_username: str
 
