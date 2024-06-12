@@ -8,6 +8,6 @@ RUN chmod +x /app/setup.sh
 WORKDIR /app
 
 RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install -r requirements.txt --no-cache-dir
 
 CMD ["/app/setup.sh"]
