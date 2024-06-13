@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/13 10:52:40 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/13 13:02:23 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -55,22 +55,26 @@ def create_user(request, user_in: UserRegisterSchema):
     return {"msg": "User created"}
 
 
-@app.post("auth/login/local_match", tags=['Auth'])
+@app.post("auth/login/local_match", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Auth'])
 @login_required
 def local_match(request, formData: localMatchSchema):
     user1 = request.user
     # check user2 exists and can play a match
     user2 = get_object_or_404(
-        User, username=formData.player2_username, password=formData.player2_password)
+        User, username=formData.player2_username)
+    if not user2.check_password(formData.player2_password):
+        return 400, {"error_msg": "Wrong password"}
     if user1 == user2:
-        return {"error_msg": "Can't play against yourself"}
+        return 400, {"error_msg": "Can't play against yourself"}
     # if match is tournament check if match between user1 and user2 exists and has not been played
     if formData.matchID != -1:
-        match = get_object_or_404(Match, matchID=formData.matchID)
+        match = Match.objects.filter(matchID=formData.matchID).first()
+        if match is None:
+            return 400, {"error_msg": "Match not found"}
         if (match.user1 != user1 or match.user2 != user2) and (match.user1 != user2 or match.user2 != user1):
-            return {"error_msg": "Player 2 is not an opponent in this match"}
-        if match.winner != None:
-            return {"error_msg": "Match already played"}
+            return 400, {"error_msg": "Player 2 is not an opponent in this match"}
+        if match.winner is not None:
+            return 400, {"error_msg": "Match already played"}
     else:
         match = Match(user1=user1, user2=user2)
         match.save()
