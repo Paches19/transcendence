@@ -80,7 +80,7 @@ In the project database we store the aplication information in 5 tables:
 
 -   `friend`: Table that stores the relationships between users, indicating if they are friends or if they have a pending friend request
 
-![DB schema image](https://github.com/Paches19/transcendence/assets/21156058/0e5becb7-2ff0-4227-a7c8-8d8ecd153a66)
+![DB schema image](https://github.com/Paches19/transcendence/assets/21156058/9b4bf1d4-24a8-4cc7-82ee-a3a51a1e5cf5)
 
 # API routes
 
