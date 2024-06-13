@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/12 13:24:34 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/06/13 12:26:11 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,8 +57,17 @@ function showMatchTypeOptions() {
 }
 
 async function handleLocalVsHumanClick() {
+
+    const apiUrl = 'https://localhost/api/tournaments/user/matches';
+  
+    const requestOptions = {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+    };
+    
     try {
-        const response = await fetch('/api/tournaments/user/matches');
+        const response = await fetch(apiUrl, requestOptions);
         if (response.ok) {
             const matches = await response.json();
             showMatchOptions(matches);
@@ -108,7 +117,7 @@ function loadLogin() {
                 <div class="flip-card__front">
                     <div class="title">Log in</div>
                         <form action="" class="flip-card__form" id="login-form">
-                            <input type="text" placeholder="Name" id="username" class="flip-card__input">
+                            <input type="text" placeholder="Name" id="userName" class="flip-card__input">
                             <input type="password" placeholder="Password" id="password" class="flip-card__input">
                             <button type="submit" class="flip-card__btn" id="login-btn">Start Game!</button>
                             <div class="text" id="login-msg"> </div>
@@ -125,19 +134,26 @@ function loadLogin() {
 async function handleLoginSubmit(event) {
     event.preventDefault();
 
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+    console.log("selectedID: ", selectedMatchID);
 
-    const loginData = selectedMatchID ? { player2_username: username, player2_password: password, matchID: selectedMatchID } : { player2_username: username, player2_password: password, matchID: -1 };
+    const apiUrl = '/api/auth/login/local_match';
+    const requestBody = {
+        player2_username: document.getElementById('userName').value,
+        player2_password: document.getElementById('password').value,
+        matchID: selectedMatchID ? selectedMatchID : -1
+    };
+
+    console.log("requestBody: ", requestBody);
+  
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+        credentials: 'include'
+    };
 
     try {
-        const response = await fetch('/api/auth/login/local_match', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(loginData)
-        });
+        const response = await fetch(apiUrl, requestOptions);
 
         if (response.ok) {
             const data = await response.json();
@@ -162,27 +178,28 @@ function showStartGameButton() {
 }
 
 async function startGameBtn() {
-    const endpoint = selectedMatchID ? `/api/tournaments/${selectedMatchID}/start` : `/api/matches/start`;
+    // const endpoint = selectedMatchID ? `/api/tournaments/${selectedMatchID}/start` : `/api/matches/start`;
     
-    try {
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+    // try {
+    //     const response = await fetch(endpoint, {
+    //         method: 'POST',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         }
+    //     });
 
-        if (response.ok) {
-            const data = await response.json();
-            // Initialize the game with the match ID if available
-            console.log('Starting game with match ID:', selectedMatchID || 'Normal match');
-        } else {
-            const errorData = await response.json();
-            showNotification(`Error: ${errorData.message}`, false);
-        }
-    } catch (error) {
-        showNotification('Error starting game. Please try again later.', false);
-    }
+    //     if (response.ok) {
+    //         const data = await response.json();
+    //         // Initialize the game with the match ID if available
+    //         console.log('Starting game with match ID:', selectedMatchID || 'Normal match');
+    //     } else {
+    //         const errorData = await response.json();
+    //         showNotification(`Error: ${errorData.message}`, false);
+    //     }
+    // } catch (error) {
+    //     showNotification('Error starting game. Please try again later.', false);
+    // }
+    showNotification(`Game starting`, true);
 }
 
 function showNotification(message, isSuccess = true) {
@@ -193,7 +210,7 @@ function showNotification(message, isSuccess = true) {
     notification = document.createElement('div');
     notification.id = 'notification';
     notification.textContent = message;
-    notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+    notification.className = `notification ${isSuccess ? true : false}`;
 
     document.body.appendChild(notification);
     notification.classList.add('show');

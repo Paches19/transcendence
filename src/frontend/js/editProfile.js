@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 13:04:35 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/10 17:29:47 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/06/13 12:13:56 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,7 +134,7 @@ function loadHtmlEditProfile(currentUser) {
     const requestOptions = {
         method: 'POST',  
         body: formData,
-		credentials: 'include'
+		    credentials: 'include'
     };
 
     fetch(apiUrl, requestOptions)
