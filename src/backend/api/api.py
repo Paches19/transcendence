@@ -1,4 +1,4 @@
-# ******************************************************************************#
+#******************************************************************************#
 #                                                                              #
 #                                                         :::      ::::::::    #
 #    api.py                                             :+:      :+:    :+:    #
@@ -6,9 +6,9 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/11 14:07:18 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/13 10:52:40 by alaparic         ###   ########.fr        #
 #                                                                              #
-# ******************************************************************************#
+#******************************************************************************#
 
 import os
 from django.shortcuts import get_object_or_404
@@ -59,14 +59,16 @@ def create_user(request, user_in: UserRegisterSchema):
 @login_required
 def local_match(request, formData: localMatchSchema):
     user1 = request.user
-    user2 = get_object_or_404(User, id=formData.user2_id)
+    # check user2 exists and can play a match
+    user2 = get_object_or_404(
+        User, username=formData.player2_username, password=formData.player2_password)
     if user1 == user2:
         return {"error_msg": "Can't play against yourself"}
     # if match is tournament check if match between user1 and user2 exists and has not been played
-    if formData.match_id != None:
-        match = get_object_or_404(Match, matchID=formData.match_id)
+    if formData.matchID != -1:
+        match = get_object_or_404(Match, matchID=formData.matchID)
         if (match.user1 != user1 or match.user2 != user2) and (match.user1 != user2 or match.user2 != user1):
-            return {"error_msg": "Match not found"}
+            return {"error_msg": "Player 2 is not an opponent in this match"}
         if match.winner != None:
             return {"error_msg": "Match already played"}
     else:
