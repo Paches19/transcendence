@@ -1,4 +1,4 @@
-#******************************************************************************#
+# ******************************************************************************#
 #                                                                              #
 #                                                         :::      ::::::::    #
 #    api.py                                             :+:      :+:    :+:    #
@@ -6,9 +6,9 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/13 13:02:23 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/14 08:03:43 by alaparic         ###   ########.fr        #
 #                                                                              #
-#******************************************************************************#
+# ******************************************************************************#
 
 import os
 from django.shortcuts import get_object_or_404
@@ -60,8 +60,9 @@ def create_user(request, user_in: UserRegisterSchema):
 def local_match(request, formData: localMatchSchema):
     user1 = request.user
     # check user2 exists and can play a match
-    user2 = get_object_or_404(
-        User, username=formData.player2_username)
+    user2 = User.objects.filter(username=formData.player2_username).first()
+    if user2 is None:
+        return 400, {"error_msg": "User does not exit"}
     if not user2.check_password(formData.player2_password):
         return 400, {"error_msg": "Wrong password"}
     if user1 == user2:
@@ -72,7 +73,7 @@ def local_match(request, formData: localMatchSchema):
         if match is None:
             return 400, {"error_msg": "Match not found"}
         if (match.user1 != user1 or match.user2 != user2) and (match.user1 != user2 or match.user2 != user1):
-            return 400, {"error_msg": "Player 2 is not an opponent in this match"}
+            return 400, {"error_msg": user2.username + " is not an opponent in this match"}
         if match.winner is not None:
             return 400, {"error_msg": "Match already played"}
     else:
