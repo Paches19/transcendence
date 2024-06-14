@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:26 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/12 12:46:24 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/14 12:09:40 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -30,7 +30,7 @@ def generate_tournaments_data(apps, schema_editor):
     for i in range(10):
         Tournament.objects.create(name=f"tournament{i+1}",
                                   date=datetime.date.today().isoformat(),
-                                  number_participants=random.randint(2, 16))
+                                  number_participants=random.randint(2, 16) if i != 0 and i != 1 else 10)
 
 
 # Aux function
@@ -53,11 +53,14 @@ def generate_tournament_participants_data(apps, schema_editor):
     Match = apps.get_model("api", "Match")
     for i in range(10):
         tournament = Tournament.objects.get(name=f"tournament{i+1}")
-        nParticipants = random.choices(
-            list(range(0, 11)), list(range(0, 11)), k=1)[0]
-        while nParticipants > tournament.number_participants:
+        if tournament.tournamentID != 1 and tournament.tournamentID != 2:
             nParticipants = random.choices(
                 list(range(0, 11)), list(range(0, 11)), k=1)[0]
+            while nParticipants > tournament.number_participants:
+                nParticipants = random.choices(
+                    list(range(0, 11)), list(range(0, 11)), k=1)[0]
+        else:
+            nParticipants = tournament.number_participants
 
         create_new_user_tournaments_data(
             nParticipants, UserTournament, User, tournament)
@@ -84,6 +87,9 @@ def generate_friends_data(apps, schema_editor):
         user1 = User.objects.get(username=f"user{i+1}")
         user2 = User.objects.get(username=f"user{i+2}")
         Friend.objects.create(user1=user1, user2=user2, status=True)
+    user1 = User.objects.get(username="user1")
+    user2 = User.objects.get(username="user10")
+    Friend.objects.create(user1=user1, user2=user2, status=True)
 
 
 def generate_matches_data(apps, schema_editor):
@@ -141,6 +147,7 @@ def generate_tournament_matches_data(apps, schema_editor):
         match.pointsUser2 = points2
         match.winner = match.user1 if points1 > points2 else match.user2
         match.save()
+
         # modify users to update their statistics with the match data
         match.user1.totalPoints += points1
         match.user1.matchesTotal += 1
