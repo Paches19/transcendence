@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 import datetime
 
-# Create your models here.
 class Paddles(models.Model):
 	x1 = models.IntegerField(default=0)
 	y1 = models.IntegerField(default=0)
@@ -16,6 +15,7 @@ class Ball(models.Model):
 	y = models.IntegerField(default=0)
 	vx = models.IntegerField(default=0)
 	vy = models.IntegerField(default=0)
+	state = models.CharField(max_length=10, default='stopped')
 
 class Game(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -29,6 +29,20 @@ class Game(models.Model):
     name2 = models.CharField(max_length=40, default='Player2')
     boundX = models.IntegerField(default=0)
     boundY = models.IntegerField(default=0)
+
+class RemotePaddle(models.Model):
+     number: int
+     x: int
+     y: int
+     score: int
+     name: str
+     state: str
+
+class RemoteGame(models.Model):
+	id = models.IntegerField(primary_key=True)
+	paddles = Paddles()
+	ball = Ball()
+	game = Game()
 
 class Match(models.Model):
     matchID = models.AutoField(primary_key=True)

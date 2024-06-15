@@ -44,12 +44,14 @@ class BallSchema(Schema):
 	y: int
 	vx: int
 	vy: int
+	state : str
      
 class MoveBallSchema(Schema):
      msg: str
      ball: BallSchema
 
 class ScoreSchema(Schema):
+	msg: str
 	score1: int
 	score2: int
 
@@ -65,7 +67,6 @@ class GameSchema(Schema):
 	ballHeight: int
 	name1: str
 	name2: str
-
 
 class InitGameSchema(Schema):
 	id : int

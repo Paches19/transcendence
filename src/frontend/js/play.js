@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/11 20:00:07 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/12 18:19:50 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,13 @@ let isPaused = true;
 let seconds = 0;
 
 let statePaddles = { x1: 0, y1: 0, score1: 0, x2: 0, y2: 0, score2: 0 };
-let stateBall = { x: 0, y: 0, vx: 0, vy: 0 };
+let stateBall = { x: 0, y: 0, vx: 0, vy: 0, state: '' };
 let stateGame = { id: 0, v: 0, ballWidth: 0, ballHeight: 0, playerWidth: 0, playerHeight: 0, finalScore: 0, name1: '', name2: '', boundX: 0, boundY: 0 };
 
 let ballInterval;
 let aiInterval;
 let gameInterval;
-let refreshTime = 1000/30;
+let refreshTime = 1000/60;
 
 function initPlayPage() {
     renderGameOptions();
@@ -337,7 +337,7 @@ async function updateScores(){
 			document.getElementById('game-score').innerHTML =
 					`${stateGame.name1} ${statePaddles.score1} - \
 					${statePaddles.score2} ${stateGame.name2}`;
-			if (statePaddles.score1 == stateGame.finalScore || statePaddles.score2 == stateGame.finalScore){
+			if (responsedata.msg == 'gameover'){
 				gameOver();
 			}else{
 				resetBall();
@@ -449,21 +449,22 @@ async function startPongRemote() {
 			const response = await fetch(apiUrl, {
 				method: 'POST',
 				headers: {'Content-Type': 'application/json',},
-				body: JSON.stringify({id: randomId,}),
+				body: JSON.stringify( { id: randomId,
+										name1: name1,
+										name2: '',
+										boundX: canvas.width,
+										boundY: canvas.height
+				}),
 			});
 			const data = await response.json();
-			if (response.ok && data.msg == "Match created"){
+			if (response.ok){
 				Swal.fire({
 					icon: "success",
 					title: "New match code: " + randomId,
 				});
-			}else {
-				Swal.fire({
-					icon: "error",
-					title: response.status + "Match already exist ",				});
 			}
 		} catch(error) {
-			console.error("Fetch error: ", error);
+			console.error("Error: ", error);
 			return false;
 		}
 	
@@ -484,24 +485,53 @@ async function startPongRemote() {
 			const response = await fetch(apiUrl, {
 				method: 'POST',
 				headers: {'Content-Type': 'application/json',},
-				body: JSON.stringify({id: matchId,}),
+				body: JSON.stringify( { id: randomId,
+										name1: '',
+										name2: name1,
+										boundX: canvas.width,
+										boundY: canvas.height
+				}),
 			});
-	
 			const data = await response.json();
-		
-			if (response.ok && data.msg === "Match joined") {
+			if (response.ok) {
 				Swal.fire("Joined !");
 			} else{
 				Swal.fire({
 					icon: "error",
-					title: "Match not found" + response.status,
+					title: "Match not found " + response.status,
 				});
 			}
 		} catch(error) {
-			console.error("fetch request error: ", error);
+			console.error("Error: ", error);
 			return false;
 		}
 	}
+}
+
+async function updateState() {
+	await fetch('/api/update_state', {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			game_id: gameId,
+			player_id: playerId,
+			state: playerId === 1 ? { paddle1: gameState.paddle1 } : { paddle2: gameState.paddle2 }
+		})
+	});
+}
+
+async function getState() {
+	const response = await fetch(`/api/get_state?game_id=${gameId}`);
+	const data = await response.json();
+	if (playerId === 1) {
+		gameState.paddle2 = data.state_player_2.paddle2;
+	} else {
+		gameState.paddle1 = data.state_player_1.paddle1;
+	}
+	// Actualizar la posición de la pelota y las paletas
+	// Dibujar los elementos del juego
 }
 
 export default initPlayPage;

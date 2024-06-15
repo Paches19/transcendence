@@ -6,16 +6,12 @@ from django.contrib.auth import authenticate, login, logout
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
 from ninja.params import Query
-from .models import User, Friend, Tournament, UserTournament, Game, Paddles, Ball
+from .models import *
 from .middleware import login_required, require_auth
 from .populate_data import *
 from typing import Optional
-from .schema import (ErrorSchema, UserUpdateSchema,
-                     UserRegisterSchema, LoginSchema, SingleTournamentSchema,
-                     AddFriendSchema, TournamentSchema, UserNameSchema,
-                     UserSchema, SuccessSchema, TournamentCreateSchema,
-                     InitGameSchema, KeySchema, MovePaddlesSchema, MoveBallSchema,
-                     IdMatchSchema, SuccessInitSchema, ScoreSchema)
+from .schema import *
+from typing import Dict, Any
 
 MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
 
@@ -34,7 +30,11 @@ app = NinjaAPI(
 @app.get('update_scores', response={200: ScoreSchema, 400: ErrorSchema}, tags=['Game'])
 def update_scores(request):
 	try:
-		return 200, {"score1": paddles.score1, "score2": paddles.score2}
+		if (paddles.score1 == game.finalScore or paddles.score2 == game.finalScore):
+			msg = "gameover"
+		else:
+			msg = "playing"
+		return 200, {"msg": msg, "score1": paddles.score1, "score2": paddles.score2}
 	except Exception as e:
 		return 400, {"error_msg": "Error getting current scores" + str(e)}
 
@@ -80,6 +80,7 @@ def init_game(request, datagame: InitGameSchema):
 		ball.y = datagame.boundY // 2 - game.ballHeight // 2
 		ball.vx = random.choice([-10, -9, -8, 8, 9, 10])
 		ball.vy = random.choice([-3, -2, -1, 1, 2, 3])
+		ball.state = 'waiting'
 
 		return 200, {"game": game, "paddles": paddles, "ball": ball}
 	except Exception as e:
@@ -137,34 +138,64 @@ def reset_ball(request):
 		return 400, {"error_msg": "Error resetting ball" + str(e)}
 
 @app.post("new_match", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
-def new_match(request, match: IdMatchSchema):
-    try:
-        print("Comprobando si existe Match ID: ", match.id)
-        game.objects.get(id=match.id)
-        return 400, {"error_msg": "Match already exists"}
-    except game.DoesNotExist:
-        game.objects.create(id=match.id)
-        return {"msg": "Match created"}
+def new_match(request, datagame: InitGameSchema):
+	try:
+		match = RemoteGame.objects.create(id = datagame.id)
+		match.game.v = 10
+		match.game.ballWidth = 10
+		match.game.ballHeight = 10
+		match.game.playerWidth = 15
+		match.game.playerHeight = 80
+		match.game.finalScore = 3
+		match.game.name1 = datagame.name1
+		match.game.name2 = datagame.name2
+		match.game.boundX = datagame.boundX
+		match.game.boundY = datagame.boundY
+		
+		match.paddles.x1 = 10
+		match.paddles.y1 = datagame.boundY // 2 - match.game.playerHeight // 2
+		match.paddles.score1 = 0
+		match.paddles.x2 = datagame.boundX - 10 - match.game.playerWidth
+		match.paddles.y2 = datagame.boundY // 2 - match.game.playerHeight // 2
+		match.paddles.score2 = 0
+
+		match.ball.x = datagame.boundX // 2 - match.game.ballWidth // 2
+		match.ball.y = datagame.boundY // 2 - match.game.ballHeight // 2
+		match.ball.vx = random.choice([-10, -9, -8, 8, 9, 10])
+		match.ball.vy = random.choice([-3, -2, -1, 1, 2, 3])
+		match.ball.state = 'waiting'
+		match.save()
+		return 200, {"msg": "Match created"}
+	except Exception as e:
+		return 400, {"error_msg": "Error initializing game" + str(e)}
 
 
-@app.post("join_match", response=SuccessSchema, tags=['Match'])
-def join_match(request, match: IdMatchSchema):
-    try:
-        game.objects.get(id=match.id)
-        return {"msg": "Match joined"}
-    except game.DoesNotExist:
-        return 400, {"error_msg": "Match does not exist"}
-
+@app.post("join_match", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
+def join_match(request, datagame: InitGameSchema):
+	match = get_object_or_404(RemoteGame, id = datagame.id)
+	if match.game.name2 != '':
+		return 400, {"error_msg": "Game already has two players"}
+	match.game.name2 = datagame.name2
+	match.ball.state = 'playing'
+	match.save()
+	return 200, {"msg": "Player joined match"}
 
 @app.post("delete_match", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
-def delete_match(request, match:IdMatchSchema):
-    try:
-        tmpmatch = game.objects.get(id=match.id)
-        tmpmatch.delete()
-        return 200, {"msg": "Match deleted"}
-    except game.DoesNotExist:
-        return 400, {"error_msg": "Match does not exist"}
+def delete_match(request, id_match: IdMatchSchema):
+	try:
+		match = get_object_or_404(RemoteGame, id = id_match.id)
+		match.delete()
+		return 200, {"msg": "Match deleted"}
+	except Exception as e:
+		return 400, {"error_msg": "Error deleting match" + str(e)}
 
+@app.get("get_state", response={200: StateSchema, 400: ErrorSchema}, tags=['Match'])
+def get_state(request, id_match: IdMatchSchema):
+	try:
+		match = get_object_or_404(RemoteGame, id = id_match)
+		return 200, {"state": match.ball.state}
+	except Exception as e:
+		return 400, {"error_msg": "Error getting game state" + str(e)}
 
 """ Auth """
 
@@ -200,32 +231,23 @@ def logout_user(request):
 
 
 @app.get("users", response=UserSchema, tags=['Users'])
-def get_users(request, user_id: Optional[int] = None):
-    if user_id:
-        user = get_object_or_404(User, id=user_id)
-        if user is None:
-            return 400, {"error_msg": "User not found"}
-    else:
-        auth_response = require_auth(request)
-        if auth_response is not None:
-            return auth_response
-        user = request.user
-
-    resp = {
-        "id": user.id,
-        "username": user.username,
-        "profilePicture": str(user.profilePicture),
-        "totalPoints": user.totalPoints,
-        "status": user.status,
-        "matchesTotal": user.matchesTotal,
-        "matchesWon": user.matchesWon,
-        "matchesLost": user.matchesLost,
-        "tournamentsPlayed": userTournamentsPlayed(user),
-        "tournamentsWon": userTournamentsWon(user),
-        "friends": populate_friends(user),
-        "matches": populate_matches(user)
-    }
-    return resp
+def get_users(request, user: Optional[int] = None):
+	if user:
+		resp = {
+			"id": user.id,
+			"username": user.username,
+			"profilePicture": str(user.profilePicture),
+			"totalPoints": user.totalPoints,
+			"status": user.status,
+			"matchesTotal": user.matchesTotal,
+			"matchesWon": user.matchesWon,
+			"matchesLost": user.matchesLost,
+			"tournamentsPlayed": userTournamentsPlayed(user),
+			"tournamentsWon": userTournamentsWon(user),
+			"friends": populate_friends(user),
+			"matches": populate_matches(user)
+		}
+		return resp
 
 
 @app.post("users/update", response={200: UserNameSchema, 400: ErrorSchema}, tags=['Users'])
