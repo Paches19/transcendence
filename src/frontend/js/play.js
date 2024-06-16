@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/12 18:19:50 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/16 23:36:12 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -385,6 +385,32 @@ function animate(){
 	aiInterval = setInterval(playAI, refreshTime);
 }
 
+function animateRemote(){
+	while (stateBall.state != 'playing'){
+		setTimeout(getState, 60);
+		console.log(stateBall.state);	
+	}
+	isPaused = false;
+	ballInterval = setInterval(moveBall, refreshTime);
+}
+
+async function getState(){
+	const apiUrl = `http://localhost:8000/api/get_state?id_match=${stateGame.id}`;
+	try{
+		const response = await fetch(apiUrl, {
+			method: 'GET',
+		});
+		if (response.ok){
+			const responsedata = await response.json();
+			stateGame = responsedata.game;
+			stateBall = responsedata.ball;
+			statePaddles = responsedata.paddles;
+		}
+	} catch (error) {
+		console.error('Error getting state:', error);
+	}
+}
+
 function stopAnimation(){
 	isPaused = true;
 	clearInterval(ballInterval);
@@ -456,12 +482,17 @@ async function startPongRemote() {
 										boundY: canvas.height
 				}),
 			});
-			const data = await response.json();
 			if (response.ok){
 				Swal.fire({
 					icon: "success",
 					title: "New match code: " + randomId,
 				});
+				console.log("Match created with code: " + randomId);
+				const responsedata = await response.json();
+				stateGame = responsedata.game;
+				stateBall = responsedata.ball;
+				statePaddles = responsedata.paddles;
+				animateRemote();
 			}
 		} catch(error) {
 			console.error("Error: ", error);
@@ -485,53 +516,34 @@ async function startPongRemote() {
 			const response = await fetch(apiUrl, {
 				method: 'POST',
 				headers: {'Content-Type': 'application/json',},
-				body: JSON.stringify( { id: randomId,
+				body: JSON.stringify( { id: matchId,
 										name1: '',
 										name2: name1,
 										boundX: canvas.width,
 										boundY: canvas.height
 				}),
 			});
-			const data = await response.json();
 			if (response.ok) {
 				Swal.fire("Joined !");
+				console.log("Match joined with code: " + matchId);
+				const responsedata = await response.json();
+				stateGame = responsedata.game;
+				stateBall = responsedata.ball;
+				statePaddles = responsedata.paddles;
+				animateRemote();
 			} else{
 				Swal.fire({
 					icon: "error",
 					title: "Match not found " + response.status,
 				});
+				initPlayPage();
+				return;
 			}
 		} catch(error) {
 			console.error("Error: ", error);
 			return false;
 		}
 	}
-}
-
-async function updateState() {
-	await fetch('/api/update_state', {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({
-			game_id: gameId,
-			player_id: playerId,
-			state: playerId === 1 ? { paddle1: gameState.paddle1 } : { paddle2: gameState.paddle2 }
-		})
-	});
-}
-
-async function getState() {
-	const response = await fetch(`/api/get_state?game_id=${gameId}`);
-	const data = await response.json();
-	if (playerId === 1) {
-		gameState.paddle2 = data.state_player_2.paddle2;
-	} else {
-		gameState.paddle1 = data.state_player_1.paddle1;
-	}
-	// Actualizar la posición de la pelota y las paletas
-	// Dibujar los elementos del juego
 }
 
 export default initPlayPage;
