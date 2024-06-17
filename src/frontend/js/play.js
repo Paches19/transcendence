@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/16 23:36:12 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/18 00:06:51 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,9 @@ let stateGame = { id: 0, v: 0, ballWidth: 0, ballHeight: 0, playerWidth: 0, play
 let ballInterval;
 let aiInterval;
 let gameInterval;
-let refreshTime = 1000/60;
+let remoteInterval;
+let refreshTime = 1000/30;
+let numPlayer = 1;
 
 function initPlayPage() {
     renderGameOptions();
@@ -50,7 +52,6 @@ function renderGameOptions() {
 }
 
 function startGame(m) {
-	console.log("play mode = " + m);
 	modality = m;
 
 	// Quitar comentarios para que pida login, de momento es para pruebas
@@ -60,6 +61,8 @@ function startGame(m) {
 		if (modality == 'remote'){
 			startPongRemote();
 		}else{
+			stateBall.state = 'playing';
+			stateGame.id = 0;
 			startPongLocal();
 		}
 	//}  else {
@@ -162,38 +165,6 @@ function attachGameControlEventListeners() {
 	document.addEventListener('keydown', handleKeyDown);
 }
 
-async function handleKeyDown(e) {
-    const pressed = e.key;
-	if (pressed == 'ArrowUp' || pressed == 'ArrowDown' ||
-		(modality == "local" && (pressed == "w" || pressed == "W")) ||
-		(modality == "local" && (pressed == "s" || pressed == "S")) ||
-		(modality == "solo" && pressed == "A") ||
-		(modality == "solo" && pressed == "D")){
-			const apiUrl = 'http://localhost:8000/api/move_paddles';
-			try {
-				const response = await fetch(apiUrl, {
-					method: 'POST',
-					headers: {'Content-Type': 'application/json'},
-					body: JSON.stringify({keypressed: pressed,}),
-				});
-				if (response.ok){
-					const responsedata = await response.json();
-					ctx.fillStyle = '#000';
-					ctx.fillRect(statePaddles.x1, 0, stateGame.playerWidth, stateGame.boundY); //Borra la paleta 1
-					ctx.fillRect(statePaddles.x2, 0, stateGame.playerWidth, stateGame.boundY); //Borra la paleta 2
-	
-					statePaddles = responsedata.paddles;
-		
-					ctx.fillStyle = '#FFF';
-					ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
-					ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
-				}
-			} catch (error) {
-				console.error('Error moving paddles:', error);
-			}
-	}
-}
-
 function pauseGame() {
 	let textButton = document.getElementById("pause-game");
 	if (textButton.textContent == "Pause"){
@@ -222,6 +193,7 @@ function quitGame() {
 	  }).then((result) => {
 			if (result.isConfirmed) {
 				console.log("Quit Game");
+				deleteMatch();
 				initPlayPage();
 				return;
 			}else if (result.isDenied){
@@ -232,21 +204,22 @@ function quitGame() {
 		});
 }
 
-function viewGame(){
-	let xp = stateGame.boundX;
-	// Calcular la posición anticipada de la bola
-	const t = (xp - stateBall.x) / stateBall.vx;
-	let yp = stateBall.y + t * stateBall.vy;
-	if (yp < 0){
-		yp = 0;
-	}else if (yp > stateGame.boundY){
-		yp = stateGame.boundY;
-	}
-	return yp;
-}
-
 function playAI(){
-	if (stateBall.vx > 0 && modality == "solo") {
+	
+	function viewGame(){
+		let xp = stateGame.boundX;
+		// Calcular la posición anticipada de la bola
+		const t = (xp - stateBall.x) / stateBall.vx;
+		let yp = stateBall.y + t * stateBall.vy;
+		if (yp < 0){
+			yp = 0;
+		}else if (yp > stateGame.boundY){
+			yp = stateGame.boundY;
+		}
+		return yp;
+	}
+	
+	if (stateBall.vx > 0) {
 		let yp = stateBall.y;
 		setInterval(() => {
 			yp = viewGame();
@@ -263,158 +236,38 @@ function playAI(){
     	}
 	}
 }
-
-async function initGame(id, name1, name2, boundX, boundY){
-	const apiUrl = 'http://localhost:8000/api/init_game';
-	try{
-		const response = await fetch(apiUrl, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json',},
-			body: JSON.stringify( { id:id,
-									name1: name1, 
-									name2: name2, 
-									boundX: boundX, 
-									boundY: boundY}),
-		});
-		if (response.ok){
-			const responsedata = await response.json();
-			stateGame = responsedata.game
-			stateBall = responsedata.ball
-			statePaddles = responsedata.paddles
-			ctx.fillStyle = '#FFF';
-			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
-			ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
-			ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
-			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
-			console.log("Game initialized");
-		}
-	} catch (error) {
-		console.error('Error initializing game:', error);
-	}
-}
-
-async function resetBall(){
-	const apiUrl = 'http://localhost:8000/api/reset_ball';
-	try{
-		const response = await fetch(apiUrl, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json',},
-		});
-		if (response.ok){
-			const responsedata = await response.json();
-			ctx.fillStyle = '#000';
-			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight); //Borra la bola
-			stateBall = responsedata.ball; //Obtiene la nueva posición de la bola
-			ctx.fillStyle = '#FFF';
-			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
-			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
-			console.log("Ball reseted")
-		}
-	} catch (error) {
-		console.error('Error reseting ball:', error);
-	}
-}
 			
 function startPongLocal(){
 	resetTime();
-	let id = 0;
-	initGame(id, name1, name2, canvas.width, canvas.height);
-	startTimer();
+	initGame(name1, name2, canvas.width, canvas.height);
 	animate();
-}
-
-async function updateScores(){
-	const apiUrl = 'http://localhost:8000/api/update_scores';
-	try{
-		const response = await fetch(apiUrl, {
-			method: 'GET',
-			headers: {'Content-Type': 'application/json',},
-		});
-		if (response.ok){
-			const responsedata = await response.json();
-			statePaddles.score1 = responsedata.score1;
-			statePaddles.score2 = responsedata.score2;
-			document.getElementById('game-score').innerHTML =
-					`${stateGame.name1} ${statePaddles.score1} - \
-					${statePaddles.score2} ${stateGame.name2}`;
-			if (responsedata.msg == 'gameover'){
-				gameOver();
-			}else{
-				resetBall();
-				animate();
-			}
-		}
-	} catch (error) {
-		console.error('Error updating scores:', error);
-	}
-}
-
-async function moveBall() {
-	const apiUrl = 'http://localhost:8000/api/move_ball';
-	try{
-		const response = await fetch(apiUrl, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json',},
-		});
-		if (response.ok){
-			const responsedata = await response.json();
-			ctx.fillStyle = '#000';
-			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight); //Borra la bola
-			
-			stateBall = responsedata.ball; //Obtiene la nueva posición de la bola
-			
-			ctx.fillStyle = '#FFF';
-			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
-			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
-			ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
-			ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
-	
-			if (responsedata.msg == 'scored'){
-				stopAnimation();
-				updateScores();
-			}
-		}
-	} catch (error) {
-		console.error('Error moving ball:', error);
-	}
 }
 
 function animate(){
 	isPaused = false;
-	ballInterval = setInterval(moveBall, refreshTime);
-	aiInterval = setInterval(playAI, refreshTime);
-}
-
-function animateRemote(){
-	while (stateBall.state != 'playing'){
-		setTimeout(getState, 60);
-		console.log(stateBall.state);	
+	if (stateBall.state == 'playing' && numPlayer == 1){
+		startTimer();
+		ballInterval = setInterval(moveBall, refreshTime);
 	}
-	isPaused = false;
-	ballInterval = setInterval(moveBall, refreshTime);
-}
-
-async function getState(){
-	const apiUrl = `http://localhost:8000/api/get_state?id_match=${stateGame.id}`;
-	try{
-		const response = await fetch(apiUrl, {
-			method: 'GET',
-		});
-		if (response.ok){
-			const responsedata = await response.json();
-			stateGame = responsedata.game;
-			stateBall = responsedata.ball;
-			statePaddles = responsedata.paddles;
-		}
-	} catch (error) {
-		console.error('Error getting state:', error);
+	if (modality == 'solo'){
+		aiInterval = setInterval(playAI, refreshTime);
+	}
+	
+	if (modality == 'remote'){
+		remoteInterval = setInterval(getState,500);
 	}
 }
 
 function stopAnimation(){
 	isPaused = true;
 	clearInterval(ballInterval);
-	clearInterval(aiInterval);	//si es pause no hace nada
+	if (modality == 'solo'){
+		clearInterval(aiInterval);	//si es pause no hace nada
+	}
+	if (modality == 'remote'){
+		//Hay que enviar un mensaje al servidor para que pause el juego del otro jugador tambiém
+		//clearInterval(remoteInterval);
+	}
 }
 
 function gameOver(){
@@ -440,6 +293,7 @@ function gameOver(){
 					showGameScreen();
 					startPongLocal();
 				}else if (result.isDenied){
+					deleteMatch();
 					initPlayPage();
 					return;
 				}});
@@ -469,37 +323,8 @@ async function startPongRemote() {
 	});
 	  
 	if (mode == "new") {
-		var randomId = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000);
-		try {
-			const apiUrl = 'http://localhost:8000/api/new_match';
-			const response = await fetch(apiUrl, {
-				method: 'POST',
-				headers: {'Content-Type': 'application/json',},
-				body: JSON.stringify( { id: randomId,
-										name1: name1,
-										name2: '',
-										boundX: canvas.width,
-										boundY: canvas.height
-				}),
-			});
-			if (response.ok){
-				Swal.fire({
-					icon: "success",
-					title: "New match code: " + randomId,
-				});
-				console.log("Match created with code: " + randomId);
-				const responsedata = await response.json();
-				stateGame = responsedata.game;
-				stateBall = responsedata.ball;
-				statePaddles = responsedata.paddles;
-				animateRemote();
-			}
-		} catch(error) {
-			console.error("Error: ", error);
-			return false;
-		}
-	
-	} else if (mode == "join") {
+		newMatch();
+	} else{
 		const { value: matchId } = await Swal.fire({
 			title: "Enter match code",
 			input: "text",
@@ -510,39 +335,298 @@ async function startPongRemote() {
 				}
 			}
 		});
-		
-		try{
-			const apiUrl = 'http://localhost:8000/api/join_match';
-			const response = await fetch(apiUrl, {
-				method: 'POST',
-				headers: {'Content-Type': 'application/json',},
-				body: JSON.stringify( { id: matchId,
-										name1: '',
-										name2: name1,
-										boundX: canvas.width,
-										boundY: canvas.height
-				}),
+		joinMatch(matchId);
+	}
+}
+
+function drawPaddles(newPaddles){
+	ctx.fillStyle = '#000';
+	ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Borra la paleta 1
+	ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Borra la paleta 2
+
+	statePaddles = newPaddles;
+
+	ctx.fillStyle = '#FFF';
+	ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+	ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2	
+}
+
+function drawBall(newBall){
+	ctx.fillStyle = '#000';
+	ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight); //Borra la bola
+	stateBall = newBall; //Obtiene la nueva posición de la bola
+	ctx.fillStyle = '#FFF';
+	ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
+}
+
+function drawScores(newScores){
+	statePaddles.score1 = newScores.score1;
+	statePaddles.score2 = newScores.score2;
+	document.getElementById('game-score').innerHTML =
+		`${stateGame.name1} ${statePaddles.score1} - \
+		${statePaddles.score2} ${stateGame.name2}`;
+}
+
+function drawNet(){
+	ctx.fillStyle = '#FFF';
+	ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
+}
+
+
+/***************** CONNECTING WITH API ********************/
+
+async function newMatch(){
+	var randomId = Math.floor(Math.random() * (9999 - 1000 + 1) + 1000);
+	try {
+		const apiUrl = 'http://localhost:8000/api/new_match';
+		const response = await fetch(apiUrl, {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json',},
+			body: JSON.stringify( { id: randomId,
+									name1: name1,
+									name2: '',
+									boundX: canvas.width,
+									boundY: canvas.height
+			}),
+		});
+		if (response.ok){
+			Swal.fire({
+				icon: "success",
+				title: "New match code: " + randomId,
 			});
-			if (response.ok) {
-				Swal.fire("Joined !");
-				console.log("Match joined with code: " + matchId);
-				const responsedata = await response.json();
-				stateGame = responsedata.game;
-				stateBall = responsedata.ball;
-				statePaddles = responsedata.paddles;
-				animateRemote();
-			} else{
-				Swal.fire({
-					icon: "error",
-					title: "Match not found " + response.status,
-				});
-				initPlayPage();
-				return;
-			}
-		} catch(error) {
-			console.error("Error: ", error);
-			return false;
+			console.log("Match created with code: " + randomId);
+			const responsedata = await response.json();
+			stateGame = responsedata.game;
+			stateBall = responsedata.ball;
+			statePaddles = responsedata.paddles;
+			ctx.fillStyle = '#FFF';
+			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
+			ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+			ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
+			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
+			animate();
 		}
+	} catch(error) {
+		console.error("Error: ", error);
+		return false;
+	}
+}
+async function initGame(name1, name2, boundX, boundY){
+	const apiUrl = 'http://localhost:8000/api/new_match';
+	try{
+		const response = await fetch(apiUrl, {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json',},
+			body: JSON.stringify( { id:0,
+									name1: name1, 
+									name2: name2, 
+									boundX: boundX, 
+									boundY: boundY}),
+		});
+		if (response.ok){
+			const responsedata = await response.json();
+			stateGame = responsedata.game
+			stateBall = responsedata.ball
+			statePaddles = responsedata.paddles
+			ctx.fillStyle = '#FFF';
+			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
+			ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+			ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
+			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
+			console.log("Game initialized");
+		}
+	} catch (error) {
+		console.error('Error initializing game:', error);
+	}
+}
+
+async function resetBall(){
+	const apiUrl = `http://localhost:8000/api/reset_ball?id_match=${stateGame.id}`;
+	try{
+		const response = await fetch(apiUrl);
+		if (response.ok){
+			const responsedata = await response.json();
+			ctx.fillStyle = '#000';
+			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight); //Borra la bola
+			stateBall = responsedata.ball; //Obtiene la nueva posición de la bola
+			ctx.fillStyle = '#FFF';
+			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
+			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
+			console.log("Ball reseted")
+		}
+	} catch (error) {
+		console.error('Error reseting ball:', error);
+	}
+}
+
+async function handleKeyDown(e) {
+    let pressed = e.key;
+	if (pressed == 'ArrowUp' || pressed == 'ArrowDown' ||
+		(modality == "local" && (pressed == "w" || pressed == "W")) ||
+		(modality == "local" && (pressed == "s" || pressed == "S")) ||
+		(modality == "solo" && pressed == "A") ||
+		(modality == "solo" && pressed == "D")){
+			//Si es el jugador 2 y la modalidad es remota, cambia las teclas
+			if (numPlayer == 2 && modality == 'remote'){
+				if (pressed == 'ArrowUp'){
+					pressed = 'w';
+				}else if (pressed == 'ArrowDown'){
+					pressed = 's';
+				}
+			}
+			
+			const apiUrl = `http://localhost:8000/api/move_paddles?id_match=${stateGame.id}&key=${pressed}`;
+			
+			try {
+				const response = await fetch(apiUrl);
+				if (response.ok){
+					const responsedata = await response.json();
+					ctx.fillStyle = '#000';
+					ctx.fillRect(statePaddles.x1, 0, stateGame.playerWidth, stateGame.boundY); //Borra la paleta 1
+					ctx.fillRect(statePaddles.x2, 0, stateGame.playerWidth, stateGame.boundY); //Borra la paleta 2
+	
+					statePaddles = responsedata.paddles;
+		
+					ctx.fillStyle = '#FFF';
+					ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+					ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
+				}
+			} catch (error) {
+				console.error('Error moving paddles:', error);
+			}
+	}
+}
+
+async function joinMatch(matchId){
+	const apiUrl = 'http://localhost:8000/api/join_match';
+	try{
+		const response = await fetch(apiUrl, {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json',},
+			body: JSON.stringify( { id: matchId,
+									name1: '',
+									name2: name1,
+									boundX: canvas.width,
+									boundY: canvas.height
+			}),
+		});
+		if (response.ok) {
+			Swal.fire("Joined !");
+			console.log("Match joined with code: " + matchId);
+			const responsedata = await response.json();
+			stateGame = responsedata.game;
+			stateBall = responsedata.ball;
+			statePaddles = responsedata.paddles;
+			numPlayer = 2;
+			ctx.fillStyle = '#FFF';
+			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
+			ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+			ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
+			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
+			animate();
+		} else{
+			Swal.fire({
+				icon: "error",
+				title: "Match not found " + response.status,
+			});
+			initPlayPage();
+			return;
+		}
+	} catch(error) {
+		console.error("Error: ", error);
+		return false;
+	}
+}
+
+async function getState(){
+	const apiUrl = `http://localhost:8000/api/get_state?id_match=${stateGame.id}`;
+	console.log('getState of player ', numPlayer);
+	try{
+		const response = await fetch(apiUrl);
+		if (response.ok){
+			const responsedata = await response.json();
+			if (responsedata.ball.state == 'playing'){
+				stateBall = responsedata.ball;
+				stateGame = responsedata.game;
+				statePaddles = responsedata.paddles;
+				ctx.fillStyle = '#FFF';
+				console.log("player 2 joined");
+				ctx.fillStyle = '#000';
+				ctx.fillRect(0,0,canvas.width,canvas.height); //Borra todo
+				ctx.fillStyle = '#FFF';
+				ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
+				ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+				ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
+				ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
+			}
+			if (responsedata.ball.state == 'paused'){
+				stopAnimation();
+			}
+		}
+	} catch (error) {
+		console.error('Error getting state:', error);
+	}
+}
+
+async function moveBall() {
+	const apiUrl = `http://localhost:8000/api/move_ball?id_match=${stateGame.id}`;
+	try{
+		const response = await fetch(apiUrl);
+		if (response.ok){
+			const responsedata = await response.json();
+			ctx.fillStyle = '#000';
+			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight); //Borra la bola
+			
+			stateBall = responsedata.ball; //Obtiene la nueva posición de la bola
+			
+			ctx.fillStyle = '#FFF';
+			ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);// Dibuja la red
+			ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
+			ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+			ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
+	
+			if (responsedata.msg == 'scored'){
+				stopAnimation();
+				updateScores();
+			}
+		}
+	} catch (error) {
+		console.error('Error moving ball:', error);
+	}
+}
+
+async function updateScores(){
+	const apiUrl = `http://localhost:8000/api/update_scores?id_match=${stateGame.id}`;
+	try{
+		const response = await fetch(apiUrl);
+		if (response.ok){
+			const responsedata = await response.json();
+			statePaddles.score1 = responsedata.score1;
+			statePaddles.score2 = responsedata.score2;
+			document.getElementById('game-score').innerHTML =
+					`${stateGame.name1} ${statePaddles.score1} - \
+					${statePaddles.score2} ${stateGame.name2}`;
+			if (responsedata.msg == 'gameover'){
+				gameOver();
+			}else{
+			 	resetBall();
+			 	animate();
+			}
+		}
+	} catch (error) {
+		console.error('Error updating scores:', error);
+	}
+}
+
+async function deleteMatch(){
+	const apiUrl = `http://localhost:8000/api/delete_match?id_match=${stateGame.id}`;
+	try{
+		const response = await fetch(apiUrl);
+		if (response.ok){
+			console.log(response.msg);
+		}
+	} catch (error) {
+		console.error('Error deleting match:', error);
 	}
 }
 

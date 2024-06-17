@@ -30,14 +30,6 @@ class Game(models.Model):
     boundX = models.IntegerField(default=0)
     boundY = models.IntegerField(default=0)
 
-class RemotePaddle(models.Model):
-     number: int
-     x: int
-     y: int
-     score: int
-     name: str
-     state: str
-
 class RemoteGame(models.Model):
 	id = models.IntegerField(primary_key=True)
 	paddles = Paddles()

@@ -74,20 +74,11 @@ class InitGameSchema(Schema):
 	name2: str
 	boundX: int
 	boundY: int
-
-class KeySchema(Schema):
-	keypressed: str
-
-class IdMatchSchema(Schema):
-	id: int
     
 class SuccessInitSchema(Schema):
 	game: GameSchema
 	paddles: PaddlesSchema
 	ball: BallSchema
-
-class StateSchema(Schema):
-	state: str
  
 """ User schemas """
 
