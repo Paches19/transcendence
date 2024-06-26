@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/13 12:26:11 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/06/26 13:19:06 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,12 @@ function renderGameOptions() {
             </div>
         </div>
     `;
+    attachEventListeners();
 }
 
 function attachEventListeners() {
     document.getElementById('local-vs-human').addEventListener('click', showMatchTypeOptions);
+    document.getElementById('remote-vs-human').addEventListener('click', showMatchTypeOptions);
 }
 
 function showMatchTypeOptions() {
@@ -52,12 +54,11 @@ function showMatchTypeOptions() {
         </div>
     `;
 
-    document.getElementById('normal-match').addEventListener('click', loadLogin);
+    document.getElementById('normal-match').addEventListener('click', () => loadLogin(null));
     document.getElementById('tournament-match').addEventListener('click', handleLocalVsHumanClick);
 }
 
 async function handleLocalVsHumanClick() {
-
     const apiUrl = 'https://localhost/api/tournaments/user/matches';
   
     const requestOptions = {
@@ -92,7 +93,7 @@ function showMatchOptions(matches) {
                         </div>
                         <div class="match-details">
                             <span class="match-info">${match.player1_username} vs ${match.player2_username}</span>
-                            <button class="play-btn play-btn-primary select-match-btn" data-match-id="${match.matchID}">Select</button>
+                            <button class="play-btn play-btn-primary select-match-btn" data-match-id="${match.matchID}" data-user2-match="${match.player2_username}">Select</button>
                         </div>
                     </li>
                 `).join('')}
@@ -104,28 +105,44 @@ function showMatchOptions(matches) {
     matchButtons.forEach(button => {
         button.addEventListener('click', (event) => {
             selectedMatchID = event.target.getAttribute('data-match-id');
-            loadLogin();
+            const user2Match = event.target.getAttribute('data-user2-match');
+            loadLogin(user2Match);
         });
     });
 }
 
-function loadLogin() {
-    const mainContent = document.getElementById('main-content');
-    mainContent.innerHTML = `
+function loadLogin(user2Match) {
+    // Verificar si la superposición ya existe
+    if (document.querySelector('.login-overlay')) {
+        document.querySelector('.login-overlay').remove();
+    }
+
+    if (!user2Match) user2Match = "Name";
+
+    const loginOverlay = document.createElement('div');
+    loginOverlay.className = 'login-overlay';
+    loginOverlay.innerHTML = `
         <div class="wrapper">
             <div class="flip-card__inner">
                 <div class="flip-card__front">
+                    <button class="close-btn" id="close-login-overlay">X</button>
                     <div class="title">Log in</div>
-                        <form action="" class="flip-card__form" id="login-form">
-                            <input type="text" placeholder="Name" id="userName" class="flip-card__input">
-                            <input type="password" placeholder="Password" id="password" class="flip-card__input">
-                            <button type="submit" class="flip-card__btn" id="login-btn">Start Game!</button>
-                            <div class="text" id="login-msg"> </div>
-                        </form>
+                    <form action="" class="flip-card__form" id="login-form">
+                        <input type="text" id="userName" class="flip-card__input" value="${user2Match}">
+                        <input type="password" placeholder="Password" id="password" class="flip-card__input">
+                        <button type="submit" class="flip-card__btn" id="login-btn">Start Game!</button>
+                        <div class="text" id="login-msg"> </div>
+                    </form>
                 </div>
             </div>   
         </div>
     `;
+    document.body.appendChild(loginOverlay);
+    
+    const closeBtn = document.getElementById('close-login-overlay');
+    closeBtn.addEventListener('click', () => {
+        document.querySelector('.login-overlay').remove();
+    });
 
     const loginForm = document.getElementById('login-form');
     loginForm.addEventListener('submit', handleLoginSubmit);
@@ -134,16 +151,12 @@ function loadLogin() {
 async function handleLoginSubmit(event) {
     event.preventDefault();
 
-    console.log("selectedID: ", selectedMatchID);
-
     const apiUrl = '/api/auth/login/local_match';
     const requestBody = {
         player2_username: document.getElementById('userName').value,
         player2_password: document.getElementById('password').value,
         matchID: selectedMatchID ? selectedMatchID : -1
     };
-
-    console.log("requestBody: ", requestBody);
   
     const requestOptions = {
         method: 'POST',
@@ -157,7 +170,8 @@ async function handleLoginSubmit(event) {
 
         if (response.ok) {
             const data = await response.json();
-            showStartGameButton();
+            document.querySelector('.login-overlay').remove();
+            startGame();
         } else {
             const errorData = await response.json();
             document.getElementById('login-msg').textContent = `Error: ${errorData.message}`;
@@ -167,17 +181,7 @@ async function handleLoginSubmit(event) {
     }
 }
 
-function showStartGameButton() {
-    const mainContent = document.getElementById('main-content');
-    mainContent.innerHTML += `
-        <button id="start-game-btn" class="flip-card__btn btn btn-success play-btn mt-3">Start Game</button>
-    `;
-
-    const startGameButton = document.getElementById('start-game-btn');
-    startGameButton.addEventListener('click', startGameBtn);
-}
-
-async function startGameBtn() {
+async function startGame() {
     // const endpoint = selectedMatchID ? `/api/tournaments/${selectedMatchID}/start` : `/api/matches/start`;
     
     // try {
