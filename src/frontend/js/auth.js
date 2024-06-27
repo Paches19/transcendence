@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   auth.js                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/24 13:16:03 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/06/27 17:27:49 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,8 +79,7 @@ function getUsernameFromToken() {
     if (!token)
         return null;
 
-    const decoded = atob(token);
-    return decoded.split(':')[0];
+    return token;
 }
 
 export { login, isLoggedIn, logout, getUsernameFromToken };

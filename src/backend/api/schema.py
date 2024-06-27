@@ -1,14 +1,14 @@
-#******************************************************************************#
+# **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
 #    schema.py                                          :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
+#    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:15 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/11 14:08:43 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/27 20:05:22 by jutrera-         ###   ########.fr        #
 #                                                                              #
-#******************************************************************************#
+# **************************************************************************** #
 
 from pydantic import BaseModel, ValidationError, model_validator
 import datetime
@@ -177,3 +177,54 @@ class UserStatsUpdateSchema(Schema):
     userID: int
     points: int
     won: bool
+
+
+""" Match schemas """
+
+class PaddlesSchema(Schema):
+	x1: int
+	y1: int
+	score1: int
+	x2: int
+	y2: int
+	score2: int
+
+class MovePaddlesSchema(Schema):
+     msg: str
+     paddles: PaddlesSchema
+
+class BallSchema(Schema):
+	x: int
+	y: int
+	vx: int
+	vy: int
+     
+class MoveBallSchema(Schema):
+     msg: str
+     ball: BallSchema
+     score1: int
+     score2: int
+
+class GameSchema(Schema):
+	v: int
+	boundX: int
+	boundY: int
+	finalScore: int
+	playerWidth: int
+	playerHeight: int
+	ballWidth: int
+	ballHeight: int
+	name1: str
+	name2: str
+
+class InitGameSchema(Schema):
+	id: int
+	name1: str
+	name2: str
+	boundX: int
+	boundY: int
+    
+class SuccessInitSchema(Schema):
+	game: GameSchema
+	paddles: PaddlesSchema
+	ball: BallSchema

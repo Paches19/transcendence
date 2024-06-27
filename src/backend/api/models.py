@@ -1,14 +1,14 @@
-#******************************************************************************#
+# **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
 #    models.py                                          :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
+#    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:10 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/13 13:08:45 by alaparic         ###   ########.fr        #
+#    Updated: 2024/06/27 20:03:13 by jutrera-         ###   ########.fr        #
 #                                                                              #
-#******************************************************************************#
+# **************************************************************************** #
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -17,6 +17,38 @@ import datetime
 
 # Create your models here.
 
+
+class Paddles(models.Model):
+	x1 = models.IntegerField(default=0)
+	y1 = models.IntegerField(default=0)
+	score1 = models.IntegerField(default=0)
+	x2 = models.IntegerField(default=0)
+	y2 = models.IntegerField(default=0)
+	score2 = models.IntegerField(default=0)
+
+class Ball(models.Model):
+	x = models.IntegerField(default=0)
+	y = models.IntegerField(default=0)
+	vx = models.IntegerField(default=0)
+	vy = models.IntegerField(default=0)
+
+class Game(models.Model):
+    v = models.IntegerField(default=0)
+    ballWidth = models.IntegerField(default=10)
+    ballHeight = models.IntegerField(default=10)
+    playerWidth = models.IntegerField(default=15)
+    playerHeight = models.IntegerField(default=80)
+    finalScore = models.IntegerField(default=3)
+    name1 = models.CharField(max_length=40, default='Player1')
+    name2 = models.CharField(max_length=40, default='Player2')
+    boundX = models.IntegerField(default=0)
+    boundY = models.IntegerField(default=0)
+
+class RemoteGame(models.Model):
+	id = models.IntegerField(primary_key=True)
+	paddles = Paddles()
+	ball = Ball()
+	game = Game()
 
 class Match(models.Model):
     matchID = models.AutoField(primary_key=True)

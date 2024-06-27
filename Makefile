@@ -29,6 +29,9 @@ stop:
 			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) stop
 			@printf "\n$(BLUE)==> $(RED)Transcendence stopped 🛑\n$(RESET)"
 
+logs:
+			docker logs -f	django
+
 clean:		stop
 			@docker-compose -p $(NAME) -f $(COMPOSE_ROUTE) down
 			@printf "\n$(BLUE)==> $(RED)Removed Transcendence 🗑️\n$(RESET)"

@@ -3,15 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   play.js                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/26 13:19:06 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/06/27 17:15:56 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import { isLoggedIn, getUsernameFromToken } from "./auth.js";
-//import router from "./main.js";
+import startGameAI from "./gameAI.js";
 
 let selectedMatchID = null;
 
@@ -34,10 +33,10 @@ function renderGameOptions() {
             </div>
         </div>
     `;
-    attachEventListeners();
 }
 
 function attachEventListeners() {
+	document.getElementById('solo-vs-ai').addEventListener('click', () => startGameAI());
     document.getElementById('local-vs-human').addEventListener('click', showMatchTypeOptions);
     document.getElementById('remote-vs-human').addEventListener('click', showMatchTypeOptions);
 }
@@ -118,7 +117,7 @@ function loadLogin(user2Match) {
     }
 
     if (!user2Match) user2Match = "Name";
-
+	
     const loginOverlay = document.createElement('div');
     loginOverlay.className = 'login-overlay';
     loginOverlay.innerHTML = `
