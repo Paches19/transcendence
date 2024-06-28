@@ -6,11 +6,11 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/27 17:15:56 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/28 10:14:49 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import startGameAI from "./gameAI.js";
+import startGame from "./pongLocal.js";
 
 let selectedMatchID = null;
 
@@ -36,7 +36,7 @@ function renderGameOptions() {
 }
 
 function attachEventListeners() {
-	document.getElementById('solo-vs-ai').addEventListener('click', () => startGameAI());
+	document.getElementById('solo-vs-ai').addEventListener('click', () => startGame('solo', null, 0));
     document.getElementById('local-vs-human').addEventListener('click', showMatchTypeOptions);
     document.getElementById('remote-vs-human').addEventListener('click', showMatchTypeOptions);
 }
@@ -149,10 +149,11 @@ function loadLogin(user2Match) {
 
 async function handleLoginSubmit(event) {
     event.preventDefault();
+	let player2_name = document.getElementById('userName').value;
 
     const apiUrl = '/api/auth/login/local_match';
     const requestBody = {
-        player2_username: document.getElementById('userName').value,
+        player2_username: player2_name,
         player2_password: document.getElementById('password').value,
         matchID: selectedMatchID ? selectedMatchID : -1
     };
@@ -170,7 +171,8 @@ async function handleLoginSubmit(event) {
         if (response.ok) {
             const data = await response.json();
             document.querySelector('.login-overlay').remove();
-            startGame();
+            //startGame();
+			startGame('local', player2_name, selectedMatchID);
         } else {
             const errorData = await response.json();
             document.getElementById('login-msg').textContent = `Error: ${errorData.message}`;
@@ -180,7 +182,7 @@ async function handleLoginSubmit(event) {
     }
 }
 
-async function startGame() {
+//async function startGame() {
     // const endpoint = selectedMatchID ? `/api/tournaments/${selectedMatchID}/start` : `/api/matches/start`;
     
     // try {
@@ -202,8 +204,8 @@ async function startGame() {
     // } catch (error) {
     //     showNotification('Error starting game. Please try again later.', false);
     // }
-    showNotification(`Game starting`, true);
-}
+  //  showNotification(`Game starting`, true);
+//}
 
 function showNotification(message, isSuccess = true) {
     let notification = document.getElementById('notification');

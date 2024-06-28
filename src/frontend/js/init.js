@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   init.js                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 13:02:06 by adpachec          #+#    #+#             */
-/*   Updated: 2024/04/18 15:40:13 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/06/28 10:07:22 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ function loadInitialContent()
 	
 	<div class="hero-section">
 		<div class="hero-text-container">
-			<h1>Welcome to Trascendence</h1>
+			<h1>Welcome to Transcendence</h1>
 			<p>The return of the iconic game that will end everything</p>
 			<a data-route="/play" id="play-now" class="btn btn-primary btn-lg">PLAY NOW</a>
 		</div>

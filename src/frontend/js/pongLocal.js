@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pongLocal.js                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
+/*   Updated: 2024/05/03 20:39:19 by jutrera-         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 import { isLoggedIn, getUsernameFromToken } from "./auth.js";
 import router from "./main.js";
@@ -14,22 +25,29 @@ let stateGame = { v: 0, ballWidth: 0, ballHeight: 0, playerWidth: 0, playerHeigh
 let state;
 let name1;
 let name2;
-let id = 0;
+let id;
 let ballInterval;
 let aiInterval;
 let gameInterval;
 let countdownInterval
 const refreshTime = 1000/30;
 
-function startGameAI(){
+function startGame(mode, player2, id_match){
+	modality = mode;
 	if (isLoggedIn()) {
-		modality = 'solo';
 		name1 = getUsernameFromToken();
-		name2 = 'AI';
+		if (!player2)
+			name2 = 'AI';
+		else
+			name2 = player2;
+		if (!id_match)
+			id = 0;
+		else
+			id = id_match;
 		showGameScreen();
 		startPongLocal();
 	}else{
-		router.route('login');
+		router.route('/login');
 	}
 }
 
@@ -244,35 +262,49 @@ function gameOver(){
 	else 
 		texto = stateGame.name2;
 	
+	if (modality == 'solo'){
+		if (texto != 'AI'){
+		//mandar estadísticas de la partida para name1
+		}
+	}else{
+		//mandar estadísticas de la partida para name1 y name2
+	}
+	
 	stopAnimation();
 	deleteMatch();
 
 	Swal.fire({
-		title: texto + " WIN",
+		title: texto + " WINS",
 		confirmButtonColor: '#32B974',
 	}).then((result) => {	
 		if (result.isConfirmed){
-			Swal.fire({
-				confirmButtonColor: '#32B974',
-				title: "Play again ?",
-				showDenyButton: true,
-				showCancelButton: false,
-				confirmButtonText: "Yes",
-				denyButtonText: `No`
-			  }).then((result) => {
-				if (result.isConfirmed) {
-					showGameScreen();
-				}else if (result.isDenied){
-					initPlayPage();
-					return;
+			if (id == 0){ //Pedir volver a jugar si no es un torneo
+				Swal.fire({
+					confirmButtonColor: '#32B974',
+					title: "Play again ?",
+					showDenyButton: true,
+					showCancelButton: false,
+					confirmButtonText: "Yes",
+					denyButtonText: `No`
+			  	}).then((result) => {
+					if (result.isConfirmed) {
+						showGameScreen();
+					}else if (result.isDenied){
+						initPlayPage();
+						return;
 				}});
-		};
-	});
+			}else{
+				initPlayPage();
+				return;
+			}
+		}
+	})
 }
 
 function drawPong(){
 	ctx.fillStyle = '#000';
-	ctx.fillRect(0,0,canvas.width,canvas.height); //Borra todo
+	ctx.fillRect(0, 0, canvas.width, canvas.height); //Borra todo
+	drawBorders();
 	drawNet();
 	ctx.fillStyle = '#FFF';
 	ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
@@ -300,6 +332,7 @@ function drawBall(newBall){
 	
 	ctx.fillStyle = '#FFF';
 	drawNet();
+	drawBorders();
 	ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
 }
 
@@ -311,6 +344,19 @@ function drawScores(newScore1, newScore2){
 	document.getElementById('game-score').innerHTML =
 		`${stateGame.name1} ${statePaddles.score1} - \
 		${statePaddles.score2} ${stateGame.name2}`;
+}
+
+function drawBorders(){
+	ctx.fillStyle = '#FFF';
+	ctx.lineWidth = 6;
+	ctx.beginPath();
+	ctx.moveTo(3, 3);
+	ctx.lineTo(canvas.width-3, 3);
+	ctx.lineTo(canvas.width-3, canvas.height-3);
+	ctx.lineTo(3, canvas.height-3);
+	ctx.lineTo(3, 3);
+	ctx.setLineDash([]);
+	ctx.stroke();
 }
 
 function drawNet(){
@@ -325,6 +371,7 @@ function drawNet(){
 
 /***************** CONNECTING WITH API ********************/
 /** Por defecto, la función fetch utiliza el método GET  **/
+
 
 async function  startPongLocal(){	
 	const apiUrl = 'https://localhost/api/match/new';
@@ -341,6 +388,7 @@ async function  startPongLocal(){
 		});
 		if (response.ok){
 			const responsedata = await response.json();
+			id = responsedata.id;
 			stateGame = responsedata.game;
 			stateBall = responsedata.ball;
 			statePaddles = responsedata.paddles;
@@ -421,4 +469,4 @@ async function moveBall() {
 	}
 }
 
-export default startGameAI;
+export default startGame;

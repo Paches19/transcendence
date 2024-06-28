@@ -395,7 +395,6 @@ game = Game()
 paddles = Paddles()
 ball = Ball()
 
-
 @app.get('game/paddles', response={200: MovePaddlesSchema, 400: ErrorSchema}, tags=['Game'])
 def move_paddles(request, id_match: int, key:str):
 	try:
@@ -471,11 +470,6 @@ def reset_ball(request, id_match: int):
 
 @app.post("match/new", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
 def new_match(request, datagame: InitGameSchema):
-	try:
-		match = RemoteGame.objects.get(id = datagame.id)
-		match.delete()
-	except:
-		pass
 	match = RemoteGame.objects.create(id = datagame.id)
 	match.game.v = 10
 	match.game.ballWidth = 10
@@ -484,7 +478,9 @@ def new_match(request, datagame: InitGameSchema):
 	match.game.playerHeight = 80
 	match.game.finalScore = 3
 	match.game.name1 = datagame.name1
+	
 	match.game.name2 = datagame.name2
+	
 	match.game.boundX = datagame.boundX
 	match.game.boundY = datagame.boundY
 	
@@ -499,7 +495,7 @@ def new_match(request, datagame: InitGameSchema):
 	match.ball.vx = random.choice([-10, -9, -8, 8, 9, 10])
 	match.ball.vy = random.choice([-3, -2, -1, 1, 2, 3])
 	match.save()
-	return 200, {"game": match.game, "paddles": match.paddles, "ball": match.ball}
+	return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
 
 
 @app.post("match/join", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
@@ -509,7 +505,7 @@ def join_match(request, datagame: InitGameSchema):
 		return 400, {"error_msg": "Game already has two players"}
 	match.game.name2 = datagame.name2
 	match.save()
-	return 200, {"game": match.game, "paddles": match.paddles, "ball": match.ball}
+	return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
 
 @app.get("match/delete", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
 def delete_match(request, id_match: int):
@@ -524,6 +520,6 @@ def delete_match(request, id_match: int):
 def get_state(request, id_match: int):
 	try:
 		match = get_object_or_404(RemoteGame, id = id_match)
-		return 200, {"game": match.game, "paddles": match.paddles, "ball": match.ball}
+		return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
 	except Exception as e:
 		return 400, {"error_msg": "Error getting game state" + str(e)}

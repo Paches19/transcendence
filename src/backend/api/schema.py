@@ -6,7 +6,7 @@
 #    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:15 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/27 20:05:22 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/06/28 12:05:29 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -225,6 +225,7 @@ class InitGameSchema(Schema):
 	boundY: int
     
 class SuccessInitSchema(Schema):
+	id: int
 	game: GameSchema
 	paddles: PaddlesSchema
 	ball: BallSchema
