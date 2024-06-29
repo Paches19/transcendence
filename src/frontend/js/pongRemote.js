@@ -1,4 +1,3 @@
-
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
@@ -11,345 +10,420 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-import {initPlayPage, resetTime} from "./play.js";
+import { isLoggedIn, getUsernameFromToken } from "./auth.js";
+import router from "./main.js";
+import initPlayPage from "./play.js";
 
-let socket;
+let modality;
+let ctx;
 let canvas;
-let stateMatch = {
-	'ball': {
-		'x': 0,
-		'y': 0,
-		'vx': 0,
-		'vy': 0,
-	},
-	'player1': {
-		'x': 0,
-		'y': 0,
-		'score': 0,
-		'name': "",
-	},
-	'player2': {
-		'x': 0,
-		'y': 0,
-		'score': 0,
-		'name': "",
-	},
-	'state': 'waiting',
-}
-let v = 10;
-let ballWidth = 10;
-let ballHeight = 10;
-let playerWidth = 15;
-let playerHeight = 80;
-let y;
-let player = "";
+
+let seconds = 0;
+let statePaddles = { x1: 0, y1: 0, score1: 0, x2: 0, y2: 0, score2: 0 };
+let stateBall = { x: 0, y: 0, vx: 0, vy: 0 };
+let stateGame = { v: 0, ballWidth: 0, ballHeight: 0, playerWidth: 0, playerHeight: 0, finalScore: 0, name1: '', name2: '', boundX: 0, boundY: 0 };
+let state;
 let name1;
 let name2;
-let finalScore = 3;
-let ctx;
-let winner;
+let id;
+let ballInterval;
+let gameInterval;
+let countdownInterval
+const refreshTime = 1000/30;
 
-function loop() {	
-	if (stateMatch.state == 'gameover'){
-		return;
+function startGameRemote(player2, id_match){
+	if (isLoggedIn()) {
+		name1 = getUsernameFromToken();
+		name2 = player2;
+		if (!id_match)
+			id = 0;
+		else
+			id = id_match;
+		console.log("modo remoto id= ", id_match);
+		//showGameScreen();
+		//startPongRemote();
+	}else{
+		router.route('/login');
 	}
-	if (stateMatch.state == 'playing'){
-		ballBounce();
-		drawElements();
+}
+
+function showGameScreen() {
+	const mainContent = document.getElementById('main-content');
+    mainContent.innerHTML = `
+    <div class="container mt-5 game-container">
+        <div class="row align-items-center">
+            <div class="col-12 col-lg-8 mx-auto">
+                <div class="bg-dark text-white p-3 rounded-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <h2 id="game-score" class="mb-0">${name1} 0 - 0 ${name2}</h2>
+                        <h3 id="game-timer" class="mb-0">00:00</h3>
+                    </div>
+                    <canvas id="pong-game" class="w-100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12 text-center">
+                <button class="btn btn-success btn-lg mx-2" id="pause-game">Pause</button>
+                <button class="btn btn-danger btn-lg mx-2" id="quit-game">Quit</button>
+            </div>
+        </div>
+    </div>
+    `;
+	initializeGame();
+	attachGameControlEventListeners();
+}
+
+function attachGameControlEventListeners() {
+	document.getElementById('pause-game').addEventListener('click', pauseGame);
+ document.getElementById('quit-game').addEventListener('click', quitGame);
+ document.addEventListener('keydown', handleKeyDown);
+}
+
+function initializeGame() {
+    canvas = document.getElementById("pong-game");
+    if (canvas) {
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+		resetTime();
+    }
+}
+
+function resizeCanvas() {
+    const container = document.querySelector('.game-container');
+    if (canvas && container) {
+        const width = container.clientWidth;
+        const height = Math.max(width * 0.5, 300);
+        canvas.width = width;
+        canvas.height = height;
+		ctx = canvas.getContext('2d');
+		drawPong();
+    }
+}
+
+function startTimer() {
+    const timerDisplay = document.getElementById("game-timer");
+	
+	function pad(number) {return number < 10 ? '0' + number : number;}
+	
+    gameInterval = setInterval(() => {
+	        seconds++;
+    	    let minutes = Math.floor(seconds / 60);
+    	    let remainingSeconds = seconds % 60;
+    	    timerDisplay.textContent = `${pad(minutes)}:${pad(remainingSeconds)}`;
+	}, 1000);
+}
+
+function resetTime(){
+	const timerDisplay = document.getElementById("game-timer");
+	clearInterval(gameInterval);
+	seconds = 0;
+	timerDisplay.textContent = `00:00`;
+}
+
+function pauseGame() {
+	let textButton = document.getElementById("pause-game");
+	
+	if (state == 'pause'){
+		textButton.textContent = "Pause";
+		startLocal();
+	}else if (state == 'playing'){
+		textButton.textContent = "Resume";
+		stopAnimation();
 	}
-	requestAnimationFrame(loop);
 }
 
-function playRemote(){
-	stateMatch.state = 'playing';
+function quitGame() {
+	if (state == 'playing'){
+		stopAnimation();
+		Swal.fire({
+			confirmButtonColor: '#32B974',
+			title: "Are you sure ?",
+			showDenyButton: true,
+			showCancelButton: false,
+			confirmButtonText: "Yes",
+			denyButtonText: `No`
+	  	}).then((result) => {
+			if (result.isConfirmed) {
+				deleteMatch();
+				initPlayPage();
+				return;
+			}else if (result.isDenied){
+				document.getElementById("pause-game").textContent = "Pause";
+				startLocal();
+			}
+		});
+	}
 }
 
-function quitRemote(){
-	stateMatch.state = 'gameover';
+function animate(){
+	let timeLeft = 3;
+	state =  'countdown';
+	countdownInterval = setInterval(() => {
+		drawPong();
+		// Calculate minutes and seconds
+		const seconds = timeLeft % 60;
+		const displayTime = `${seconds}`;
+
+		// Set font size relative to canvas size
+		const fontSize = Math.min(canvas.width, canvas.height) / 3;
+		ctx.strokeStyle = '#FFF';
+		ctx.font = `${fontSize}px Arial`;
+		ctx.textAlign = 'center';
+		ctx.textBaseline = 'middle';
+
+		// Draw the countdown text
+		ctx.fillStyle = '#FFF';
+		ctx.fillText(displayTime, canvas.width / 2, canvas.height / 2);
+
+		// Draw the circle
+		const centerX = canvas.width / 2;
+		const centerY = canvas.height / 2;
+	
+		ctx.beginPath();
+		const radius = Math.min(canvas.width, canvas.height) / 2.5;
+		ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+		ctx.strokeStyle = '#FFF';
+		ctx.lineWidth = 10;
+		ctx.setLineDash([]);
+		ctx.stroke();
+
+		// Update the time left
+		timeLeft--;
+
+		// Stop the countdown when it reaches zero
+		if (timeLeft < 0) {
+			drawPong();
+			clearInterval(countdownInterval);
+			startLocal();
+		}
+	}, 1000);
 }
 
-function pauseRemote(){
-	stateMatch.state = 'waiting';
+function startLocal(){
+	state = 'playing';
+	startTimer();
+	ballInterval = setInterval(moveBall, refreshTime);
+}
+
+function stopAnimation(){
+	state = 'pause';
+	clearInterval(ballInterval);
+	clearInterval(gameInterval);
 }
 
 function gameOver(){
-	pauseRemote();
-	socket.send(JSON.stringify({
-		"event": 'game_over',
-		"winner": winner,
-	}));
-	stateMatch.state = 'gameover';
 	let texto;
-	if (stateMatch.player1.score == finalScore)
-		texto = "YOU WIN";
-	else
-		texto = "YOU LOSE";
+	if (statePaddles.score1 >= stateGame.finalScore)
+		texto = stateGame.name1;
+	else 
+		texto = stateGame.name2;
+	
+	if (modality == 'solo'){
+		if (texto != 'AI'){
+		//mandar estadísticas de la partida para name1
+		}
+	}else{
+		//mandar estadísticas de la partida para name1 y name2
+	}
+	
+	stopAnimation();
+	deleteMatch();
 
 	Swal.fire({
-		title: texto,
+		title: texto + " WINS",
 		confirmButtonColor: '#32B974',
 	}).then((result) => {	
 		if (result.isConfirmed){
-			Swal.fire({
-				confirmButtonColor: '#32B974',
-				title: "Play again ?",
-				showDenyButton: true,
-				showCancelButton: false,
-				confirmButtonText: "Yes",
-				denyButtonText: `No`
-			  }).then((result) => {
-				if (result.isConfirmed) {
-					resetTime();
-					initGameRemote();
-				}else if (result.isDenied){
-					initPlayPage();
+			if (id == 0){ //Pedir volver a jugar si no es un torneo
+				Swal.fire({
+					confirmButtonColor: '#32B974',
+					title: "Play again ?",
+					showDenyButton: true,
+					showCancelButton: false,
+					confirmButtonText: "Yes",
+					denyButtonText: `No`
+			  	}).then((result) => {
+					if (result.isConfirmed) {
+						showGameScreen();
+					}else if (result.isDenied){
+						initPlayPage();
+						return;
 				}});
-		};
-	});
+			}else{
+				initPlayPage();
+				return;
+			}
+		}
+	})
 }
 
-function initGameRemote(){
-	console.log('Game initialized');
-	canvas = document.getElementById('pong-game');
-	ctx = canvas.getContext('2d');
-	ctx.fillStyle = 'white';
-	socket = new WebSocket("ws://localhost:8080/ws/game/remote/1");
-	document.addEventListener('keydown', handleKeyDown);
-	stateMatch = {
-		'ball': {
-			'x': canvas.width / 2 - 5,
-			'y': canvas.height / 2 - 5,
-			'vx': Math.floor(Math.random() * 7) - 3,
-			'vy': Math.floor(Math.random() * 7) - 3,
-		},
-		'player1': {
-			'x': 10,
-			'y': canvas.height / 2 - 40,
-			'score': 0,
-		},
-		'player2': {
-			'x': canvas.width - 25,
-			'y': canvas.height / 2 - 40,
-			'score': 0,
+function drawPong(){
+	ctx.fillStyle = '#000';
+	ctx.fillRect(0, 0, canvas.width, canvas.height); //Borra todo
+	drawBorders();
+	drawNet();
+	ctx.fillStyle = '#FFF';
+	ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+	ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
+	ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
+}
+
+function drawPaddles(newPaddles){
+	ctx.fillStyle = '#000';
+	ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Borra la paleta 1
+	ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Borra la paleta 2
+
+	statePaddles = newPaddles;
+
+	ctx.fillStyle = '#FFF';
+	ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+	ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2	
+}
+
+function drawBall(newBall){
+	ctx.fillStyle = '#000';
+	ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight); //Borra la bola
 	
-		},
-		'state': 'waiting',
-	}
-	var words = document.getElementById('game-score').textContent.split(' ');
-    name1 = words[0];
-	name2 = words[4];	
-	drawElements();
-	drawScores();
-	stateMatch.ball.vx = Math.floor(Math.random() * 7) - 3;
-	stateMatch.ball.vy = Math.floor(Math.random() * 7) - 3;
-	if (stateMatch.ball.vx == 0)
-		stateMatch.ball.vx = 4;
-	if (stateMatch.ball.vy == 0)
-		stateMatch.ball.vy = 4
-	y = canvas.height / 2 - 40;
-	loop();
-	setTimeout(playRemote,3000);
+	stateBall = newBall; //Obtiene la nueva posición de la bola
+	
+	ctx.fillStyle = '#FFF';
+	drawNet();
+	drawBorders();
+	ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
 }
 
-function resetBall(){
-	stateMatch.ball.x = canvas.width / 2 - 5;
-	stateMatch.ball.y = canvas.height / 2 - 5;
-	stateMatch.ball.vx = Math.floor(Math.random() * 7) - 3;
-	stateMatch.ball.vy = Math.floor(Math.random() * 7) - 3;
-	if (stateMatch.ball.vx == 0)
-		stateMatch.ball.vx = 4;
-	if (stateMatch.ball.vy == 0)
-		stateMatch.ball.vy = 4
-	stateMatch.state = 'waiting';
-	drawElements();
-	setTimeout(playHuman,3000);
+function drawScores(newScore1, newScore2){
+	clearInterval(ballInterval);
+	clearInterval(gameInterval);
+	statePaddles.score1 = newScore1;
+	statePaddles.score2 = newScore2;
+	document.getElementById('game-score').innerHTML =
+		`${stateGame.name1} ${statePaddles.score1} - \
+		${statePaddles.score2} ${stateGame.name2}`;
 }
 
-function ballBounce() {
-	if (stateMatch.ball.y + stateMatch.ball.vy <= 0 || stateMatch.ball.y + stateMatch.ball.vy >= canvas.height) {
-		stateMatch.ball.vy = -stateMatch.ball.vy;
-	}
-	stateMatch.ball.y += stateMatch.ball.vy;
-	stateMatch.ball.x += stateMatch.ball.vx;
-	ballPaddleCollision();
-}
-
-function ballPaddleCollision(){
-	if (stateMatch.ball.x <= stateMatch.player1.x){
-		stateMatch.player2.score++;
-		drawScores();
-		if (stateMatch.player2.score == finalScore){
-			stateMatch.player2.winner = true;
-			winner = stateMatch.player2.name;
-			gameOver();
-		}
-		resetBall();
-	}
-	else if (stateMatch.ball.x >= stateMatch.player2.x + playerWidth){
-		stateMatch.player1.score++;
-		drawScores();
-		if (stateMatch.player1.score == finalScore){
-			stateMatch.player1.winner = true;
-			winner = stateMatch.player1.name;
-			gameOver();
-		}
-		resetBall();
-	}
-	else if ((stateMatch.ball.y <= stateMatch.player2.y + playerHeight &&
-			  stateMatch.ball.y >= stateMatch.player2.y &&
-			  stateMatch.ball.x + ballWidth >= stateMatch.player2.x) ||
-	  		 (stateMatch.ball.y  <= stateMatch.player1.y + playerHeight &&
-			  stateMatch.ball.y  >= stateMatch.player1.y &&
-			  stateMatch.ball.x  <= stateMatch.player1.x + playerWidth)){
-		  			stateMatch.ball.vx = -stateMatch.ball.vx;
-		  			if (stateMatch.ball.x > stateMatch.player1.x && 
-				  		stateMatch.ball.x < stateMatch.player1.x + playerWidth)
-				  			stateMatch.ball.x = stateMatch.player1.x + playerWidth + 1;
-	  
-				    if (stateMatch.ball.x > stateMatch.player2.x && 
-			  		    stateMatch.ball.x < stateMatch.player2.x + playerWidth)
-				  			stateMatch.ball.x = stateMatch.player2.x - ballWidth - 1;
-		  
-					 if ((stateMatch.ball.y > stateMatch.player1.y + playerHeight * 0.75 ||
-				  		  stateMatch.ball.y > stateMatch.player2.y + playerHeight * 0.75) &&
-				  		  stateMatch.ball.vy < 3)
-							stateMatch.ball.vy += 1;
-
-		  			 if ((stateMatch.ball.y < stateMatch.player1.y + playerHeight * 0.25 ||
-					  	  stateMatch.ball.y < stateMatch.player2.y + playerHeight * 0.25) &&
-						  stateMatch.ball.vy > -3)
-						 	stateMatch.ball.vy -= 1;
-  }
-}
-
-
-
-function drawPaddles(){
-	ctx.fillRect(stateMatch.player1.x, stateMatch.player1.y, playerWidth, playerHeight);
-	ctx.fillRect(stateMatch.player2.x, stateMatch.player2.y, playerWidth, playerHeight);
-}
-
-function drawBall(){
-	ctx.fillRect(stateMatch.ball.x, stateMatch.ball.y, ballWidth, ballHeight);
+function drawBorders(){
+	ctx.fillStyle = '#FFF';
+	ctx.lineWidth = 6;
+	ctx.beginPath();
+	ctx.moveTo(3, 3);
+	ctx.lineTo(canvas.width-3, 3);
+	ctx.lineTo(canvas.width-3, canvas.height-3);
+	ctx.lineTo(3, canvas.height-3);
+	ctx.lineTo(3, 3);
+	ctx.setLineDash([]);
+	ctx.stroke();
 }
 
 function drawNet(){
-	ctx.fillRect(canvas.width / 2 - 1, 0, 2, canvas.height);
+	ctx.strokeStyle = '#FFF';
+	ctx.lineWidth = 10;
+	ctx.beginPath();
+	ctx.moveTo(canvas.width / 2, 0);
+	ctx.lineTo(canvas.width / 2, canvas.height);
+	ctx.setLineDash([20, 8]);
+	ctx.stroke();
 }
 
-function drawScores(){
-	document.getElementById('game-score').innerHTML = `${name1} ${stateMatch.player1.score} - ${stateMatch.player2.score} ${name2}`;
+/***************** CONNECTING WITH API ********************/
+/** Por defecto, la función fetch utiliza el método GET  **/
 
-}
 
-function drawElements() {
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	drawBall();
-	drawNet();
-	drawPaddles();
-}
-
-function handleKeyDown(e) {
-    const key = e.key;
-    let y;
-    if (player == "1") {
-        y = stateMatch.player1.y;
-    } else {
-        y = stateMatch.player2.y;
-    }
-    if ((key === 'ArrowUp' && y - v > 0) ||
-        (key === 'ArrowDown' && y + playerHeight + v < canvas.height))
-        y += key === 'ArrowUp' ? -v : v;
-    if (player == "1") {
-        stateMatch.player1.y = y;
-    } else if (player == "2") {
-        stateMatch.player2.y = y;
-    }
-    socket.send(JSON.stringify({
-        "event": 'game_update',
-        "stateMatch": stateMatch,
-    }));
-}
-
-if (socket){
-	socket.onopen = e => {
-		console.log(e);
+async function  startPongLocal(){	
+	const apiUrl = 'https://localhost/api/match/new';
+	try{
+		const response = await fetch(apiUrl, {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json',},
+			body: JSON.stringify( { id: id,
+									name1: name1, 
+									name2: name2, 
+									boundX: canvas.width, 
+									boundY: canvas.height
+			}),
+		});
+		if (response.ok){
+			const responsedata = await response.json();
+			id = responsedata.id;
+			stateGame = responsedata.game;
+			stateBall = responsedata.ball;
+			statePaddles = responsedata.paddles;
+			drawScores(0, 0);
+			drawPong();
+			animate();
+		}
+	} catch (error) {
+		console.error('Error initializing game:', error);
 	}
+}
 
-	socket.onmessage = e => {
-		console.log(e);
-		const data = JSON.parse(e.data);
-
-		if(data.event == "show_error"){
-			Swal.fire({
-				icon: "error",
-				title: data.error,
-			}).then(e => window.location.href = "/");
+async function deleteMatch(){
+	const apiUrl = `https://localhost/api/match/delete?id_match=${id}`;
+	try{
+		const response = await fetch(apiUrl);
+		if (response.ok){
+			console.log(response.msg);
 		}
+	} catch (error) {
+		console.error('Error deleting match:', error);
+	}
+}
 
-		else if(data.event == "write_names"){
-			if (stateMatch.player1.name == "" || stateMatch.player1.name == "Waiting...") 
-				stateMatch.player1.name = data.name1;
-			if (stateMatch.player2.name == "" || stateMatch.player2.name == "Waiting...")
-				stateMatch.player2.name = data.name2;
-			stateMatch.ball.vy = data.ballvy;
-			drawScores();
+async function resetBall(){
+	const apiUrl = `https://localhost/api/game/reset?id_match=${id}`;
+	try{
+		const response = await fetch(apiUrl);
+		if (response.ok){
+			const responsedata = await response.json();
+			drawBall(responsedata.ball);
 		}
+	} catch (error) {
+		console.error('Error reseting ball:', error);
+	}
+}
 
-		else if(data.event == "game_start"){
-			player = data.player;
-			if (player == "1"){
-				stateMatch.player1.name = playerName;
-				socket.send(JSON.stringify({
-					"event": 'write_names',
-					"name1": playerName,
-					"name2": "Waiting...",
-					"ballvy" : 0,
-				}));
-			}else{
-				stateMatch.player2.name = playerName;
-				socket.send(JSON.stringify({
-					"event": 'write_names',
-					"name1": "",
-					"name2": playerName,
-					"ballvy" : Math.floor(Math.random() * 7) - 3,
-				}));
+async function handleKeyDown(e) {
+    let pressed = e.key;
+	if (pressed == 'ArrowUp' || pressed == 'ArrowDown' ||
+       (modality == "local" && (pressed == "w" || pressed == "W" || pressed == "s" || pressed == "S")) ||
+       (modality == "solo"  && (pressed == "A" || pressed == "D"))){
+			const apiUrl = `https://localhost/api/game/paddles?id_match=${id}&key=${pressed}`;
+			try {
+				const response = await fetch(apiUrl);
+				if (response.ok){
+					const responsedata = await response.json();
+					drawPaddles(responsedata.paddles);
+				}
+			} catch (error) {
+				console.error('Error moving paddles:', error);
 			}
-			drawElements();
-			loop();
-			setTimeout(waitMatch,3000);
-		}
-	
-		else if(data.event == "game_update"){
-			stateMatch = data.stateMatch;
-			drawElements();
-		}
-	
-		else if(data.event == "opponent_left" && stateMatch.state != 'ended'){
-			stateMatch.state = 'ended';
-			drawElements();
-			setTimeout(() => {
-				Swal.fire({
-					icon:  "info",
-					title:  "Opponent Left",
-					confirmButtonText: "Ok",
-				}).then(e => window.location.href = "/")
-			}, 400);
-		}
-	
-		else if (data.event == "game_over"){
-			winner = data.winner;
-			stateMatch.state = 'ended';
-			drawElements();
-			Swal.fire({
-				icon: winner == currentName ?'success': "error",
-				title: winner == currentName ? "You win!" : "You lose!",
-				confirmButtonText: "Ok",
-			}).then((result) => { if (result.isConfirmed) {
-				window.location.href = "/";
-			}});
-		}
 	}
 }
 
-export { initGameRemote, playRemote, quitRemote, pauseRemote};
+async function moveBall() {
+	const apiUrl = `https://localhost/api/game/ball?id_match=${id}`;
+	try{
+		const response = await fetch(apiUrl);
+		if (response.ok){
+			const responsedata = await response.json();
+			console.log(responsedata.msg);
+			state = responsedata.msg;
+			if (responsedata.msg == "scored"){
+				drawScores(responsedata.score1, responsedata.score2);
+				resetBall();
+				animate();
+			}
+			else if (responsedata.msg == "gameover"){
+				drawScores(responsedata.score1, responsedata.score2);
+				gameOver();
+			}
+			else
+				drawBall(responsedata.ball);
+		}
+	} catch (error) {
+		console.error('Error moving ball:', error);
+	}
+}
+
+export default startGameRemote;

@@ -6,13 +6,15 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/28 10:14:49 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/29 19:02:55 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import startGame from "./pongLocal.js";
+import startGameRemote from "./pongRemote.js";
 
 let selectedMatchID = null;
+let mode = null;
 
 function initPlayPage() {
     renderGameOptions();
@@ -36,10 +38,20 @@ function renderGameOptions() {
 }
 
 function attachEventListeners() {
-	document.getElementById('solo-vs-ai').addEventListener('click', () => startGame('solo', null, 0));
-    document.getElementById('local-vs-human').addEventListener('click', showMatchTypeOptions);
-    document.getElementById('remote-vs-human').addEventListener('click', showMatchTypeOptions);
+	document.getElementById('solo-vs-ai').addEventListener('click', () => {
+		mode = 'solo';
+		startGame(mode, null, 0);
+	});
+    document.getElementById('local-vs-human').addEventListener('click', () => {
+		mode = 'local';
+		showMatchTypeOptions()
+	});
+    document.getElementById('remote-vs-human').addEventListener('click', () => {
+		mode = 'remote';
+		showMatchTypeOptions()
+	});
 }
+
 
 function showMatchTypeOptions() {
     const mainContent = document.getElementById('main-content');
@@ -171,8 +183,10 @@ async function handleLoginSubmit(event) {
         if (response.ok) {
             const data = await response.json();
             document.querySelector('.login-overlay').remove();
-            //startGame();
-			startGame('local', player2_name, selectedMatchID);
+			if (mode != 'remote')
+				startGame('local', player2_name, selectedMatchID);
+			else
+				startGameRemote(player2_name, selectedMatchID);
         } else {
             const errorData = await response.json();
             document.getElementById('login-msg').textContent = `Error: ${errorData.message}`;
