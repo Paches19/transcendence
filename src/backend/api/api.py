@@ -503,7 +503,7 @@ def join_match(request, datagame: InitGameSchema):
 	match = get_object_or_404(RemoteGame, id = datagame.id)
 	if match.game.name2 != '':
 		return 400, {"error_msg": "Game already has two players"}
-	match.game.name2 = datagame.name2
+	match.game.name2 = datagame.name1
 	match.save()
 	return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
 

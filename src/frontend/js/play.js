@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/29 19:02:55 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/06/29 19:17:56 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,9 +64,12 @@ function showMatchTypeOptions() {
             </div>
         </div>
     `;
-
-    document.getElementById('normal-match').addEventListener('click', () => loadLogin(null));
-    document.getElementById('tournament-match').addEventListener('click', handleLocalVsHumanClick);
+	if (mode == 'local'){
+   		document.getElementById('normal-match').addEventListener('click', () => loadLogin(null));
+	}else{
+		document.getElementById('normal-match').addEventListener('click', () => startGameRemote(0));
+	}
+	document.getElementById('tournament-match').addEventListener('click', handleLocalVsHumanClick);
 }
 
 async function handleLocalVsHumanClick() {
@@ -116,8 +119,12 @@ function showMatchOptions(matches) {
     matchButtons.forEach(button => {
         button.addEventListener('click', (event) => {
             selectedMatchID = event.target.getAttribute('data-match-id');
-            const user2Match = event.target.getAttribute('data-user2-match');
-            loadLogin(user2Match);
+			if (mode  === 'local'){
+	            const user2Match = event.target.getAttribute('data-user2-match');
+    	        loadLogin(user2Match);
+			}else{
+				startGameRemote(selectedMatchID);
+			}
         });
     });
 }
@@ -183,10 +190,7 @@ async function handleLoginSubmit(event) {
         if (response.ok) {
             const data = await response.json();
             document.querySelector('.login-overlay').remove();
-			if (mode != 'remote')
-				startGame('local', player2_name, selectedMatchID);
-			else
-				startGameRemote(player2_name, selectedMatchID);
+			startGame('local', player2_name, selectedMatchID);
         } else {
             const errorData = await response.json();
             document.getElementById('login-msg').textContent = `Error: ${errorData.message}`;

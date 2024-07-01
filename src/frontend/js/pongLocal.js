@@ -80,8 +80,8 @@ function showGameScreen() {
 
 function attachGameControlEventListeners() {
 	document.getElementById('pause-game').addEventListener('click', pauseGame);
- document.getElementById('quit-game').addEventListener('click', quitGame);
- document.addEventListener('keydown', handleKeyDown);
+ 	document.getElementById('quit-game').addEventListener('click', quitGame);
+ 	document.addEventListener('keydown', handleKeyDown);
 }
 
 function initializeGame() {

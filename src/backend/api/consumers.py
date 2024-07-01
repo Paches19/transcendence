@@ -4,8 +4,9 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 class PongConsumerRemote(AsyncJsonWebsocketConsumer):
     
     async def connect(self):
-        self.match_id = self.scope['url_route']['kwargs']['game_id']
-        self.group_name = f'group_{self.match_id}'
+        print("Connected")
+        self.game_id = self.scope['url_route']['kwargs']['game_id']
+        self.group_name = f'pong_{self.game_id}'
         await self.channel_layer.group_add(self.group_name, self.channel_name)
 
         # Check if the group already has two players
@@ -20,14 +21,7 @@ class PongConsumerRemote(AsyncJsonWebsocketConsumer):
 
         await self.accept()
         
-        if len(self.channel_layer.groups[self.group_name]) == 1:
-            await self.channel_layer.send(self.channel_name, {
-				"type": "gameData.send",
-				"data": {
-					"event": "waiting_opponent",
-				}
-			})
-
+		# Check if the group has two players
         if len(self.channel_layer.groups[self.group_name]) == 2:
             matchGroup = list(self.channel_layer.groups[self.group_name])
             for i, channel_name in enumerate(matchGroup):
@@ -35,30 +29,23 @@ class PongConsumerRemote(AsyncJsonWebsocketConsumer):
                 await self.channel_layer.send(channel_name, {
 					"type": "gameData.send",
                     "data": {
-                        "event": "game_start",
+                        "event": "ready",
                         "player": player_number,
                     }
 				})
 
+
     async def receive_json(self, content, **kwargs):
         event = content['event']
         
-        if event == "game_update":
-            for channel_name in self.channel_layer.groups[self.group_name]:
-                await self.channel_layer.send(channel_name, {
-                    "type": "gameData.send",
-                    "data": {
-                        "event": "game_update",
-                        "match": content['stateMatch'],
-                    }
-                })
-        elif event == "game_over":
+        if event == "game_over":
             for channel_name in self.channel_layer.groups[self.group_name]:
                 await self.channel_layer.send(channel_name, {
                     "type": "gameData.send",
                     "data": {
                         "event": "game_over",
-                        "winner": content['winner'],
+                        "score1": content['score1'],
+                        "score2": content['score2'],
                     }
                 })
         elif event == "write_names":
@@ -71,12 +58,46 @@ class PongConsumerRemote(AsyncJsonWebsocketConsumer):
                         "name2": content['name2'],
                     }
                 })
+        elif event == "write_scores":
+            for channel_name in self.channel_layer.groups[self.group_name]:
+                await self.channel_layer.send(channel_name, {
+                    "type": "gameData.send",
+					"data": {
+						"event": "write_scores",
+						"score1": content['score1'],
+						"score2": content['score2'],
+					}
+				})
+        elif event == "change_state":
+            for channel_name in self.channel_layer.groups[self.group_name]:
+                await self.channel_layer.send(channel_name, {
+					"type": "gameData.send",
+					"data": {
+						"event": "change_state",
+						"state": content['state'],
+					}
+				})
+                
+        elif event == "move_paddles":
+            for channel_name in self.channel_layer.groups[self.group_name]:
+                await self.channel_layer.send(channel_name, {
+					"type": "gameData.send",
+					"data": {
+						"event": "move_paddles",
+						"paddles": content['paddles'],
+					}
+				})
+        elif event == "move_ball":
+            for channel_name in self.channel_layer.groups[self.group_name]:
+                await self.channel_layer.send(channel_name, {
+					"type": "gameData.send",
+					"data": {
+						"event": "move_ball",
+						"ball": content['ball'],
+					}
+				})
+                   
 
-        elif event == "game_state":
-            state = content['match']['state']
-            if (state == 'quit'):
-                self.disconnect(200)
-			
     async def disconnect(self, code):
         if (code == 1):
             return
