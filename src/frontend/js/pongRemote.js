@@ -662,4 +662,10 @@ function handleSocketMessage(e) {
 	}
 }
 
+function closeSocket(){
+	if (socket)
+		socket.close();
+}
+
 export default startGameRemote;
+export { closeSocket };
