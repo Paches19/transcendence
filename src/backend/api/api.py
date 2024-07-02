@@ -391,9 +391,9 @@ def get_user_matches(request):
             })
     return resp
 
-game = Game()
-paddles = Paddles()
-ball = Ball()
+
+""" Game """
+
 
 @app.get('game/paddles', response={200: MovePaddlesSchema, 400: ErrorSchema}, tags=['Game'])
 def move_paddles(request, id_match: int, key:str):
@@ -410,6 +410,7 @@ def move_paddles(request, id_match: int, key:str):
 		return 200, {"msg": key, "paddles": match.paddles}
 	except Exception as e:
 		return 400, {"error_msg": "Error moving paddle" + str(e)}
+
 
 @app.get('game/ball', response={200: MoveBallSchema, 400: ErrorSchema}, tags=['Game'])
 def move_ball(request, id_match: int):
@@ -454,7 +455,8 @@ def move_ball(request, id_match: int):
 		return 200, {"msg": "playing", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
 	except Exception as e:
 		return 400, {"error_msg": "Error moving ball" + str(e)}
-   
+
+
 @app.get('game/reset', response={200: MoveBallSchema, 400: ErrorSchema}, tags=['Game'])
 def reset_ball(request, id_match: int):
 	try:
@@ -468,8 +470,17 @@ def reset_ball(request, id_match: int):
 	except Exception as e:
 		return 400, {"error_msg": "Error resetting ball" + str(e)}
 
+
+""" Match """
+
+
 @app.post("match/new", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
 def new_match(request, datagame: InitGameSchema):
+	try:
+		match = get_object_or_404(RemoteGame, id = datagame.id)
+		match.delete()	
+	except:
+		pass
 	match = RemoteGame.objects.create(id = datagame.id)
 	match.game.v = 10
 	match.game.ballWidth = 10
@@ -507,6 +518,7 @@ def join_match(request, datagame: InitGameSchema):
 	match.save()
 	return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
 
+
 @app.get("match/delete", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
 def delete_match(request, id_match: int):
 	try:
@@ -515,7 +527,8 @@ def delete_match(request, id_match: int):
 		return 200, {"msg": "Match deleted"}
 	except Exception as e:
 		return 400, {"error_msg": "Error deleting match" + str(e)}
-	
+
+
 @app.get("match/state", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
 def get_state(request, id_match: int):
 	try:

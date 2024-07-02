@@ -1,3 +1,15 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    manage.py                                          :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/05/27 12:38:06 by alaparic          #+#    #+#              #
+#    Updated: 2024/07/02 09:06:57 by jutrera-         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
 import os

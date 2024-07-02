@@ -26,10 +26,10 @@ let state;
 let name1;
 let name2;
 let id;
-let ballInterval;
-let aiInterval;
-let gameInterval;
-let countdownInterval
+let ballInterval = null;
+let aiInterval = null;
+let timerInterval = null;
+let countdownInterval = null;
 const refreshTime = 1000/30;
 
 function startGame(mode, player2, id_match){
@@ -110,7 +110,7 @@ function startTimer() {
 	
 	function pad(number) {return number < 10 ? '0' + number : number;}
 	
-    gameInterval = setInterval(() => {
+    timerInterval = setInterval(() => {
 	        seconds++;
     	    let minutes = Math.floor(seconds / 60);
     	    let remainingSeconds = seconds % 60;
@@ -120,7 +120,8 @@ function startTimer() {
 
 function resetTime(){
 	const timerDisplay = document.getElementById("game-timer");
-	clearInterval(gameInterval);
+	clearInterval(timerInterval);
+	timerInterval = null;
 	seconds = 0;
 	timerDisplay.textContent = `00:00`;
 }
@@ -130,7 +131,7 @@ function pauseGame() {
 	
 	if (state == 'pause'){
 		textButton.textContent = "Pause";
-		startLocal();
+		startAnimation();
 	}else if (state == 'playing'){
 		textButton.textContent = "Resume";
 		stopAnimation();
@@ -154,7 +155,7 @@ function quitGame() {
 				return;
 			}else if (result.isDenied){
 				document.getElementById("pause-game").textContent = "Pause";
-				startLocal();
+				startAnimation();
 			}
 		});
 	}
@@ -193,7 +194,7 @@ function playAI(){
 	}
 }
 
-function animate(){
+function initAnimation(){
 	let timeLeft = 3;
 	state =  'countdown';
 	countdownInterval = setInterval(() => {
@@ -232,16 +233,18 @@ function animate(){
 		if (timeLeft < 0) {
 			drawPong();
 			clearInterval(countdownInterval);
-			startLocal();
+			countdownInterval = null;
+			startAnimation();
 		}
 	}, 1000);
 }
 
-function startLocal(){
+function startAnimation(){
 	state = 'playing';
 	startTimer();
-	ballInterval = setInterval(moveBall, refreshTime);
-	if (modality == 'solo'){
+	if (!ballInterval)
+		ballInterval = setInterval(moveBall, refreshTime);
+	if (modality == 'solo' && !aiInterval){
 		aiInterval = setInterval(playAI, refreshTime);
 	}
 }
@@ -249,9 +252,12 @@ function startLocal(){
 function stopAnimation(){
 	state = 'pause';
 	clearInterval(ballInterval);
-	clearInterval(gameInterval);
+	ballInterval = null;
+	clearInterval(timerInterval);
+	timerInterval = null;
 	if (modality == 'solo'){
 		clearInterval(aiInterval);
+		aiInterval = null;
 	}
 }
 
@@ -261,18 +267,7 @@ function gameOver(){
 		texto = stateGame.name1;
 	else 
 		texto = stateGame.name2;
-	
-	if (modality == 'solo'){
-		if (texto != 'AI'){
-		//mandar estadísticas de la partida para name1
-		}
-	}else{
-		//mandar estadísticas de la partida para name1 y name2
-	}
-	
 	stopAnimation();
-	deleteMatch();
-
 	Swal.fire({
 		title: texto + " WINS",
 		confirmButtonColor: '#32B974',
@@ -288,8 +283,9 @@ function gameOver(){
 					denyButtonText: `No`
 			  	}).then((result) => {
 					if (result.isConfirmed) {
-						showGameScreen();
+						startPongLocal();
 					}else if (result.isDenied){
+						deleteMatch();
 						initPlayPage();
 						return;
 				}});
@@ -333,17 +329,20 @@ function drawBall(newBall){
 	ctx.fillStyle = '#FFF';
 	drawNet();
 	drawBorders();
+	ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+	ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2	
 	ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
 }
 
 function drawScores(newScore1, newScore2){
 	clearInterval(ballInterval);
-	clearInterval(gameInterval);
+	ballInterval = null;
+	clearInterval(timerInterval);
+	timerInterval = null;
 	statePaddles.score1 = newScore1;
 	statePaddles.score2 = newScore2;
 	document.getElementById('game-score').innerHTML =
-		`${stateGame.name1} ${statePaddles.score1} - \
-		${statePaddles.score2} ${stateGame.name2}`;
+		`${stateGame.name1} ${statePaddles.score1} - ${statePaddles.score2} ${stateGame.name2}`;
 }
 
 function drawBorders(){
@@ -394,7 +393,8 @@ async function  startPongLocal(){
 			statePaddles = responsedata.paddles;
 			drawScores(0, 0);
 			drawPong();
-			animate();
+			resetTime();
+			if (!countdownInterval) initAnimation();
 		}
 	} catch (error) {
 		console.error('Error initializing game:', error);
@@ -406,7 +406,8 @@ async function deleteMatch(){
 	try{
 		const response = await fetch(apiUrl);
 		if (response.ok){
-			console.log(response.msg);
+			const responsedata = await response.json();
+			console.log(responsedata.msg);
 		}
 	} catch (error) {
 		console.error('Error deleting match:', error);
@@ -450,12 +451,11 @@ async function moveBall() {
 		const response = await fetch(apiUrl);
 		if (response.ok){
 			const responsedata = await response.json();
-			console.log(responsedata.msg);
 			state = responsedata.msg;
 			if (responsedata.msg == "scored"){
 				drawScores(responsedata.score1, responsedata.score2);
 				resetBall();
-				animate();
+				if (!countdownInterval) initAnimation();
 			}
 			else if (responsedata.msg == "gameover"){
 				drawScores(responsedata.score1, responsedata.score2);

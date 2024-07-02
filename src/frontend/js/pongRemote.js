@@ -259,6 +259,8 @@ function drawBall(newBall){
 	ctx.fillStyle = '#FFF';
 	drawNet();
 	drawBorders();
+	ctx.fillRect(stateMatch.paddles.x1, stateMatch.paddles.y1, stateMatch.game.playerWidth, stateMatch.game.playerHeight); //Dibuja la paleta 1
+	ctx.fillRect(stateMatch.paddles.x2, stateMatch.paddles.y2, stateMatch.game.playerWidth, stateMatch.game.playerHeight); //Dibuja la paleta 2	
 	ctx.fillRect(stateMatch.ball.x, stateMatch.ball.y, stateMatch.game.ballWidth, stateMatch.game.ballHeight);// Dibuja la bola
 }
 
@@ -434,7 +436,8 @@ async function deleteMatch(){
 	try{
 		const response = await fetch(apiUrl);
 		if (response.ok){
-			console.log(response.msg);
+			const responsedata = await response.json();
+			console.log(responsedata.msg);
 		}
 	} catch (error) {
 		console.error('Error deleting match:', error);
