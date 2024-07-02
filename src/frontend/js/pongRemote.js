@@ -73,17 +73,24 @@ function showGameScreen() {
 
 function initializeGame() {
     canvas = document.getElementById("pong-game");
-    if (canvas) {
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-		resetTime();
-    }
+	ctx = canvas.getContext('2d');
+	resetTime();
+	const container = document.querySelector('.game-container');
+	const width = container.clientWidth;
+	const height = Math.max(width * 0.5, 300);
+	canvas.width = width;
+	canvas.height = height;
+	ctx.fillStyle = '#000';
+	ctx.fillRect(0, 0, canvas.width, canvas.height); //Borra todo
+	drawBorders();
+	drawNet();
 }
 
 function attachGameControlEventListeners() {
 	document.getElementById('pause-game').addEventListener('click', pauseGame);
  	document.getElementById('quit-game').addEventListener('click', quitGame);
  	document.addEventListener('keydown', handleKeyDown);
+	window.addEventListener('resize', resizeCanvas);
 }
 
 async function handleKeyDown(e) {
@@ -112,9 +119,25 @@ function resizeCanvas() {
         const height = Math.max(width * 0.5, 300);
         canvas.width = width;
         canvas.height = height;
-		ctx = canvas.getContext('2d');
+		updateDrawings();
 		drawPong();
     }
+}
+
+
+async function updateDrawings(){
+	const apiUrl = `https://localhost/api/match/resize?id_match=${id}&boundX=${canvas.width}&boundY=${canvas.height}`;
+	try{
+		const response = await fetch(apiUrl);
+		if (response.ok){
+			const responsedata = await response.json();
+			statePaddles = responsedata.paddles;
+			stateBall = responsedata.ball;
+			stateGame = responsedata.game;
+		}
+	} catch (error) {
+		console.error('Error resizing game:', error);
+	}
 }
 
 function updateTimeDisplay() {
@@ -143,7 +166,6 @@ function resetTime(){
 	timerInterval = null;
 	elapsedTime = 0;
 	updateTimeDisplay();
-
 }
 
 function pauseTimer() {
@@ -187,7 +209,14 @@ function quitGame() {
 function initAnimation(){
 	let timeLeft = 3;
 	const countdownInterval = setInterval(() => {
-		drawPong();
+		
+		ctx.fillStyle = '#000';
+		ctx.fillRect(0, 0, canvas.width, canvas.height); //Borra todo
+		drawBorders();
+		ctx.fillStyle = '#FFF';
+		ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+		ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
+		
 		// Calculate minutes and seconds
 		const seconds = timeLeft % 60;
 		const displayTime = `${seconds}`;
@@ -239,12 +268,12 @@ function drawPong(){
 }
 
 function drawPaddles(newPaddles){
+
 	ctx.fillStyle = '#000';
 	ctx.fillRect(stateMatch.paddles.x1, stateMatch.paddles.y1, stateMatch.game.playerWidth, stateMatch.game.playerHeight); //Borra la paleta 1
 	ctx.fillRect(stateMatch.paddles.x2, stateMatch.paddles.y2, stateMatch.game.playerWidth, stateMatch.game.playerHeight); //Borra la paleta 2
 
 	stateMatch.paddles = newPaddles;
-
 	ctx.fillStyle = '#FFF';
 	ctx.fillRect(stateMatch.paddles.x1, stateMatch.paddles.y1, stateMatch.game.playerWidth, stateMatch.game.playerHeight); //Dibuja la paleta 1
 	ctx.fillRect(stateMatch.paddles.x2, stateMatch.paddles.y2, stateMatch.game.playerWidth, stateMatch.game.playerHeight); //Dibuja la paleta 2	
@@ -255,7 +284,6 @@ function drawBall(newBall){
 	ctx.fillRect(stateMatch.ball.x, stateMatch.ball.y, stateMatch.game.ballWidth, stateMatch.game.ballHeight); //Borra la bola
 	
 	stateMatch.ball = newBall; //Obtiene la nueva posición de la bola
-	
 	ctx.fillStyle = '#FFF';
 	drawNet();
 	drawBorders();
@@ -358,7 +386,6 @@ async function newMatch(id_match){
 					title: "Match match code: " + stateMatch.id,
 				});
 			}
-			
 		}else {
 			console.error("Fetch error:  ", response.status);
 		}
@@ -591,7 +618,6 @@ function handleSocketMessage(e) {
 		if (data.name2 != "")
 			stateMatch.game.name2 = data.name2;
 		document.getElementById('game-score').innerHTML = `${stateMatch.game.name1} 0 - 0 ${stateMatch.game.name2}`;
-		drawPong();
 	}
 	
 	else if(data.event == "ready"){

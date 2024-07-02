@@ -82,15 +82,22 @@ function attachGameControlEventListeners() {
 	document.getElementById('pause-game').addEventListener('click', pauseGame);
  	document.getElementById('quit-game').addEventListener('click', quitGame);
  	document.addEventListener('keydown', handleKeyDown);
+	window.addEventListener('resize', resizeCanvas);
 }
 
 function initializeGame() {
     canvas = document.getElementById("pong-game");
-    if (canvas) {
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-		resetTime();
-    }
+	ctx = canvas.getContext('2d');
+	resetTime();
+	const container = document.querySelector('.game-container');
+	const width = container.clientWidth;
+	const height = Math.max(width * 0.5, 300);
+	canvas.width = width;
+	canvas.height = height;
+	ctx.fillStyle = '#000';
+	ctx.fillRect(0, 0, canvas.width, canvas.height); //Borra todo
+	drawBorders();
+	drawNet();
 }
 
 function resizeCanvas() {
@@ -100,9 +107,24 @@ function resizeCanvas() {
         const height = Math.max(width * 0.5, 300);
         canvas.width = width;
         canvas.height = height;
-		ctx = canvas.getContext('2d');
+		updateDrawings();
 		drawPong();
     }
+}
+
+async function updateDrawings(){
+	const apiUrl = `https://localhost/api/match/resize?id_match=${id}&boundX=${canvas.width}&boundY=${canvas.height}`;
+	try{
+		const response = await fetch(apiUrl);
+		if (response.ok){
+			const responsedata = await response.json();
+			statePaddles = responsedata.paddles;
+			stateBall = responsedata.ball;
+			stateGame = responsedata.game;
+		}
+	} catch (error) {
+		console.error('Error resizing game:', error);
+	}
 }
 
 function startTimer() {
@@ -198,7 +220,14 @@ function initAnimation(){
 	let timeLeft = 3;
 	state =  'countdown';
 	countdownInterval = setInterval(() => {
-		drawPong();
+		
+		ctx.fillStyle = '#000';
+		ctx.fillRect(0, 0, canvas.width, canvas.height); //Borra todo
+		drawBorders();
+		ctx.fillStyle = '#FFF';
+		ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
+		ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
+		
 		// Calculate minutes and seconds
 		const seconds = timeLeft % 60;
 		const displayTime = `${seconds}`;
@@ -268,7 +297,7 @@ function gameOver(){
 	else 
 		texto = stateGame.name2;
 	stopAnimation();
-	
+	deleteMatch();
 	Swal.fire({
 		title: texto + " WINS",
 		confirmButtonColor: '#32B974',
@@ -286,7 +315,6 @@ function gameOver(){
 					if (result.isConfirmed) {
 						startPongLocal();
 					}else if (result.isDenied){
-						deleteMatch();
 						initPlayPage();
 						return;
 				}});
@@ -361,7 +389,7 @@ function drawBorders(){
 
 function drawNet(){
 	ctx.strokeStyle = '#FFF';
-	ctx.lineWidth = 10;
+	ctx.lineWidth = 6;
 	ctx.beginPath();
 	ctx.moveTo(canvas.width / 2, 0);
 	ctx.lineTo(canvas.width / 2, canvas.height);
