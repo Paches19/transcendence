@@ -343,7 +343,7 @@ async function newMatch(id_match){
 		});
 
 		if (response.ok){
-			socket = new WebSocket(`wss://localhost/ws/pong/${id_match}/`);
+			socket = new WebSocket(`wss://localhost/wss/pong/${id_match}/`);
 			configureSocketEvents();
 			
 			const data = await response.json();
@@ -414,7 +414,7 @@ async function joinMatch(id_match){
 			}).then(e => window.location.href = "/");
 		}
 		else if (response.ok) {
-			socket = new WebSocket(`wss://localhost/ws/pong/${id_match}/`);
+			socket = new WebSocket(`wss://localhost/wss/pong/${id_match}/`);
 			configureSocketEvents();
 			
 			const data = await response.json();

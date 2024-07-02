@@ -268,6 +268,7 @@ function gameOver(){
 	else 
 		texto = stateGame.name2;
 	stopAnimation();
+	
 	Swal.fire({
 		title: texto + " WINS",
 		confirmButtonColor: '#32B974',
