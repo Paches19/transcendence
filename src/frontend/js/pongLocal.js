@@ -449,9 +449,9 @@ async function resetBall(){
 
 async function handleKeyDown(e) {
     let pressed = e.key;
-	if (pressed == 'ArrowUp' || pressed == 'ArrowDown' ||
+	if (state != 'pause' && (pressed == 'ArrowUp' || pressed == 'ArrowDown' ||
        (modality == "local" && (pressed == "w" || pressed == "W" || pressed == "s" || pressed == "S")) ||
-       (modality == "solo"  && (pressed == "A" || pressed == "D"))){
+       (modality == "solo"  && (pressed == "A" || pressed == "D")))){
 			const apiUrl = `https://localhost/api/game/paddles?id_match=${id}&key=${pressed}`;
 			try {
 				const response = await fetch(apiUrl);
