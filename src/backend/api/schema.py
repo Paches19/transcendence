@@ -6,7 +6,7 @@
 #    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:15 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/03 00:15:30 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/07/03 13:36:40 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -207,8 +207,6 @@ class MoveBallSchema(Schema):
 
 class GameSchema(Schema):
 	v: float
-	boundX: int
-	boundY: int
 	finalScore: int
 	playerWidth: float
 	playerHeight: float
@@ -216,14 +214,7 @@ class GameSchema(Schema):
 	ballHeight: float
 	name1: str
 	name2: str
-
-class InitGameSchema(Schema):
-	id: int
-	name1: str
-	name2: str
-	boundX: int
-	boundY: int
-    
+ 
 class SuccessInitSchema(Schema):
 	id: int
 	game: GameSchema

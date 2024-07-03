@@ -6,7 +6,7 @@
 #    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:10 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/02 23:57:45 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/07/03 13:29:02 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -40,8 +40,6 @@ class Game(models.Model):
     finalScore = models.IntegerField(default=3)
     name1 = models.CharField(max_length=40, default='Player1')
     name2 = models.CharField(max_length=40, default='Player2')
-    boundX = models.IntegerField(default=0)
-    boundY = models.IntegerField(default=0)
 
 class RemoteGame(models.Model):
 	id = models.IntegerField(primary_key=True)

@@ -20,7 +20,7 @@ let socket;
 
 let statePaddles = { x1: 0, y1: 0, score1: 0, x2: 0, y2: 0, score2: 0 };
 let stateBall = { x: 0, y: 0, vx: 0, vy: 0 };
-let stateGame = { v: 0, ballWidth: 0, ballHeight: 0, playerWidth: 0, playerHeight: 0, finalScore: 0, name1: '', name2: '', boundX: 0, boundY: 0 };
+let stateGame = { v: 0, ballWidth: 0, ballHeight: 0, playerWidth: 0, playerHeight: 0, finalScore: 0, name1: '', name2: '' };
 let stateMatch = { id: 0, state: '', paddles: statePaddles, ball: stateBall, game: stateGame}
 let mode; //normal or tournament
 let playerNumber; //1 or 2
@@ -95,7 +95,7 @@ function attachGameControlEventListeners() {
 
 async function handleKeyDown(e) {
     let pressed = e.key;
-	if (pressed == 'ArrowUp' || pressed == 'ArrowDown'){
+	if (stateMatch.state == 'playing' && (pressed == 'ArrowUp' || pressed == 'ArrowDown')){
 		if (playerNumber == 2){
 			pressed == 'ArrowUp' ? pressed = 'w' : pressed = 's';
 		}
@@ -292,10 +292,10 @@ function drawScores(newScore1, newScore2){
 }
 
 function drawBorders(){
-	const w = 0.01 * canvas.height;
+	const w = 0.005 * canvas.height;
 
 	ctx.fillStyle = '#FFF';
-	ctx.lineWidth = w;
+	ctx.lineWidth = 2 * w;
 	ctx.beginPath();
 	ctx.moveTo(w, w);
 	ctx.lineTo(canvas.width - w, w);
@@ -312,7 +312,7 @@ function drawNet(){
 	ctx.strokeStyle = '#FFF';
 	ctx.lineWidth = w;
 	ctx.beginPath();
-	ctx.moveTo(canvas.width / 2, 0);
+	ctx.moveTo(canvas.width / 2, w);
 	ctx.lineTo(canvas.width / 2, canvas.height);
 	ctx.setLineDash([0.1 * canvas.height, 0.02 * canvas.height]);
 	ctx.stroke();
@@ -398,19 +398,8 @@ async function joinMatch(id_match){
 	}
 
 	try{
-		const apiUrl = 'https://localhost/api/match/join';
-		const response = await fetch(apiUrl, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json',},
-			body: JSON.stringify( { 
-				id: id_match,
-				name1: stateMatch.game.name1, 
-				name2: stateMatch.game.name2, 
-				boundX: canvas.width, 
-				boundY: canvas.height
-			}),
-		});
-
+		const apiUrl = `https://localhost/api/match/join?id_match=${id_match}&name1=${stateMatch.game.name1}&name2=${stateMatch.game.name2}`;
+		const response = await fetch(apiUrl);
 		if (response.status == 404){
 			if (isTournament){
 				console.error("El match no existe aún");

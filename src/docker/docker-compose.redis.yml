@@ -30,6 +30,7 @@ services:
             - "PYTHONDONTWRITEBYTECODE=1"
             - "PYTHONUNBUFFERED=1"
             - "DEBUG=0"
+            - "REDIS_HOST=redis"
         expose:
             - "8000"
         networks:
@@ -53,9 +54,16 @@ services:
             - transcendence_net
         restart: always
 
+    redis:
+        container_name: redis
+        image: redis:latest
+        ports:
+            - "6379:6379"
+        networks:
+            - transcendence_net
+        restart: always
+
 networks:
     transcendence_net:
         name: transcendence_net
         driver: bridge
-
-

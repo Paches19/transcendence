@@ -21,7 +21,7 @@ let canvas;
 let seconds = 0;
 let statePaddles = { x1: 0, y1: 0, score1: 0, x2: 0, y2: 0, score2: 0 };
 let stateBall = { x: 0, y: 0, vx: 0, vy: 0 };
-let stateGame = { v: 0, ballWidth: 0, ballHeight: 0, playerWidth: 0, playerHeight: 0, finalScore: 0, name1: '', name2: '', boundX: 0, boundY: 0 };
+let stateGame = { v: 0, ballWidth: 0, ballHeight: 0, playerWidth: 0, playerHeight: 0, finalScore: 0, name1: '', name2: ''};
 let state;
 let name1;
 let name2;
@@ -371,10 +371,10 @@ function drawScores(newScore1, newScore2){
 }
 
 function drawBorders(){
-	const w = 0.01 * canvas.height;
+	const w = 0.005 * canvas.height;
 
 	ctx.fillStyle = '#FFF';
-	ctx.lineWidth = w;
+	ctx.lineWidth = 2 * w;
 	ctx.beginPath();
 	ctx.moveTo(w, w);
 	ctx.lineTo(canvas.width - w, w);
@@ -391,7 +391,7 @@ function drawNet(){
 	ctx.strokeStyle = '#FFF';
 	ctx.lineWidth = w;
 	ctx.beginPath();
-	ctx.moveTo(canvas.width / 2, 0);
+	ctx.moveTo(canvas.width / 2, w);
 	ctx.lineTo(canvas.width / 2, canvas.height);
 	ctx.setLineDash([0.1 * canvas.height, 0.02 * canvas.height]);
 	ctx.stroke();
@@ -412,7 +412,6 @@ async function  startPongLocal(){
 			stateBall = responsedata.ball;
 			statePaddles = responsedata.paddles;
 			drawScores(0, 0);
-			drawPong();
 			resetTime();
 			if (!countdownInterval) initAnimation();
 		}
@@ -449,7 +448,7 @@ async function resetBall(){
 
 async function handleKeyDown(e) {
     let pressed = e.key;
-	if (state != 'pause' && (pressed == 'ArrowUp' || pressed == 'ArrowDown' ||
+	if (state == 'playing' && (pressed == 'ArrowUp' || pressed == 'ArrowDown' ||
        (modality == "local" && (pressed == "w" || pressed == "W" || pressed == "s" || pressed == "S")) ||
        (modality == "solo"  && (pressed == "A" || pressed == "D")))){
 			const apiUrl = `https://localhost/api/game/paddles?id_match=${id}&key=${pressed}`;
