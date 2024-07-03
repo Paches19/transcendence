@@ -399,14 +399,15 @@ def get_user_matches(request):
 def move_paddles(request, id_match: int, key:str):
 	try:
 		match = get_object_or_404(RemoteGame, id = id_match)
+		border = 0.02
 		if key == 'ArrowUp':
-			match.paddles.y1 = max(6, match.paddles.y1 - match.game.v)
+			match.paddles.y1 = max(border, match.paddles.y1 - match.game.v)
 		elif key == 'ArrowDown':
-			match.paddles.y1 = min(match.game.boundY - match.game.playerHeight - 6, match.paddles.y1 + match.game.v - 6)
+			match.paddles.y1 = min(match.game.boundY - match.game.playerHeight - border, match.paddles.y1 + match.game.v)
 		elif key == 'w' or key == 'W' or key == 'A':
-			match.paddles.y2 = max(6, match.paddles.y2 - match.game.v)
+			match.paddles.y2 = max(border, match.paddles.y2 - match.game.v)
 		elif key == 's' or key == 'S' or key == 'D':
-			match.paddles.y2 = min(match.game.boundY - match.game.playerHeight, match.paddles.y2 + match.game.v + 6)
+			match.paddles.y2 = min(match.game.boundY - match.game.playerHeight - border, match.paddles.y2 + match.game.v)
 		return 200, {"msg": key, "paddles": match.paddles}
 	except Exception as e:
 		return 400, {"error_msg": "Error moving paddle" + str(e)}
@@ -417,7 +418,7 @@ def move_ball(request, id_match: int):
 	try:
 		match = get_object_or_404(RemoteGame, id = id_match)
 		# Update ball position
-		if match.ball.y + match.ball.vy <= 0 or match.ball.y + match.ball.vy + match.game.ballHeight >= match.game.boundY:
+		if match.ball.y + match.ball.vy <= 0 or match.ball.y + match.ball.vy + match.game.ballWidth >= match.game.boundY:
 			match.ball.vy = -match.ball.vy
 		match.ball.x += match.ball.vx
 		match.ball.y += match.ball.vy
@@ -443,15 +444,15 @@ def move_ball(request, id_match: int):
 			(match.ball.y <= match.game.playerHeight + match.paddles.y1 and match.ball.y >= match.paddles.y1 and match.ball.x <= match.paddles.x1 + match.game.playerWidth):
 			match.ball.vx = -match.ball.vx
 			if match.ball.x < match.paddles.x1 + match.game.playerWidth:
-				match.ball.x = match.paddles.x1 + match.game.playerWidth + 1 
+				match.ball.x = match.paddles.x1 + match.game.playerWidth
 			if match.ball.x > match.paddles.x2:
-				match.ball.x = match.paddles.x2 - match.game.ballWidth - 1
+				match.ball.x = match.paddles.x2 - match.game.ballWidth
 
 			if (match.ball.y > match.paddles.y1 + match.game.playerHeight * 0.75 or match.ball.y > match.paddles.y2 + match.game.playerHeight * 0.75) and match.ball.vy < 3:
-				match.ball.vy += 1
+				match.ball.vy += 0.001
 
 			if (match.ball.y < match.paddles.y1 + match.game.playerHeight * 0.25 or match.ball.y < match.paddles.y2 + match.game.playerHeight * 0.25) and match.ball.vy > -3:
-				match.ball.vy -= 1
+				match.ball.vy -= 0.001
 		return 200, {"msg": "playing", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
 	except Exception as e:
 		return 400, {"error_msg": "Error moving ball" + str(e)}
@@ -461,10 +462,10 @@ def move_ball(request, id_match: int):
 def reset_ball(request, id_match: int):
 	try:
 		match = get_object_or_404(RemoteGame, id = id_match)
-		match.ball.x = match.game.boundX // 2 - match.game.ballWidth // 2
-		match.ball.y = match.game.boundY // 2 - match.game.ballHeight // 2
-		match.ball.vx = random.choice([-15, 15])
-		match.ball.vy = random.choice([-3, -2, 2, 3])
+		match.ball.x = (match.game.boundX - match.game.ballWidth) / 2
+		match.ball.y = (match.game.boundY  - match.game.ballHeight) / 2
+		match.ball.vx = random.choice([-0.01, 0.01])
+		match.ball.vy = random.choice([-0.002, -0.001, 0.001, 0.002])
 		return 200, {"msg": "playing", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
 
 	except Exception as e:
@@ -473,59 +474,36 @@ def reset_ball(request, id_match: int):
 
 """ Match """
 
-@app.get("match/resize", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
-def resize_match(request, id_match: int, boundX: int, boundY: int):
+@app.get("match/new", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
+def new_match(request, id_match: int, name1: str, name2: str):
 	try:
 		match = get_object_or_404(RemoteGame, id = id_match)
-		match.game.ballWidth = int(boundY * 0.03)
-		match.game.ballHeight = int(boundY * 0.03)
-		match.game.playerWidth = int(boundY * 0.02)
-		match.game.playerHeight = int(boundY * 0.2)
-		match.paddles.x1 = int(boundX * 0.02)
-		match.paddles.y1 = match.paddles.y1 * boundY // match.game.boundY
-		match.paddles.x2 = boundX - int(boundX * 0.02)  - match.game.playerWidth
-		match.paddles.y2 = match.paddles.y2 * boundY // match.game.boundY
-		match.ball.x = match.ball.x * boundX // match.game.boundX
-		match.ball.y = match.ball.y * boundY // match.game.boundY
-		match.game.boundX = boundX
-		match.game.boundY = boundY
-		match.save()
-		return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
-	except Exception as e:
-		return 400, {"error_msg": "Error resizing match" + str(e)}
-
-
-@app.post("match/new", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
-def new_match(request, datagame: InitGameSchema):
-	try:
-		match = get_object_or_404(RemoteGame, id = datagame.id)
 		match.delete()	
 	except:
 		pass
-	match = RemoteGame.objects.create(id = datagame.id)
-	match.game.v = 10
-	match.game.ballWidth = int(datagame.boundY * 0.02)
-	match.game.ballHeight = int(datagame.boundY * 0.02)
-	match.game.playerWidth = int(datagame.boundY * 0.02)
-	match.game.playerHeight = int(datagame.boundY * 0.2)
-	match.game.finalScore = 3
-	match.game.name1 = datagame.name1
-	
-	match.game.name2 = datagame.name2
-	
-	match.game.boundX = datagame.boundX
-	match.game.boundY = datagame.boundY
-	
-	match.paddles.x1 = int(datagame.boundX * 0.02)
-	match.paddles.y1 = datagame.boundY // 2 - match.game.playerHeight // 2
+	match = RemoteGame.objects.create(id = id_match)
 	match.paddles.score1 = 0
-	match.paddles.x2 = datagame.boundX - int(datagame.boundX * 0.02)  - match.game.playerWidth
-	match.paddles.y2 = datagame.boundY // 2 - match.game.playerHeight // 2
 	match.paddles.score2 = 0
-	match.ball.x = datagame.boundX // 2 - match.game.ballWidth // 2
-	match.ball.y = datagame.boundY // 2 - match.game.ballHeight // 2
-	match.ball.vx = random.choice([-15, 15])
-	match.ball.vy = random.choice([-3, -2, 2, 3])
+	match.game.name1 = name1
+	match.game.name2 = name2
+	match.game.finalScore = 3
+
+	# Los valores de las variables son porcentajes del tamaño de la pantalla
+	match.game.v = 0.02
+	match.game.ballWidth = 0.02
+	match.game.ballHeight = 0.02
+	match.game.playerWidth = 0.02
+	match.game.playerHeight = 0.20
+	match.game.boundX = 1
+	match.game.boundY = 1
+	match.paddles.x1 = 0.02
+	match.paddles.y1 = (match.game.boundY - match.game.playerHeight) / 2
+	match.paddles.x2 = 0.96
+	match.paddles.y2 = (match.game.boundY - match.game.playerHeight) / 2
+	match.ball.x = (match.game.boundX - match.game.ballWidth) / 2
+	match.ball.y = (match.game.boundY - match.game.ballWidth) / 2
+	match.ball.vx = random.choice([-0.01, 0.01])
+	match.ball.vy = random.choice([-0.002, -0.001, 0.001, 0.002])
 	match.save()
 	return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
 

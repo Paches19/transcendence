@@ -119,25 +119,8 @@ function resizeCanvas() {
         const height = Math.max(width * 0.5, 300);
         canvas.width = width;
         canvas.height = height;
-		updateDrawings();
 		drawPong();
     }
-}
-
-
-async function updateDrawings(){
-	const apiUrl = `https://localhost/api/match/resize?id_match=${id}&boundX=${canvas.width}&boundY=${canvas.height}`;
-	try{
-		const response = await fetch(apiUrl);
-		if (response.ok){
-			const responsedata = await response.json();
-			statePaddles = responsedata.paddles;
-			stateBall = responsedata.ball;
-			stateGame = responsedata.game;
-		}
-	} catch (error) {
-		console.error('Error resizing game:', error);
-	}
 }
 
 function updateTimeDisplay() {
@@ -207,15 +190,20 @@ function quitGame() {
 }
 
 function initAnimation(){
+
+	const centerX = canvas.width / 2;
+	const centerY = canvas.height / 2;
 	let timeLeft = 3;
+	const fx = canvas.width;
+	const fy = canvas.height;
 	const countdownInterval = setInterval(() => {
 		
 		ctx.fillStyle = '#000';
 		ctx.fillRect(0, 0, canvas.width, canvas.height); //Borra todo
 		drawBorders();
 		ctx.fillStyle = '#FFF';
-		ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
-		ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
+		ctx.fillRect(stateMatch.paddles.x1 * fx, stateMatch.paddles.y1 * fy, stateMatch.game.playerWidth * fx, stateMatch.game.playerHeight * fy); //Dibuja la paleta 1
+		ctx.fillRect(stateMatch.paddles.x2 * fx, stateMatch.paddles.y2 * fy, stateMatch.game.playerWidth * fx, stateMatch.game.playerHeight * fy); //Dibuja la paleta 2
 		
 		// Calculate minutes and seconds
 		const seconds = timeLeft % 60;
@@ -230,12 +218,9 @@ function initAnimation(){
 
 		// Draw the countdown text
 		ctx.fillStyle = '#FFF';
-		ctx.fillText(displayTime, canvas.width / 2, canvas.height / 2);
+		ctx.fillText(displayTime, centerX, centerY);
 
 		// Draw the circle
-		const centerX = canvas.width / 2;
-		const centerY = canvas.height / 2;
-	
 		ctx.beginPath();
 		const radius = Math.min(canvas.width, canvas.height) / 2.5;
 		ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
@@ -257,39 +242,48 @@ function initAnimation(){
 }
 
 function drawPong(){
+	const fx = canvas.width;
+	const fy = canvas.height;
+
 	ctx.fillStyle = '#000';
 	ctx.fillRect(0, 0, canvas.width, canvas.height); //Borra todo
 	drawBorders();
 	drawNet();
+
 	ctx.fillStyle = '#FFF';
-	ctx.fillRect(stateMatch.paddles.x1, stateMatch.paddles.y1, stateMatch.game.playerWidth, stateMatch.game.playerHeight); //Dibuja la paleta 1
-	ctx.fillRect(stateMatch.paddles.x2, stateMatch.paddles.y2, stateMatch.game.playerWidth, stateMatch.game.playerHeight); //Dibuja la paleta 2
-	ctx.fillRect(stateMatch.ball.x, stateMatch.ball.y, stateMatch.game.ballWidth, stateMatch.game.ballHeight);// Dibuja la bola
+	ctx.fillRect(stateMatch.paddles.x1 * fx, stateMatch.paddles.y1 * fy, stateMatch.game.playerWidth * fx, stateMatch.game.playerHeight * fy); //Dibuja la paleta 1
+	ctx.fillRect(stateMatch.paddles.x2 * fx, stateMatch.paddles.y2 * fy, stateMatch.game.playerWidth * fx, stateMatch.game.playerHeight * fy); //Dibuja la paleta 2
+	ctx.fillRect(stateMatch.ball.x * fx, stateMatch.ball.y * fy, stateMatch.game.ballWidth * fy, stateMatch.game.ballHeight * fy);// Dibuja la bola
 }
 
 function drawPaddles(newPaddles){
+	const fx = canvas.width;
+	const fy = canvas.height;
 
 	ctx.fillStyle = '#000';
-	ctx.fillRect(stateMatch.paddles.x1, stateMatch.paddles.y1, stateMatch.game.playerWidth, stateMatch.game.playerHeight); //Borra la paleta 1
-	ctx.fillRect(stateMatch.paddles.x2, stateMatch.paddles.y2, stateMatch.game.playerWidth, stateMatch.game.playerHeight); //Borra la paleta 2
+	ctx.fillRect(stateMatch.paddles.x1 * fx - 1, stateMatch.paddles.y1 * fy - 1, stateMatch.game.playerWidth * fx + 2, stateMatch.game.playerHeight * fy + 2); //Borra la paleta 1
+	ctx.fillRect(stateMatch.paddles.x2 * fx - 1, stateMatch.paddles.y2 * fy - 1, stateMatch.game.playerWidth * fx + 2, stateMatch.game.playerHeight * fy + 2); //Borra la paleta 2
 
 	stateMatch.paddles = newPaddles;
 	ctx.fillStyle = '#FFF';
-	ctx.fillRect(stateMatch.paddles.x1, stateMatch.paddles.y1, stateMatch.game.playerWidth, stateMatch.game.playerHeight); //Dibuja la paleta 1
-	ctx.fillRect(stateMatch.paddles.x2, stateMatch.paddles.y2, stateMatch.game.playerWidth, stateMatch.game.playerHeight); //Dibuja la paleta 2	
+	ctx.fillRect(stateMatch.paddles.x1 * fx, stateMatch.paddles.y1 * fy, stateMatch.game.playerWidth * fx, stateMatch.game.playerHeight * fy); //Dibuja la paleta 1
+	ctx.fillRect(stateMatch.paddles.x2 * fx, stateMatch.paddles.y2 * fy, stateMatch.game.playerWidth * fx, stateMatch.game.playerHeight * fy); //Dibuja la paleta 2	
 }
 
 function drawBall(newBall){
+	const fx = canvas.width;
+	const fy = canvas.height;
+
 	ctx.fillStyle = '#000';
-	ctx.fillRect(stateMatch.ball.x, stateMatch.ball.y, stateMatch.game.ballWidth, stateMatch.game.ballHeight); //Borra la bola
+	ctx.fillRect(stateMatch.ball.x * fx - 1, stateMatch.ball.y * fy - 1, stateMatch.game.ballWidth * fy + 2, stateMatch.game.ballWidth * fy + 2); //Borra la bola
 	
 	stateMatch.ball = newBall; //Obtiene la nueva posición de la bola
 	ctx.fillStyle = '#FFF';
 	drawNet();
 	drawBorders();
-	ctx.fillRect(stateMatch.paddles.x1, stateMatch.paddles.y1, stateMatch.game.playerWidth, stateMatch.game.playerHeight); //Dibuja la paleta 1
-	ctx.fillRect(stateMatch.paddles.x2, stateMatch.paddles.y2, stateMatch.game.playerWidth, stateMatch.game.playerHeight); //Dibuja la paleta 2	
-	ctx.fillRect(stateMatch.ball.x, stateMatch.ball.y, stateMatch.game.ballWidth, stateMatch.game.ballHeight);// Dibuja la bola
+	ctx.fillRect(stateMatch.paddles.x1 * fx, stateMatch.paddles.y1 * fy, stateMatch.game.playerWidth * fx, stateMatch.game.playerHeight * fy); //Dibuja la paleta 1
+	ctx.fillRect(stateMatch.paddles.x2 * fx, stateMatch.paddles.y2 * fy, stateMatch.game.playerWidth * fx, stateMatch.game.playerHeight * fy); //Dibuja la paleta 2	
+	ctx.fillRect(stateMatch.ball.x * fx, stateMatch.ball.y * fy, stateMatch.game.ballWidth * fy, stateMatch.game.ballHeight * fy);// Dibuja la bola
 }
 
 function drawScores(newScore1, newScore2){
@@ -298,25 +292,29 @@ function drawScores(newScore1, newScore2){
 }
 
 function drawBorders(){
+	const w = 0.01 * canvas.height;
+
 	ctx.fillStyle = '#FFF';
-	ctx.lineWidth = 6;
+	ctx.lineWidth = w;
 	ctx.beginPath();
-	ctx.moveTo(3, 3);
-	ctx.lineTo(canvas.width-3, 3);
-	ctx.lineTo(canvas.width-3, canvas.height-3);
-	ctx.lineTo(3, canvas.height-3);
-	ctx.lineTo(3, 3);
+	ctx.moveTo(w, w);
+	ctx.lineTo(canvas.width - w, w);
+	ctx.lineTo(canvas.width - w, canvas.height - w);
+	ctx.lineTo(w, canvas.height - w);
+	ctx.lineTo(w, w);
 	ctx.setLineDash([]);
 	ctx.stroke();
 }
 
 function drawNet(){
+	const w = 0.01 * canvas.width;
+
 	ctx.strokeStyle = '#FFF';
-	ctx.lineWidth = 10;
+	ctx.lineWidth = w;
 	ctx.beginPath();
 	ctx.moveTo(canvas.width / 2, 0);
 	ctx.lineTo(canvas.width / 2, canvas.height);
-	ctx.setLineDash([20, 8]);
+	ctx.setLineDash([0.1 * canvas.height, 0.02 * canvas.height]);
 	ctx.stroke();
 }
 
@@ -357,19 +355,8 @@ async function newMatch(id_match){
 	}
 	
 	try {
-		const apiUrl = 'https://localhost/api/match/new';
-		const response = await fetch(apiUrl, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json',},
-			body: JSON.stringify( { 
-				id: id_match,
-				name1: stateMatch.game.name1, 
-				name2: stateMatch.game.name2, 
-				boundX: canvas.width, 
-				boundY: canvas.height
-			}),
-		});
-
+		const apiUrl = `https://localhost/api/match/new?id_match=${id_match}&name1=${stateMatch.game.name1}&name2=${stateMatch.game.name2}`;
+		const response = await fetch(apiUrl);
 		if (response.ok){
 			socket = new WebSocket(`wss://localhost/wss/pong/${id_match}/`);
 			configureSocketEvents();

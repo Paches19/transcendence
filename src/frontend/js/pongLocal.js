@@ -97,7 +97,6 @@ function initializeGame() {
 	ctx.fillStyle = '#000';
 	ctx.fillRect(0, 0, canvas.width, canvas.height); //Borra todo
 	drawBorders();
-	drawNet();
 }
 
 function resizeCanvas() {
@@ -107,24 +106,8 @@ function resizeCanvas() {
         const height = Math.max(width * 0.5, 300);
         canvas.width = width;
         canvas.height = height;
-		updateDrawings();
 		drawPong();
     }
-}
-
-async function updateDrawings(){
-	const apiUrl = `https://localhost/api/match/resize?id_match=${id}&boundX=${canvas.width}&boundY=${canvas.height}`;
-	try{
-		const response = await fetch(apiUrl);
-		if (response.ok){
-			const responsedata = await response.json();
-			statePaddles = responsedata.paddles;
-			stateBall = responsedata.ball;
-			stateGame = responsedata.game;
-		}
-	} catch (error) {
-		console.error('Error resizing game:', error);
-	}
 }
 
 function startTimer() {
@@ -186,14 +169,14 @@ function quitGame() {
 function playAI(){
 	
 	function viewGame(){
-		let xp = stateGame.boundX;
+		let xp = canvas.width;
 		// Calcular la posición anticipada de la bola
 		const t = (xp - stateBall.x) / stateBall.vx;
 		let yp = stateBall.y + t * stateBall.vy;
 		if (yp < 0){
 			yp = 0;
-		}else if (yp > stateGame.boundY){
-			yp = stateGame.boundY;
+		}else if (yp > canvas.height){
+			yp = canvas.height;
 		}
 		return yp;
 	}
@@ -217,7 +200,13 @@ function playAI(){
 }
 
 function initAnimation(){
+
+	const centerX = canvas.width / 2;
+	const centerY = canvas.height / 2;
 	let timeLeft = 3;
+	const fx = canvas.width;
+	const fy = canvas.height;
+
 	state =  'countdown';
 	countdownInterval = setInterval(() => {
 		
@@ -225,9 +214,9 @@ function initAnimation(){
 		ctx.fillRect(0, 0, canvas.width, canvas.height); //Borra todo
 		drawBorders();
 		ctx.fillStyle = '#FFF';
-		ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
-		ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
-		
+		ctx.fillRect(statePaddles.x1 * fx, statePaddles.y1 * fy, stateGame.playerWidth * fx, stateGame.playerHeight * fy); //Dibuja la paleta 1
+		ctx.fillRect(statePaddles.x2 * fx, statePaddles.y2 * fy, stateGame.playerWidth * fx, stateGame.playerHeight * fy); //Dibuja la paleta 2	
+
 		// Calculate minutes and seconds
 		const seconds = timeLeft % 60;
 		const displayTime = `${seconds}`;
@@ -241,12 +230,9 @@ function initAnimation(){
 
 		// Draw the countdown text
 		ctx.fillStyle = '#FFF';
-		ctx.fillText(displayTime, canvas.width / 2, canvas.height / 2);
+		ctx.fillText(displayTime, centerX, centerY);
 
 		// Draw the circle
-		const centerX = canvas.width / 2;
-		const centerY = canvas.height / 2;
-	
 		ctx.beginPath();
 		const radius = Math.min(canvas.width, canvas.height) / 2.5;
 		ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
@@ -297,13 +283,14 @@ function gameOver(){
 	else 
 		texto = stateGame.name2;
 	stopAnimation();
-	deleteMatch();
+
 	Swal.fire({
 		title: texto + " WINS",
 		confirmButtonColor: '#32B974',
 	}).then((result) => {	
 		if (result.isConfirmed){
 			if (id == 0){ //Pedir volver a jugar si no es un torneo
+				deleteMatch();
 				Swal.fire({
 					confirmButtonColor: '#32B974',
 					title: "Play again ?",
@@ -327,40 +314,49 @@ function gameOver(){
 }
 
 function drawPong(){
+	const fx = canvas.width;
+	const fy = canvas.height;
+
 	ctx.fillStyle = '#000';
 	ctx.fillRect(0, 0, canvas.width, canvas.height); //Borra todo
 	drawBorders();
 	drawNet();
 	ctx.fillStyle = '#FFF';
-	ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
-	ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2
-	ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
+	ctx.fillRect(statePaddles.x1 * fx, statePaddles.y1 * fy, stateGame.playerWidth * fx, stateGame.playerHeight * fy); //Dibuja la paleta 1
+	ctx.fillRect(statePaddles.x2 * fx, statePaddles.y2 * fy, stateGame.playerWidth * fx, stateGame.playerHeight * fy); //Dibuja la paleta 2
+	ctx.fillRect(stateBall.x * fx, stateBall.y * fy, stateGame.ballWidth * fy, stateGame.ballHeight * fy);// Dibuja la bola
 }
 
 function drawPaddles(newPaddles){
+	const fx = canvas.width;
+	const fy = canvas.height;
+
 	ctx.fillStyle = '#000';
-	ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Borra la paleta 1
-	ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Borra la paleta 2
+	ctx.fillRect(statePaddles.x1 * fx - 1, statePaddles.y1 * fy - 1, stateGame.playerWidth * fx + 2, stateGame.playerHeight * fy + 2); //Borra la paleta 1
+	ctx.fillRect(statePaddles.x2 * fx - 1, statePaddles.y2 * fy - 1, stateGame.playerWidth * fx + 2, stateGame.playerHeight * fy + 2); //Borra la paleta 2
 
 	statePaddles = newPaddles;
 
 	ctx.fillStyle = '#FFF';
-	ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
-	ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2	
+	ctx.fillRect(statePaddles.x1 * fx, statePaddles.y1 * fy, stateGame.playerWidth * fx, stateGame.playerHeight * fy); //Dibuja la paleta 1
+	ctx.fillRect(statePaddles.x2 * fx, statePaddles.y2 * fy, stateGame.playerWidth * fx, stateGame.playerHeight * fy); //Dibuja la paleta 2	
 }
 
 function drawBall(newBall){
+	const fx = canvas.width;
+	const fy = canvas.height;
+
 	ctx.fillStyle = '#000';
-	ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight); //Borra la bola
+	ctx.fillRect(stateBall.x * fx - 1, stateBall.y * fy - 1, stateGame.ballWidth * fy + 2, stateGame.ballHeight * fy + 2); //Borra la bola
 	
 	stateBall = newBall; //Obtiene la nueva posición de la bola
 	
 	ctx.fillStyle = '#FFF';
 	drawNet();
 	drawBorders();
-	ctx.fillRect(statePaddles.x1, statePaddles.y1, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 1
-	ctx.fillRect(statePaddles.x2, statePaddles.y2, stateGame.playerWidth, stateGame.playerHeight); //Dibuja la paleta 2	
-	ctx.fillRect(stateBall.x, stateBall.y, stateGame.ballWidth, stateGame.ballHeight);// Dibuja la bola
+	ctx.fillRect(statePaddles.x1 * fx, statePaddles.y1 * fy, stateGame.playerWidth * fx, stateGame.playerHeight * fy); //Dibuja la paleta 1
+	ctx.fillRect(statePaddles.x2 * fx, statePaddles.y2 * fy, stateGame.playerWidth * fx, stateGame.playerHeight * fy); //Dibuja la paleta 2	
+	ctx.fillRect(stateBall.x * fx, stateBall.y * fy, stateGame.ballWidth * fy, stateGame.ballHeight * fy);// Dibuja la bola
 }
 
 function drawScores(newScore1, newScore2){
@@ -375,25 +371,29 @@ function drawScores(newScore1, newScore2){
 }
 
 function drawBorders(){
+	const w = 0.01 * canvas.height;
+
 	ctx.fillStyle = '#FFF';
-	ctx.lineWidth = 6;
+	ctx.lineWidth = w;
 	ctx.beginPath();
-	ctx.moveTo(3, 3);
-	ctx.lineTo(canvas.width-3, 3);
-	ctx.lineTo(canvas.width-3, canvas.height-3);
-	ctx.lineTo(3, canvas.height-3);
-	ctx.lineTo(3, 3);
+	ctx.moveTo(w, w);
+	ctx.lineTo(canvas.width - w, w);
+	ctx.lineTo(canvas.width - w, canvas.height - w);
+	ctx.lineTo(w, canvas.height - w);
+	ctx.lineTo(w, w);
 	ctx.setLineDash([]);
 	ctx.stroke();
 }
 
 function drawNet(){
+	const w = 0.01 * canvas.width;
+
 	ctx.strokeStyle = '#FFF';
-	ctx.lineWidth = 6;
+	ctx.lineWidth = w;
 	ctx.beginPath();
 	ctx.moveTo(canvas.width / 2, 0);
 	ctx.lineTo(canvas.width / 2, canvas.height);
-	ctx.setLineDash([20, 8]);
+	ctx.setLineDash([0.1 * canvas.height, 0.02 * canvas.height]);
 	ctx.stroke();
 }
 
@@ -402,18 +402,9 @@ function drawNet(){
 
 
 async function  startPongLocal(){	
-	const apiUrl = 'https://localhost/api/match/new';
+	const apiUrl = `https://localhost/api/match/new?id_match=${id}&name1=${name1}&name2=${name2}`;
 	try{
-		const response = await fetch(apiUrl, {
-			method: 'POST',
-			headers: {'Content-Type': 'application/json',},
-			body: JSON.stringify( { id: id,
-									name1: name1, 
-									name2: name2, 
-									boundX: canvas.width, 
-									boundY: canvas.height
-			}),
-		});
+		const response = await fetch(apiUrl);
 		if (response.ok){
 			const responsedata = await response.json();
 			id = responsedata.id;

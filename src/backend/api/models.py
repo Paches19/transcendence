@@ -6,7 +6,7 @@
 #    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:10 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/28 11:54:46 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/07/02 23:57:45 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,27 +17,26 @@ import datetime
 
 # Create your models here.
 
-
 class Paddles(models.Model):
-	x1 = models.IntegerField(default=0)
-	y1 = models.IntegerField(default=0)
+	x1 = models.FloatField(default=0)
+	y1 = models.FloatField(default=0)
 	score1 = models.IntegerField(default=0)
-	x2 = models.IntegerField(default=0)
-	y2 = models.IntegerField(default=0)
+	x2 = models.FloatField(default=0)
+	y2 = models.FloatField(default=0)
 	score2 = models.IntegerField(default=0)
 
 class Ball(models.Model):
-	x = models.IntegerField(default=0)
-	y = models.IntegerField(default=0)
-	vx = models.IntegerField(default=0)
-	vy = models.IntegerField(default=0)
+	x = models.FloatField(default=0)
+	y = models.FloatField(default=0)
+	vx = models.FloatField(default=0)
+	vy = models.FloatField(default=0)
 
 class Game(models.Model):
-    v = models.IntegerField(default=0)
-    ballWidth = models.IntegerField(default=10)
-    ballHeight = models.IntegerField(default=10)
-    playerWidth = models.IntegerField(default=15)
-    playerHeight = models.IntegerField(default=80)
+    v = models.FloatField(default=0)
+    ballWidth = models.FloatField(default=10)
+    ballHeight = models.FloatField(default=10)
+    playerWidth = models.FloatField(default=15)
+    playerHeight = models.FloatField(default=80)
     finalScore = models.IntegerField(default=3)
     name1 = models.CharField(max_length=40, default='Player1')
     name2 = models.CharField(max_length=40, default='Player2')

@@ -6,7 +6,7 @@
 #    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:15 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/28 12:05:29 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/07/03 00:15:30 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -182,11 +182,11 @@ class UserStatsUpdateSchema(Schema):
 """ Match schemas """
 
 class PaddlesSchema(Schema):
-	x1: int
-	y1: int
+	x1: float
+	y1: float
 	score1: int
-	x2: int
-	y2: int
+	x2: float
+	y2: float
 	score2: int
 
 class MovePaddlesSchema(Schema):
@@ -194,10 +194,10 @@ class MovePaddlesSchema(Schema):
      paddles: PaddlesSchema
 
 class BallSchema(Schema):
-	x: int
-	y: int
-	vx: int
-	vy: int
+	x: float
+	y: float
+	vx: float
+	vy: float
      
 class MoveBallSchema(Schema):
      msg: str
@@ -206,14 +206,14 @@ class MoveBallSchema(Schema):
      score2: int
 
 class GameSchema(Schema):
-	v: int
+	v: float
 	boundX: int
 	boundY: int
 	finalScore: int
-	playerWidth: int
-	playerHeight: int
-	ballWidth: int
-	ballHeight: int
+	playerWidth: float
+	playerHeight: float
+	ballWidth: float
+	ballHeight: float
 	name1: str
 	name2: str
 
