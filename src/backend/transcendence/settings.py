@@ -6,7 +6,7 @@
 #    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:41 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/29 18:23:05 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/07/05 18:50:17 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,9 +14,14 @@ from pathlib import Path
 from dotenv import load_dotenv
 from django.core.management.utils import get_random_secret_key
 import os
+
+
+# Load environment variables from .env file
+load_dotenv()
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -98,8 +103,6 @@ ASGI_APPLICATION = "transcendence.asgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# Load environment variables from .env file
-load_dotenv()
 
 DATABASES = {
     'default': {
@@ -162,14 +165,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+        #"BACKEND": "channels.layers.InMemoryChannelLayer",
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('192.168.1.23', 6379)],
+		},
+	},
 }
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:8080',
     'https://localhost:8080',
-    'https://localhost'
+    'https://localhost',
+    'https://192.168.1.13',
+    'https://192.168.1.23',
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

@@ -32,8 +32,10 @@ let timerInterval = null;
 let countdownInterval = null;
 const refreshTime = 1000/30;
 
-function startGame(mode, player2, id_match){
+function startGameLocal(mode, player2, id_match){
 	modality = mode;
+	console.log("Modality: " + modality);
+	console.log("ID: ", id_match);
 	if (isLoggedIn()) {
 		name1 = getUsernameFromToken();
 		if (!player2)
@@ -41,9 +43,9 @@ function startGame(mode, player2, id_match){
 		else
 			name2 = player2;
 		if (!id_match)
-			id = 0;
+			id = 0; // Es un partido NORMAL
 		else
-			id = id_match;
+			id = id_match; // Es un partido de TORNEO
 		showGameScreen();
 		startPongLocal();
 	}else{
@@ -282,15 +284,13 @@ function gameOver(){
 		texto = stateGame.name1;
 	else 
 		texto = stateGame.name2;
-	stopAnimation();
-
+	deleteMatch();
 	Swal.fire({
 		title: texto + " WINS",
 		confirmButtonColor: '#32B974',
 	}).then((result) => {	
 		if (result.isConfirmed){
 			if (id == 0){ //Pedir volver a jugar si no es un torneo
-				deleteMatch();
 				Swal.fire({
 					confirmButtonColor: '#32B974',
 					title: "Play again ?",
@@ -360,10 +360,6 @@ function drawBall(newBall){
 }
 
 function drawScores(newScore1, newScore2){
-	clearInterval(ballInterval);
-	ballInterval = null;
-	clearInterval(timerInterval);
-	timerInterval = null;
 	statePaddles.score1 = newScore1;
 	statePaddles.score2 = newScore2;
 	document.getElementById('game-score').innerHTML =
@@ -448,7 +444,7 @@ async function resetBall(){
 
 async function handleKeyDown(e) {
     let pressed = e.key;
-	if (state == 'playing' && (pressed == 'ArrowUp' || pressed == 'ArrowDown' ||
+	if (state != 'pause' && (pressed == 'ArrowUp' || pressed == 'ArrowDown' ||
        (modality == "local" && (pressed == "w" || pressed == "W" || pressed == "s" || pressed == "S")) ||
        (modality == "solo"  && (pressed == "A" || pressed == "D")))){
 			const apiUrl = `https://localhost/api/game/paddles?id_match=${id}&key=${pressed}`;
@@ -470,13 +466,16 @@ async function moveBall() {
 		const response = await fetch(apiUrl);
 		if (response.ok){
 			const responsedata = await response.json();
-			state = responsedata.msg;
 			if (responsedata.msg == "scored"){
+				console.log("Scored");
+				stopAnimation();
 				drawScores(responsedata.score1, responsedata.score2);
 				resetBall();
 				if (!countdownInterval) initAnimation();
 			}
 			else if (responsedata.msg == "gameover"){
+				console.log("Game Over");
+				stopAnimation();
 				drawScores(responsedata.score1, responsedata.score2);
 				gameOver();
 			}
@@ -488,4 +487,4 @@ async function moveBall() {
 	}
 }
 
-export default startGame;
+export default startGameLocal;

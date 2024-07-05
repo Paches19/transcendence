@@ -14,6 +14,8 @@ import { isLoggedIn, getUsernameFromToken } from "./auth.js";
 import router from "./main.js";
 import initPlayPage from "./play.js";
 
+const ip_client = "192.168.1.13";
+const ip_server = "192.168.1.23";
 let ctx;
 let canvas;
 let socket;
@@ -190,7 +192,6 @@ function quitGame() {
 }
 
 function initAnimation(){
-
 	const centerX = canvas.width / 2;
 	const centerY = canvas.height / 2;
 	let timeLeft = 3;
@@ -358,7 +359,7 @@ async function newMatch(id_match){
 		const apiUrl = `https://localhost/api/match/new?id_match=${id_match}&name1=${stateMatch.game.name1}&name2=${stateMatch.game.name2}`;
 		const response = await fetch(apiUrl);
 		if (response.ok){
-			socket = new WebSocket(`wss://localhost/wss/pong/${id_match}/`);
+			socket = new WebSocket(`wss://${ip_client}/wss/pong/${id_match}/`);
 			configureSocketEvents();
 			
 			const data = await response.json();
@@ -417,7 +418,7 @@ async function joinMatch(id_match){
 			}).then(e => window.location.href = "/");
 		}
 		else if (response.ok) {
-			socket = new WebSocket(`wss://localhost/wss/pong/${id_match}/`);
+			socket = new WebSocket(`wss://${ip_server}/wss/pong/${id_match}/`);
 			configureSocketEvents();
 			
 			const data = await response.json();
@@ -566,7 +567,7 @@ function configureSocketEvents(){
 
     socket.onclose = (e) => {
         console.log('Game socket closed', e);
-		if (mode == 'normal') deleteMatch();
+		deleteMatch();
     };
 
     socket.onerror = (e) => {
@@ -586,6 +587,15 @@ function handleSocketMessage(e) {
 			icon: "error",
 			title: data.error,
 		}).then(e => window.location.href = "/");
+	}
+
+	else if (data.event == "Connected"){
+		if (data.server_ip){
+			const serverIP = data.server_ip;
+			console.log("Server IP received from server: ", serverIP);
+		}
+		else
+			console.log("NO server IP received from server"	);
 	}
 
 	else if(data.event == "write_names"){

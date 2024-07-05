@@ -42,9 +42,10 @@ clean:		stop
 			@docker-compose -p $(NAME) -f $(DOCKER_COMPOSE_FILE) down
 			@printf "\n$(BLUE)==> $(RED)Removed Transcendence 🗑️\n$(RESET)"
 
-fclean:		clean
-			@docker rmi postgres_transcendence django_transcendence:latest nginx_transcendence:latest
-			@docker network ls | grep transcendence_net && docker network rm transcendence_net || echo "$(YELLOW)Network transcendence_net not found or already removed$(RESET)"
+fclean:		
+			@docker rmi -f $(docker images -q)
+			@docker rm -f $(docker ps -aq)
+			@docker network rm $(docker network ls -q)
 			@printf "\n$(BLUE)==> $(RED)Fully cleaned Transcendence 🗑️\n$(RESET)"
 
 re:			clean

@@ -6,11 +6,11 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/29 19:17:56 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/04 09:24:32 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import startGame from "./pongLocal.js";
+import startGameLocal from "./pongLocal.js";
 import startGameRemote from "./pongRemote.js";
 
 let selectedMatchID = null;
@@ -40,7 +40,7 @@ function renderGameOptions() {
 function attachEventListeners() {
 	document.getElementById('solo-vs-ai').addEventListener('click', () => {
 		mode = 'solo';
-		startGame(mode, null, 0);
+		startGameLocal(mode, null, 0);
 	});
     document.getElementById('local-vs-human').addEventListener('click', () => {
 		mode = 'local';
@@ -174,7 +174,7 @@ async function handleLoginSubmit(event) {
     const requestBody = {
         player2_username: player2_name,
         player2_password: document.getElementById('password').value,
-        matchID: selectedMatchID ? selectedMatchID : -1
+        matchID: selectedMatchID ? selectedMatchID : -1  //-1 for normal match and it is created in the backend
     };
   
     const requestOptions = {
@@ -190,7 +190,7 @@ async function handleLoginSubmit(event) {
         if (response.ok) {
             const data = await response.json();
             document.querySelector('.login-overlay').remove();
-			startGame('local', player2_name, selectedMatchID);
+			startGameLocal('local', player2_name, selectedMatchID);
         } else {
             const errorData = await response.json();
             document.getElementById('login-msg').textContent = `Error: ${errorData.message}`;

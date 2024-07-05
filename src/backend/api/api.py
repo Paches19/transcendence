@@ -520,7 +520,10 @@ def join_match(request, id_match: int, name1: str, name2: str):
 def delete_match(request, id_match: int):
 	try:
 		match = get_object_or_404(RemoteGame, id = id_match)
-        #actualizar la DB para estadísticas
+        #Guardo datos antes de borrar
+
+  
+        #Borro mi partida temporal    
 		match.delete()
 		return 200, {"msg": "Match deleted"}
 	except Exception as e:
