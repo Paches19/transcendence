@@ -6,7 +6,7 @@
 #    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:41 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/05 18:50:17 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/07/06 19:40:06 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,7 +37,7 @@ debugging = os.getenv("DEBUG")
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Custom user model
 
@@ -165,11 +165,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CHANNEL_LAYERS = {
     "default": {
-        #"BACKEND": "channels.layers.InMemoryChannelLayer",
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('192.168.1.23', 6379)],
-		},
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        # 'CONFIG': {
+        #     "hosts": [('redis', 6379)],
+		# },
 	},
 }
 
@@ -177,8 +177,7 @@ CORS_ORIGIN_WHITELIST = [
     'http://localhost:8080',
     'https://localhost:8080',
     'https://localhost',
-    'https://192.168.1.13',
-    'https://192.168.1.23',
+    # 'https://192.168.1.23',
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

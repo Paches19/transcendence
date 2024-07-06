@@ -35,17 +35,23 @@ stop:
 			@docker-compose -p $(NAME) -f $(DOCKER_COMPOSE_FILE) stop
 			@printf "\n$(BLUE)==> $(RED)Transcendence stopped 🛑\n$(RESET)"
 
-logs:
+logs-django:
 			docker logs -f	django
+logs-nginx:
+			docker logs -f	nginx
+logs-postgres:
+			docker logs -f	postgres
+logs-redis:
+			docker logs -f	redis
 
 clean:		stop
 			@docker-compose -p $(NAME) -f $(DOCKER_COMPOSE_FILE) down
 			@printf "\n$(BLUE)==> $(RED)Removed Transcendence 🗑️\n$(RESET)"
 
 fclean:		
-			@docker rmi -f $(docker images -q)
-			@docker rm -f $(docker ps -aq)
-			@docker network rm $(docker network ls -q)
+			@docker rmi -f $(shell docker images -q)
+			@docker rm -f $(shell docker ps -aq)
+			@docker network rm $(shell docker network ls -q)
 			@printf "\n$(BLUE)==> $(RED)Fully cleaned Transcendence 🗑️\n$(RESET)"
 
 re:			clean
