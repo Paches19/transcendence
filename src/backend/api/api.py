@@ -1,4 +1,4 @@
-# ******************************************************************************#
+# **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
 #    api.py                                             :+:      :+:    :+:    #
@@ -6,9 +6,9 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/06/14 08:03:43 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/06 13:32:43 by alaparic         ###   ########.fr        #
 #                                                                              #
-# ******************************************************************************#
+# **************************************************************************** #
 
 import os
 import random
@@ -17,10 +17,10 @@ from django.contrib.auth import authenticate, login, logout
 from ninja import NinjaAPI, File
 from ninja.files import UploadedFile
 from ninja.params import Query
+from typing import Optional
 from .models import *
 from .middleware import login_required, require_auth
 from .populate_data import *
-from typing import Optional
 from .schema import *
 
 
@@ -397,143 +397,177 @@ def get_user_matches(request):
 
 @app.get('game/paddles', response={200: MovePaddlesSchema, 400: ErrorSchema}, tags=['Game'])
 def move_paddles(request, id_match: int, key:str):
-	try:
-		match = get_object_or_404(RemoteGame, id = id_match)
-		border = 0.02
-		if key == 'ArrowUp':
-			match.paddles.y1 = max(border, match.paddles.y1 - match.game.v)
-		elif key == 'ArrowDown':
-			match.paddles.y1 = min(1 - match.game.playerHeight - border, match.paddles.y1 + match.game.v)
-		elif key == 'w' or key == 'W' or key == 'A':
-			match.paddles.y2 = max(border, match.paddles.y2 - match.game.v)
-		elif key == 's' or key == 'S' or key == 'D':
-			match.paddles.y2 = min(1 - match.game.playerHeight - border, match.paddles.y2 + match.game.v)
-		return 200, {"msg": key, "paddles": match.paddles}
-	except Exception as e:
-		return 400, {"error_msg": "Error moving paddle" + str(e)}
+    try:
+        match = get_object_or_404(RemoteGame, id = id_match)
+        border = 0.02
+        if key == 'ArrowUp':
+            match.paddles.y1 = max(border, match.paddles.y1 - match.game.v)
+        elif key == 'ArrowDown':
+            match.paddles.y1 = min(1 - match.game.playerHeight - border, match.paddles.y1 + match.game.v)
+        elif key == 'w' or key == 'W' or key == 'A':
+            match.paddles.y2 = max(border, match.paddles.y2 - match.game.v)
+        elif key == 's' or key == 'S' or key == 'D':
+            match.paddles.y2 = min(1 - match.game.playerHeight - border, match.paddles.y2 + match.game.v)
+        return 200, {"msg": key, "paddles": match.paddles}
+    except Exception as e:
+        return 400, {"error_msg": "Error moving paddle" + str(e)}
 
 
 @app.get('game/ball', response={200: MoveBallSchema, 400: ErrorSchema}, tags=['Game'])
 def move_ball(request, id_match: int):
-	try:
-		match = get_object_or_404(RemoteGame, id = id_match)
-		# Update ball position
-		if match.ball.y + match.ball.vy <= 0 or match.ball.y + match.ball.vy + match.game.ballWidth >= 1:
-			match.ball.vy = -match.ball.vy
-		match.ball.x += match.ball.vx
-		match.ball.y += match.ball.vy
-		# Check for collisions with walls
-		# Left wall (Paddle 1)
-		if match.ball.x < match.paddles.x1:
-			match.paddles.score2 += 1
-			if match.paddles.score2 >= match.game.finalScore:
-				return 200, {"msg": "gameover", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
-			else:
-				return 200, {"msg": "scored", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
+    try:
+        match = get_object_or_404(RemoteGame, id = id_match)
+        # Update ball position
+        if match.ball.y + match.ball.vy <= 0 or match.ball.y + match.ball.vy + match.game.ballWidth >= 1:
+            match.ball.vy = -match.ball.vy
+        match.ball.x += match.ball.vx
+        match.ball.y += match.ball.vy
+        # Check for collisions with walls
+        # Left wall (Paddle 1)
+        if match.ball.x < match.paddles.x1:
+            match.paddles.score2 += 1
+            if match.paddles.score2 >= match.game.finalScore:
+                return 200, {"msg": "gameover", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
+            else:
+                return 200, {"msg": "scored", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
 
-		# Right wall (Paddle 2)
-		elif match.ball.x > match.paddles.x2:
-			match.paddles.score1 += 1
-			if match.paddles.score1 >= match.game.finalScore:
-				return 200, {"msg": "gameover", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
-			else:
-				return 200, {"msg": "scored", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
-			
-		# Paddle collisions
-		elif (match.ball.y <= match.game.playerHeight + match.paddles.y2 and match.ball.y >= match.paddles.y2 and match.ball.x + match.game.ballWidth >= match.paddles.x2) or \
-			(match.ball.y <= match.game.playerHeight + match.paddles.y1 and match.ball.y >= match.paddles.y1 and match.ball.x <= match.paddles.x1 + match.game.playerWidth):
-			match.ball.vx = -match.ball.vx
-			if match.ball.x < match.paddles.x1 + match.game.playerWidth:
-				match.ball.x = match.paddles.x1 + match.game.playerWidth
-			if match.ball.x > match.paddles.x2:
-				match.ball.x = match.paddles.x2 - match.game.ballWidth
+        # Right wall (Paddle 2)
+        elif match.ball.x > match.paddles.x2:
+            match.paddles.score1 += 1
+            if match.paddles.score1 >= match.game.finalScore:
+                return 200, {"msg": "gameover", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
+            else:
+                return 200, {"msg": "scored", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
+            
+        # Paddle collisions
+        elif (match.ball.y <= match.game.playerHeight + match.paddles.y2 and match.ball.y >= match.paddles.y2 and match.ball.x + match.game.ballWidth >= match.paddles.x2) or \
+            (match.ball.y <= match.game.playerHeight + match.paddles.y1 and match.ball.y >= match.paddles.y1 and match.ball.x <= match.paddles.x1 + match.game.playerWidth):
+            match.ball.vx = -match.ball.vx
+            if match.ball.x < match.paddles.x1 + match.game.playerWidth:
+                match.ball.x = match.paddles.x1 + match.game.playerWidth
+            if match.ball.x > match.paddles.x2:
+                match.ball.x = match.paddles.x2 - match.game.ballWidth
 
-			if (match.ball.y > match.paddles.y1 + match.game.playerHeight * 0.75 or match.ball.y > match.paddles.y2 + match.game.playerHeight * 0.75) and match.ball.vy < 3:
-				match.ball.vy += 0.004
+            if (match.ball.y > match.paddles.y1 + match.game.playerHeight * 0.75 or match.ball.y > match.paddles.y2 + match.game.playerHeight * 0.75) and match.ball.vy < 3:
+                match.ball.vy += 0.004
 
-			if (match.ball.y < match.paddles.y1 + match.game.playerHeight * 0.25 or match.ball.y < match.paddles.y2 + match.game.playerHeight * 0.25) and match.ball.vy > -3:
-				match.ball.vy -= 0.004
-		return 200, {"msg": "playing", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
-	except Exception as e:
-		return 400, {"error_msg": "Error moving ball" + str(e)}
+            if (match.ball.y < match.paddles.y1 + match.game.playerHeight * 0.25 or match.ball.y < match.paddles.y2 + match.game.playerHeight * 0.25) and match.ball.vy > -3:
+                match.ball.vy -= 0.004
+        return 200, {"msg": "playing", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
+    except Exception as e:
+        return 400, {"error_msg": "Error moving ball" + str(e)}
 
 
 @app.get('game/reset', response={200: MoveBallSchema, 400: ErrorSchema}, tags=['Game'])
 def reset_ball(request, id_match: int):
-	try:
-		match = get_object_or_404(RemoteGame, id = id_match)
-		match.ball.x = (1 - match.game.ballWidth) / 2
-		match.ball.y = (1  - match.game.ballHeight) / 2
-		match.ball.vx = random.choice([-0.02, 0.02])
-		match.ball.vy = random.choice([-0.004, -0.003, 0.003, 0.004])
-		return 200, {"msg": "playing", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
+    try:
+        match = get_object_or_404(RemoteGame, id = id_match)
+        match.ball.x = (1 - match.game.ballWidth) / 2
+        match.ball.y = (1  - match.game.ballHeight) / 2
+        match.ball.vx = random.choice([-0.02, 0.02])
+        match.ball.vy = random.choice([-0.004, -0.003, 0.003, 0.004])
+        return 200, {"msg": "playing", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
 
-	except Exception as e:
-		return 400, {"error_msg": "Error resetting ball" + str(e)}
+    except Exception as e:
+        return 400, {"error_msg": "Error resetting ball" + str(e)}
 
 
 """ Match """
 
 @app.get("match/new", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
 def new_match(request, id_match: int, name1: str, name2: str):
-	try:
-		match = get_object_or_404(RemoteGame, id = id_match)
-		match.delete()	
-	except:
-		pass
-	match = RemoteGame.objects.create(id = id_match)
-	match.paddles.score1 = 0
-	match.paddles.score2 = 0
-	match.game.name1 = name1
-	match.game.name2 = name2
-	match.game.finalScore = 3
+    try:
+        match = get_object_or_404(RemoteGame, id = id_match)
+        match.delete()	
+    except:
+        pass
+    match = RemoteGame.objects.create(id = id_match)
+    match.paddles.score1 = 0
+    match.paddles.score2 = 0
+    match.game.name1 = name1
+    match.game.name2 = name2
+    match.game.finalScore = 3
 
-	# Los valores de las variables son porcentajes del tamaño de la pantalla
-	match.game.v = 0.02
-	match.game.ballWidth = 0.02
-	match.game.ballHeight = 0.02
-	match.game.playerWidth = 0.02
-	match.game.playerHeight = 0.20
-	match.paddles.x1 = 0.02
-	match.paddles.y1 = (1 - match.game.playerHeight) / 2
-	match.paddles.x2 = 0.96
-	match.paddles.y2 = (1 - match.game.playerHeight) / 2
-	match.ball.x = (1 - match.game.ballWidth) / 2
-	match.ball.y = (1 - match.game.ballWidth) / 2
-	match.ball.vx = random.choice([-0.02, 0.02])
-	match.ball.vy = random.choice([-0.004, -0.003, 0.003, 0.004])
-	match.save()
-	return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
+    # Los valores de las variables son porcentajes del tamaño de la pantalla
+    match.game.v = 0.02
+    match.game.ballWidth = 0.02
+    match.game.ballHeight = 0.02
+    match.game.playerWidth = 0.02
+    match.game.playerHeight = 0.20
+    match.paddles.x1 = 0.02
+    match.paddles.y1 = (1 - match.game.playerHeight) / 2
+    match.paddles.x2 = 0.96
+    match.paddles.y2 = (1 - match.game.playerHeight) / 2
+    match.ball.x = (1 - match.game.ballWidth) / 2
+    match.ball.y = (1 - match.game.ballWidth) / 2
+    match.ball.vx = random.choice([-0.02, 0.02])
+    match.ball.vy = random.choice([-0.004, -0.003, 0.003, 0.004])
+    match.save()
+    return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
 
 
 @app.get("match/join", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
 def join_match(request, id_match: int, name1: str, name2: str):
-	match = get_object_or_404(RemoteGame, id = id_match)
-	if name2 != '':
-		return 400, {"error_msg": "Game already has two players"}
-	match.game.name2 = name1
-	match.save()
-	return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
+    match = get_object_or_404(RemoteGame, id = id_match)
+    if name2 != '':
+        return 400, {"error_msg": "Game already has two players"}
+    match.game.name2 = name1
+    match.save()
+    return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
 
 
 @app.get("match/delete", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
 def delete_match(request, id_match: int):
-	try:
-		match = get_object_or_404(RemoteGame, id = id_match)
-        #Guardo datos antes de borrar
+    try:
+        remoteGame = get_object_or_404(RemoteGame, id = id_match)
+        matchWinner = remoteGame.game.name1 if remoteGame.paddles.score1 > remoteGame.paddles.score2 else remoteGame.game.name2
+        if (remoteGame.id == 0):
+            # if match does not exist, cause it's not a tournament match, create it
+            match = Match(user1=remoteGame.game.name1, user2=remoteGame.game.name2, pointsUser1=remoteGame.paddles.score1, pointsUser2=remoteGame.paddles.score2, winner=matchWinner)
+        else:
+            # if match does exist, update it
+            match = Match.objects.get(matchID=remoteGame.id)
+            match.pointsUser1 = remoteGame.paddles.score1
+            match.pointsUser2 = remoteGame.paddles.score2
+            match.winner = matchWinner
 
-  
-        #Borro mi partida temporal    
-		match.delete()
-		return 200, {"msg": "Match deleted"}
-	except Exception as e:
-		return 400, {"error_msg": "Error deleting match" + str(e)}
+            # update tournament data
+            tournament = Tournament.objects.get(
+            tournamentID=match.tournamentID)
+            tournament.status = "ended"
+            tournament.save()
+        match.save()
+
+
+        # update user stadistics
+        # user1
+        user1 = User.objects.get(username=remoteGame.game.name1)
+        user1.totalPoints += remoteGame.paddles.score1
+        user1.matchesTotal += 1
+        if matchWinner == remoteGame.game.name1:
+            user1.matchesWon += 1
+        else:
+            user1.matchesLost += 1
+
+        # user2
+        user2 = User.objects.get(username=remoteGame.game.name2)
+        user2.totalPoints += remoteGame.paddles.score2
+        user2.matchesTotal += 1
+        if matchWinner == remoteGame.game.name2:
+            user2.matchesWon += 1
+        else:
+            user2.matchesLost += 1
+
+        remoteGame.delete()
+        return 200, {"msg": "Match deleted"}
+    except Exception as e:
+        return 400, {"error_msg": "Error deleting match" + str(e)}
 
 
 @app.get("match/state", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
 def get_state(request, id_match: int):
-	try:
-		match = get_object_or_404(RemoteGame, id = id_match)
-		return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
-	except Exception as e:
-		return 400, {"error_msg": "Error getting game state" + str(e)}
+    try:
+        match = get_object_or_404(RemoteGame, id = id_match)
+        return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
+    except Exception as e:
+        return 400, {"error_msg": "Error getting game state" + str(e)}
