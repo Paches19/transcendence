@@ -6,7 +6,7 @@
 #    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/08 11:58:16 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/07/08 12:00:17 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -491,21 +491,21 @@ def new_match(request, id_match: int, name1: str, name2: str):
 	match.game.finalScore = 3
 
     # Los valores de las variables son porcentajes del tamaño de la pantalla
-    match.game.v = 0.02
-    match.game.ballWidth = 0.02
-    match.game.ballHeight = 0.02
-    match.game.playerWidth = 0.02
-    match.game.playerHeight = 0.20
-    match.paddles.x1 = 0.02
-    match.paddles.y1 = (1 - match.game.playerHeight) / 2
-    match.paddles.x2 = 0.96
-    match.paddles.y2 = (1 - match.game.playerHeight) / 2
-    match.ball.x = (1 - match.game.ballWidth) / 2
-    match.ball.y = (1 - match.game.ballWidth) / 2
-    match.ball.vx = random.choice([-0.02, 0.02])
-    match.ball.vy = random.choice([-0.004, -0.003, 0.003, 0.004])
-    match.save()
-    return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
+	match.game.v = 0.02
+	match.game.ballWidth = 0.02
+	match.game.ballHeight = 0.02
+	match.game.playerWidth = 0.02
+	match.game.playerHeight = 0.20
+	match.paddles.x1 = 0.02
+	match.paddles.y1 = (1 - match.game.playerHeight) / 2
+	match.paddles.x2 = 0.96
+	match.paddles.y2 = (1 - match.game.playerHeight) / 2
+	match.ball.x = (1 - match.game.ballWidth) / 2
+	match.ball.y = (1 - match.game.ballWidth) / 2
+	match.ball.vx = random.choice([-0.02, 0.02])
+	match.ball.vy = random.choice([-0.004, -0.003, 0.003, 0.004])
+	match.save()
+	return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
 
 @app.get("match/updatescores", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
 def update_score(request, id_match: int, score1: int, score2: int):
