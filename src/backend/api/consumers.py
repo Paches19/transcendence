@@ -107,17 +107,17 @@ class PongConsumerRemote(AsyncJsonWebsocketConsumer):
 						"ball": content['ball'],
 					}
 				})
-                   
 
+                             
     async def disconnect(self, code):
-        if (code == 1):
-            return
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
-        await self.channel_layer.group_send(self.group_name, {
-            "type": "gameData.send",
-            "data": {
-                "event": "opponent_left",
-            }
+        # code = 2000 if the match finished as game over
+        if (code != 4000):
+            await self.channel_layer.group_send(self.group_name, {
+                "type": "gameData.send",
+                "data": {
+                    "event": "opponent_left",
+                }
         })
 
     async def gameData_send(self, context):

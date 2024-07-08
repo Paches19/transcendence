@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/04 09:24:32 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/07 16:13:42 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@ import startGameRemote from "./pongRemote.js";
 
 let selectedMatchID = null;
 let mode = null;
+let id_tournament = 0;
 
 function initPlayPage() {
     renderGameOptions();
@@ -40,7 +41,7 @@ function renderGameOptions() {
 function attachEventListeners() {
 	document.getElementById('solo-vs-ai').addEventListener('click', () => {
 		mode = 'solo';
-		startGameLocal(mode, null, 0);
+		startGameLocal(mode, null, 0, id_tournament);
 	});
     document.getElementById('local-vs-human').addEventListener('click', () => {
 		mode = 'local';
@@ -67,7 +68,7 @@ function showMatchTypeOptions() {
 	if (mode == 'local'){
    		document.getElementById('normal-match').addEventListener('click', () => loadLogin(null));
 	}else{
-		document.getElementById('normal-match').addEventListener('click', () => startGameRemote(0));
+		document.getElementById('normal-match').addEventListener('click', () => startGameRemote(0, id_tournament));
 	}
 	document.getElementById('tournament-match').addEventListener('click', handleLocalVsHumanClick);
 }
@@ -107,7 +108,7 @@ function showMatchOptions(matches) {
                         </div>
                         <div class="match-details">
                             <span class="match-info">${match.player1_username} vs ${match.player2_username}</span>
-                            <button class="play-btn play-btn-primary select-match-btn" data-match-id="${match.matchID}" data-user2-match="${match.player2_username}">Select</button>
+                            <button class="play-btn play-btn-primary select-match-btn" data-match-id="${match.matchID}" data-user2-match="${match.player2_username}"data-tournament-id="${match.tournamentID}">Select</button>
                         </div>
                     </li>
                 `).join('')}
@@ -119,11 +120,12 @@ function showMatchOptions(matches) {
     matchButtons.forEach(button => {
         button.addEventListener('click', (event) => {
             selectedMatchID = event.target.getAttribute('data-match-id');
+			id_tournament = event.target.getAttribute('data-tournament-id');
 			if (mode  === 'local'){
 	            const user2Match = event.target.getAttribute('data-user2-match');
     	        loadLogin(user2Match);
 			}else{
-				startGameRemote(selectedMatchID);
+				startGameRemote(selectedMatchID, id_tournament);
 			}
         });
     });
@@ -190,7 +192,7 @@ async function handleLoginSubmit(event) {
         if (response.ok) {
             const data = await response.json();
             document.querySelector('.login-overlay').remove();
-			startGameLocal('local', player2_name, selectedMatchID);
+			startGameLocal('local', player2_name, selectedMatchID, id_tournament);
         } else {
             const errorData = await response.json();
             document.getElementById('login-msg').textContent = `Error: ${errorData.message}`;

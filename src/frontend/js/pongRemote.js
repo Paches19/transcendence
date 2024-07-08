@@ -24,24 +24,24 @@ let statePaddles = { x1: 0, y1: 0, score1: 0, x2: 0, y2: 0, score2: 0 };
 let stateBall = { x: 0, y: 0, vx: 0, vy: 0 };
 let stateGame = { v: 0, ballWidth: 0, ballHeight: 0, playerWidth: 0, playerHeight: 0, finalScore: 0, name1: '', name2: '' };
 let stateMatch = { id: 0, state: '', paddles: statePaddles, ball: stateBall, game: stateGame}
-let mode; //normal or tournament
+
+let id_tournament;
 let playerNumber; //1 or 2
 let elapsedTime = 0;
 let ballInterval = null;
 let timerInterval = null;
 const refreshTime = 1000/30;
 
-function startGameRemote(id_match){
+function startGameRemote(id_match, id_tour){
 	if (isLoggedIn()) {
 		stateMatch.game.name1 = getUsernameFromToken();
 		showGameScreen();
 		if (id_match == 0){
-			mode = 'normal';
 			selectMatch();
 		}else{
-			mode = 'tournament';
 			joinMatch(id_match);
 		}
+		id_tournament = id_tour;
 	}else{
 		router.route('/login');
 	}
@@ -97,7 +97,7 @@ function attachGameControlEventListeners() {
 
 async function handleKeyDown(e) {
     let pressed = e.key;
-	if (stateMatch.state == 'playing' && (pressed == 'ArrowUp' || pressed == 'ArrowDown')){
+	if (stateMatch.state != 'pause' && (pressed == 'ArrowUp' || pressed == 'ArrowDown')){
 		if (playerNumber == 2){
 			pressed == 'ArrowUp' ? pressed = 'w' : pressed = 's';
 		}
@@ -182,7 +182,6 @@ function quitGame() {
 			if (result.isConfirmed) {
 				socket.close();
 				initPlayPage();
-				return;
 			}else if (result.isDenied){
 				document.getElementById("pause-game").textContent = "Pause";
 				sendState('playing');
@@ -436,9 +435,11 @@ async function joinMatch(id_match){
 }
 
 async function deleteMatch(){
-	const apiUrl = `https://localhost/api/match/delete?id_match=${stateMatch.id}`;
+	const apiUrl = `https://localhost/api/match/delete?id_match=${stateMatch.id}&id_tournament=${id_tournament}`;
 	try{
-		const response = await fetch(apiUrl);
+		const response = await fetch(apiUrl, {
+			method: "DELETE",
+		});
 		if (response.ok){
 			const responsedata = await response.json();
 			console.log(responsedata.msg);
@@ -477,7 +478,7 @@ async function moveBall() {
 				ballInterval = null;
 				sendGameOver(responsedata.score1, responsedata.score2);
 			}
-			else
+			else if (responsedata.msg == "playing")
 				sendBall(responsedata.ball);
 		}
 	} catch (error) {
@@ -567,7 +568,6 @@ function configureSocketEvents(){
 
     socket.onclose = (e) => {
         console.log('Game socket closed', e);
-		deleteMatch();
     };
 
     socket.onerror = (e) => {
@@ -619,9 +619,13 @@ function handleSocketMessage(e) {
 				icon:  "info",
 				title:  "Opponent Left",
 				confirmButtonText: "OK",
-			}).then(e => window.location.href = "/")
+			}).then(e =>{
+				if  (playerNumber == 1)
+					sendGameOver(3, 0);
+				else
+					sendGameOver(0, 3);
+			})
 		}, 400);
-		socket.close();
 	}
 	
 	else if (data.event == "game_over"){
@@ -635,7 +639,10 @@ function handleSocketMessage(e) {
 			title: winner == currentName ? "YOU WIN!" : "YOU LOSE!",
 			confirmButtonText: "OK",
 		}).then((result) => { if (result.isConfirmed) {
-				window.location.href = "/";
+				if (winner == currentName)
+					deleteMatch();
+				socket.close(4000);
+				initPlayPage();
 		}});
 	}
 

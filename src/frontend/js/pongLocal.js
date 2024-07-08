@@ -26,13 +26,14 @@ let state;
 let name1;
 let name2;
 let id;
+let id_tournament;
 let ballInterval = null;
 let aiInterval = null;
 let timerInterval = null;
 let countdownInterval = null;
 const refreshTime = 1000/30;
 
-function startGameLocal(mode, player2, id_match){
+function startGameLocal(mode, player2, id_match, id_tour){
 	modality = mode;
 	console.log("Modality: " + modality);
 	console.log("ID: ", id_match);
@@ -46,6 +47,7 @@ function startGameLocal(mode, player2, id_match){
 			id = 0; // Es un partido NORMAL
 		else
 			id = id_match; // Es un partido de TORNEO
+		id_tournament = id_tour;
 		showGameScreen();
 		startPongLocal();
 	}else{
@@ -417,9 +419,11 @@ async function  startPongLocal(){
 }
 
 async function deleteMatch(){
-	const apiUrl = `https://localhost/api/match/delete?id_match=${id}`;
+	const apiUrl = `https://localhost/api/match/delete?id_match=${id}&id_tournament=${id_tournament}`;
 	try{
-		const response = await fetch(apiUrl);
+		const response = await fetch(apiUrl, {
+			method: 'DELETE'
+		});
 		if (response.ok){
 			const responsedata = await response.json();
 			console.log(responsedata.msg);
@@ -479,7 +483,7 @@ async function moveBall() {
 				drawScores(responsedata.score1, responsedata.score2);
 				gameOver();
 			}
-			else
+			else if (responsedata.msg == "playing")
 				drawBall(responsedata.ball);
 		}
 	} catch (error) {

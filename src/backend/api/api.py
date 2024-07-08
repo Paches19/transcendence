@@ -417,6 +417,8 @@ def move_paddles(request, id_match: int, key:str):
 def move_ball(request, id_match: int):
 	try:
 		match = get_object_or_404(RemoteGame, id = id_match)
+		if match.ball.x < match.paddles.x1 or match.ball.x > match.paddles.x2:
+			return 200, {"msg": "donotplay", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
 		# Update ball position
 		if match.ball.y + match.ball.vy <= 0 or match.ball.y + match.ball.vy + match.game.ballWidth >= 1:
 			match.ball.vy = -match.ball.vy
@@ -516,14 +518,58 @@ def join_match(request, id_match: int, name1: str, name2: str):
 	return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
 
 
-@app.get("match/delete", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
-def delete_match(request, id_match: int):
+@app.delete("match/delete", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
+def delete_match(request, id_match: int, id_tournament: int):
 	try:
 		match = get_object_or_404(RemoteGame, id = id_match)
+
         #Guardo datos antes de borrar
 
-  
-        #Borro mi partida temporal    
+        # user1
+		user1 = get_object_or_404(User, username=match.game.name1)
+		user1.totalPoints += match.paddles.score1
+		user1.matchesTotal += 1
+		if match.paddles.score1 > match.paddles.score2:
+			user1.matchesWon += 1
+			matchWinner = user1
+		else:
+			user1.matchesLost += 1
+		user1.save()
+
+        # user2
+		if (match.game.name2 != 'AI'):
+			user2 = get_object_or_404(User, username=match.game.name2)
+		else:
+			user2 = User.objects.create(username='AI', password='AI')    
+		user2.totalPoints += match.paddles.score2
+		user2.matchesTotal += 1
+		if match.paddles.score2 > match.paddles.score1:
+			user2.matchesWon += 1
+			matchWinner = user2
+		else:
+			user2.matchesLost += 1
+		user2.save()
+
+		# tournament data
+		if id_tournament != 0:
+			tournament = get_object_or_404(Tournament,tournamentID=id_tournament)
+			tournament.status = "ended"
+			tournament.save()
+		else:
+			tournament = None
+
+		# save match data
+		if (id_tournament == 0):
+			matchToSave = Match.objects.create(user1=user1, user2=user2)
+		else:
+			matchToSave = get_object_or_404(Match, matchID=match.id)
+		matchToSave.pointsUser1 = match.paddles.score1
+		matchToSave.pointsUser2 = match.paddles.score2
+		matchToSave.winner = matchWinner
+		matchToSave.tournament = tournament
+		matchToSave.save()
+            
+		# delete temporl match
 		match.delete()
 		return 200, {"msg": "Match deleted"}
 	except Exception as e:
