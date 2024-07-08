@@ -3,8 +3,7 @@ NAME			=	transcendence
 PORT 			= 	443
 
 # Ruta de los archivos docker-compose
-COMPOSE_ROUTE   = src/docker/docker-compose.yml
-COMPOSE_REDIS_ROUTE = src/docker/docker-compose.redis.yml
+DOCKER_COMPOSE_FILE   = src/docker/docker-compose.yml
 
 # Colours
 RED				=	\033[0;31m
@@ -15,11 +14,6 @@ PURPLE			=	\033[0;35m
 CYAN			=	\033[0;36m
 WHITE			=	\033[0;37m
 RESET			=	\033[0m
-
-# Función para determinar si se usa Redis
-define DOCKER_COMPOSE_FILE
-$(shell grep -q ENABLE_REDIS=true src/docker/.env && echo $(COMPOSE_REDIS_ROUTE) || echo $(COMPOSE_ROUTE))
-endef
 
 # Rules
 all:		$(NAME)
@@ -37,12 +31,12 @@ stop:
 
 logs-django:
 			docker logs -f	django
+
 logs-nginx:
 			docker logs -f	nginx
+
 logs-postgres:
 			docker logs -f	postgres
-logs-redis:
-			docker logs -f	redis
 
 clean:		stop
 			@docker-compose -p $(NAME) -f $(DOCKER_COMPOSE_FILE) down

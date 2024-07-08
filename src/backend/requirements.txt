@@ -31,5 +31,3 @@ Twisted==24.3.0
 txaio==23.1.1
 typing_extensions==4.11.0
 zope.interface==6.3.0
-# channels-redis==4.2.0
-# aioredis==2.0.0

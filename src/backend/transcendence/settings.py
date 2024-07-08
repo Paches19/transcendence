@@ -6,7 +6,7 @@
 #    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:41 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/06 19:40:06 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/07/08 08:48:08 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -76,10 +76,12 @@ ROOT_URLCONF = 'transcendence.urls'
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = False
-CORS_ORIGIN_WHITELIST = (
+CORS_ORIGIN_WHITELIST = [
     'http://localhost:8080',
-    'https://localhost:8080'
-)
+    'https://localhost:8080',
+    'https://localhost',
+    # 'https://192.168.1.23',
+]
 
 TEMPLATES = [
     {
@@ -166,19 +168,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
-        # 'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        # 'CONFIG': {
-        #     "hosts": [('redis', 6379)],
-		# },
 	},
 }
 
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:8080',
-    'https://localhost:8080',
-    'https://localhost',
-    # 'https://192.168.1.23',
-]
+
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = True

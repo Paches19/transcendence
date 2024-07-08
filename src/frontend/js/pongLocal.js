@@ -286,6 +286,7 @@ function gameOver(){
 		texto = stateGame.name1;
 	else 
 		texto = stateGame.name2;
+	saveMatch();
 	deleteMatch();
 	Swal.fire({
 		title: texto + " WINS",
@@ -305,11 +306,9 @@ function gameOver(){
 						startPongLocal();
 					}else if (result.isDenied){
 						initPlayPage();
-						return;
 				}});
 			}else{
 				initPlayPage();
-				return;
 			}
 		}
 	})
@@ -419,7 +418,7 @@ async function  startPongLocal(){
 }
 
 async function deleteMatch(){
-	const apiUrl = `https://localhost/api/match/delete?id_match=${id}&id_tournament=${id_tournament}`;
+	const apiUrl = `https://localhost/api/match/delete?id_match=${id}`;
 	try{
 		const response = await fetch(apiUrl, {
 			method: 'DELETE'
@@ -430,6 +429,19 @@ async function deleteMatch(){
 		}
 	} catch (error) {
 		console.error('Error deleting match:', error);
+	}
+}
+
+async function saveMatch(){
+	const apiUrl = `https://localhost/api/match/save?id_match=${id}&id_tournament=${id_tournament}`;
+	try{
+		const response = await fetch(apiUrl);
+		if (response.ok){
+			const responsedata = await response.json();
+			console.log(responsedata.msg);
+		}
+	} catch (error) {
+		console.error('Error saving match:', error);
 	}
 }
 

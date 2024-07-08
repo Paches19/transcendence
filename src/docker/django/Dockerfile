@@ -14,10 +14,4 @@ WORKDIR /app
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt --no-cache-dir
 
-# Instala Redis
-# RUN 	apt-get update \
-#     && 	apt-get install -y redis-server \
-#     && 	apt-get clean \
-#     && 	rm -rf /var/lib/apt/lists/*
-
 CMD ["/app/setup.sh"]

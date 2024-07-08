@@ -355,6 +355,7 @@ async function newMatch(id_match){
 	}
 	
 	try {
+		stateMatch.game.name2 = '';
 		const apiUrl = `https://localhost/api/match/new?id_match=${id_match}&name1=${stateMatch.game.name1}&name2=${stateMatch.game.name2}`;
 		const response = await fetch(apiUrl);
 		if (response.ok){
@@ -398,7 +399,7 @@ async function joinMatch(id_match){
 	}
 
 	try{
-		const apiUrl = `https://localhost/api/match/join?id_match=${id_match}&name1=${stateMatch.game.name1}&name2=${stateMatch.game.name2}`;
+		const apiUrl = `https://localhost/api/match/join?id_match=${id_match}&name1=${stateMatch.game.name1}`;
 		const response = await fetch(apiUrl);
 		if (response.status == 404){
 			if (isTournament){
@@ -435,7 +436,7 @@ async function joinMatch(id_match){
 }
 
 async function deleteMatch(){
-	const apiUrl = `https://localhost/api/match/delete?id_match=${stateMatch.id}&id_tournament=${id_tournament}`;
+	const apiUrl = `https://localhost/api/match/delete?id_match=${stateMatch.id}`;
 	try{
 		const response = await fetch(apiUrl, {
 			method: "DELETE",
@@ -446,6 +447,19 @@ async function deleteMatch(){
 		}
 	} catch (error) {
 		console.error('Error deleting match:', error);
+	}
+}
+
+async function saveMatch(){
+	const apiUrl = `https://localhost/api/match/save?id_match=${stateMatch.id}&id_tournament=${id_tournament}`;
+	try{
+		const response = await fetch(apiUrl);
+		if (response.ok){
+			const responsedata = await response.json();
+			console.log(responsedata.msg);
+		}
+	} catch (error) {
+		console.error('Error saving match:', error);
 	}
 }
 
@@ -483,6 +497,20 @@ async function moveBall() {
 		}
 	} catch (error) {
 		console.error('Error moving ball:', error);
+	}
+}
+
+async function updateScores(newScore1, newScore2){
+	const apiUrl = `https://localhost/api/match/updatescores?id_match=${stateMatch.id}&score1=${newScore1}&score2=${newScore2}`;
+	try{
+		const response = await fetch(apiUrl);
+		if (response.ok){
+			const responsedata = await response.json();
+			console.log(responsedata.msg);
+			sendGameOver(newScore1, newScore2);
+		}
+	} catch (error) {
+		console.error('Error updating scores:', error);
 	}
 }
 
@@ -621,9 +649,9 @@ function handleSocketMessage(e) {
 				confirmButtonText: "OK",
 			}).then(e =>{
 				if  (playerNumber == 1)
-					sendGameOver(3, 0);
+					updateScores(3, 0);
 				else
-					sendGameOver(0, 3);
+					updateScores(0, 3);
 			})
 		}, 400);
 	}
@@ -639,8 +667,8 @@ function handleSocketMessage(e) {
 			title: winner == currentName ? "YOU WIN!" : "YOU LOSE!",
 			confirmButtonText: "OK",
 		}).then((result) => { if (result.isConfirmed) {
-				if (winner == currentName)
-					deleteMatch();
+				saveMatch();
+				deleteMatch();
 				socket.close(4000);
 				initPlayPage();
 		}});

@@ -476,12 +476,12 @@ def reset_ball(request, id_match: int):
 
 """ Match """
 
-@app.get("match/new", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
+@app.get("match/new", response={200: SuccessInitSchema}, tags=['Match'])
 def new_match(request, id_match: int, name1: str, name2: str):
 	try:
-		match = get_object_or_404(RemoteGame, id = id_match)
+		match = RemoteGame.objects.get(id = id_match)
 		match.delete()	
-	except:
+	except RemoteGame.DoesNotExist:
 		pass
 	match = RemoteGame.objects.create(id = id_match)
 	match.paddles.score1 = 0
@@ -507,25 +507,32 @@ def new_match(request, id_match: int, name1: str, name2: str):
 	match.save()
 	return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
 
+@app.get("match/updatescores", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
+def update_score(request, id_match: int, score1: int, score2: int):
+	try:
+		match = get_object_or_404(RemoteGame, id = id_match)
+		match.paddles.score1 = score1
+		match.paddles.score2 = score2
+		match.save()
+		return 200, {"msg": "Scores updated"}
+	except Exception as e:
+		return 400, {"error_msg": "Error updating score" + str(e)}
 
 @app.get("match/join", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
-def join_match(request, id_match: int, name1: str, name2: str):
+def join_match(request, id_match: int, name1: str):
 	match = get_object_or_404(RemoteGame, id = id_match)
-	if name2 != '':
+	if match.game.name2 != '':
 		return 400, {"error_msg": "Game already has two players"}
 	match.game.name2 = name1
 	match.save()
 	return 200, {"id": match.id, "game": match.game, "paddles": match.paddles, "ball": match.ball}
 
-
-@app.delete("match/delete", response={200: SuccessSchema, 400: ErrorSchema}, tags=['Match'])
-def delete_match(request, id_match: int, id_tournament: int):
+@app.get("match/save", response={200: SuccessSchema}, tags=['Match'])
+def save_match(request, id_match: int, id_tournament: int):
 	try:
-		match = get_object_or_404(RemoteGame, id = id_match)
+		match = RemoteGame.objects.get(id = id_match)
 
-        #Guardo datos antes de borrar
-
-        # user1
+		# user1
 		user1 = get_object_or_404(User, username=match.game.name1)
 		user1.totalPoints += match.paddles.score1
 		user1.matchesTotal += 1
@@ -536,7 +543,7 @@ def delete_match(request, id_match: int, id_tournament: int):
 			user1.matchesLost += 1
 		user1.save()
 
-        # user2
+		# user2
 		if (match.game.name2 != 'AI'):
 			user2 = get_object_or_404(User, username=match.game.name2)
 		else:
@@ -568,13 +575,18 @@ def delete_match(request, id_match: int, id_tournament: int):
 		matchToSave.winner = matchWinner
 		matchToSave.tournament = tournament
 		matchToSave.save()
-            
-		# delete temporl match
+		return 200, {"msg": "Match saved"}
+	except	RemoteGame.DoesNotExist:
+		return 200, {"msg": "Match was saved before"}
+
+@app.delete("match/delete", response={200: SuccessSchema}, tags=['Match'])
+def delete_match(request, id_match: int):
+	try:
+		match = RemoteGame.objects.get(id = id_match)
 		match.delete()
 		return 200, {"msg": "Match deleted"}
-	except Exception as e:
-		return 400, {"error_msg": "Error deleting match" + str(e)}
-
+	except RemoteGame.DoesNotExist:
+		return 200, {"msg": "Match already deleted"}		
 
 @app.get("match/state", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
 def get_state(request, id_match: int):
