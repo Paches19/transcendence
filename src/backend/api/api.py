@@ -6,7 +6,7 @@
 #    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/08 12:00:17 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/07/08 12:42:28 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -519,9 +519,9 @@ def update_score(request, id_match: int, score1: int, score2: int):
 		return 400, {"error_msg": "Error updating score" + str(e)}
 
 @app.get("match/join", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
-def join_match(request, id_match: int, name1: str, name2: str):
+def join_match(request, id_match: int, name1: str):
 	match = get_object_or_404(RemoteGame, id = id_match)
-	if name2 != '':
+	if match.game.name2 != '':
 		return 400, {"error_msg": "Game already has two players"}
 	match.game.name2 = name1
 	match.save()
@@ -582,15 +582,11 @@ def save_match(request, id_match: int, id_tournament: int):
 @app.delete("match/delete", response={200: SuccessSchema}, tags=['Match'])
 def delete_match(request, id_match: int):
 	try:
-		match = get_object_or_404(RemoteGame, id = id_match)
-        #Guardo datos antes de borrar
-
-  
-        #Borro mi partida temporal    
+		match = RemoteGame.objects.get(id = id_match)  
 		match.delete()
 		return 200, {"msg": "Match deleted"}
-	except Exception as e:
-		return 400, {"error_msg": "Error deleting match" + str(e)}
+	except RemoteGame.DoesNotExist:
+		return 200, {"msg": "Match was deleted before"}
 
 
 @app.get("match/state", response={200: SuccessInitSchema, 400: ErrorSchema}, tags=['Match'])
