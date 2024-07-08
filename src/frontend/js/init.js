@@ -6,12 +6,19 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 13:02:06 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/28 10:07:22 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/08 14:08:06 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+import { closeSocket } from "./pongRemote.js";
+import { stopAnimation, stopCountDown } from "./pongLocal.js";
+
+
 function loadInitialContent()
 {
+	closeSocket();
+	stopAnimation();
+	stopCountDown();
     document.getElementById('main-content').innerHTML = `
 	
 	<div class="hero-section">

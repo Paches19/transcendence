@@ -6,13 +6,14 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/01 22:25:29 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/08 14:07:14 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import router from "./main.js";
 import updateNavbar from "./navbar.js";
 import { closeSocket } from "./pongRemote.js";
+import { stopAnimation, stopCountDown } from "./pongLocal.js";
 
 async function login(username, password) {
     const loginEndpoint = 'https://localhost/api/auth/login';
@@ -67,7 +68,9 @@ async function logout() {
         if (response.ok) {
             localStorage.removeItem('userToken');
             updateNavbar();
+			stopAnimation();
 			closeSocket();
+			stopCountDown();
             router.route('/home');
             console.log('Logged out successfully.');
         }

@@ -204,7 +204,6 @@ function playAI(){
 }
 
 function initAnimation(){
-
 	const centerX = canvas.width / 2;
 	const centerY = canvas.height / 2;
 	let timeLeft = 3;
@@ -503,4 +502,9 @@ async function moveBall() {
 	}
 }
 
-export default startGameLocal;
+function stopCountDown(){
+	clearInterval(countdownInterval);
+	countdownInterval = null;
+}
+
+export {stopAnimation, startGameLocal, stopCountDown }

@@ -717,5 +717,4 @@ function closeSocket(){
 		socket.close();
 }
 
-export default startGameRemote;
-export { closeSocket };
+export { closeSocket,  startGameRemote };

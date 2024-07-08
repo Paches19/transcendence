@@ -6,18 +6,21 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/07 16:13:42 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/08 14:08:44 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import startGameLocal from "./pongLocal.js";
-import startGameRemote from "./pongRemote.js";
+import {startGameRemote,  closeSocket } from "./pongRemote.js";
+import { startGameLocal, stopAnimation, stopCountDown } from "./pongLocal.js";
 
 let selectedMatchID = null;
 let mode = null;
 let id_tournament = 0;
 
 function initPlayPage() {
+	closeSocket();
+	stopAnimation();
+	stopCountDown();
     renderGameOptions();
     attachEventListeners();
 }
