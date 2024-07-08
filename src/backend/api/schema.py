@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    schema.py                                          :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
+#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:15 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/03 13:36:40 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/07/06 13:20:20 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -182,41 +182,41 @@ class UserStatsUpdateSchema(Schema):
 """ Match schemas """
 
 class PaddlesSchema(Schema):
-	x1: float
-	y1: float
-	score1: int
-	x2: float
-	y2: float
-	score2: int
+    x1: float
+    y1: float
+    score1: int
+    x2: float
+    y2: float
+    score2: int
 
 class MovePaddlesSchema(Schema):
-     msg: str
-     paddles: PaddlesSchema
+    msg: str
+    paddles: PaddlesSchema
 
 class BallSchema(Schema):
-	x: float
-	y: float
-	vx: float
-	vy: float
+    x: float
+    y: float
+    vx: float
+    vy: float
      
 class MoveBallSchema(Schema):
-     msg: str
-     ball: BallSchema
-     score1: int
-     score2: int
+    msg: str
+    ball: BallSchema
+    score1: int
+    score2: int
 
 class GameSchema(Schema):
-	v: float
-	finalScore: int
-	playerWidth: float
-	playerHeight: float
-	ballWidth: float
-	ballHeight: float
-	name1: str
-	name2: str
+    v: float
+    finalScore: int
+    playerWidth: float
+    playerHeight: float
+    ballWidth: float
+    ballHeight: float
+    name1: str
+    name2: str
  
 class SuccessInitSchema(Schema):
-	id: int
-	game: GameSchema
-	paddles: PaddlesSchema
-	ball: BallSchema
+    id: int
+    game: GameSchema
+    paddles: PaddlesSchema
+    ball: BallSchema
