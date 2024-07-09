@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   tournamentDetails.js                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 18:11:12 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/10 16:45:13 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/07/09 17:16:50 by alaparic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 async function fetchTournamentById(id) {
-    const apiUrl = `https://localhost/api/tournaments/${id}`;
+    const apiUrl = `https://localhost:8080/api/tournaments/${id}`;
     try {
         const response = await fetch(apiUrl, {
             method: 'GET',
@@ -161,7 +161,7 @@ async function joinTournament(tournamentId) {
     if (username) {
         console.log(`${username} logged in. Joining tournament with ID: ${tournamentId}`);
 
-        const apiUrl = `https://localhost/api/tournaments/${tournamentId}/join`;
+        const apiUrl = `https://localhost:8080/api/tournaments/${tournamentId}/join`;
 
         try {
             const response = await fetch(apiUrl, {
@@ -194,7 +194,7 @@ async function joinTournament(tournamentId) {
 async function leaveTournament(tournamentId) {
     const username = localStorage.getItem('userToken');
     if (username) {
-        const apiUrl = `https://localhost/api/tournaments/${tournamentId}/leave`;
+        const apiUrl = `https://localhost:8080/api/tournaments/${tournamentId}/leave`;
         try {
             const response = await fetch(apiUrl, {
                 method: 'POST',

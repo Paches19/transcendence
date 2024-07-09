@@ -1,6 +1,5 @@
 # Transcendence
 NAME			=	transcendence
-PORT 			= 	443
 
 # Ruta de los archivos docker-compose
 DOCKER_COMPOSE_FILE   = src/docker/docker-compose.yml
@@ -23,7 +22,7 @@ $(NAME):
 			@echo "Using compose files: $(DOCKER_COMPOSE_FILE)"
 			@docker-compose -p $(NAME) -f $(DOCKER_COMPOSE_FILE) up -d --remove-orphans
 			@printf "\n$(BLUE)==> $(CYAN)Transcendence is running ✅\n$(RESET)"
-			@printf "$(BLUE)==> $(BLUE)Accessible on: \n\t$(YELLOW)https://localhost:443\n$(RESET)"
+			@printf "$(BLUE)==> $(BLUE)Accessible on: \n\t$(YELLOW)https://localhost:8080\n$(RESET)"
 
 stop:
 			@docker-compose -p $(NAME) -f $(DOCKER_COMPOSE_FILE) stop
@@ -52,7 +51,7 @@ re:			clean
 			@docker-compose -p $(NAME) -f $(DOCKER_COMPOSE_FILE) up -d --build
 			@printf "$(BLUE)==> $(CYAN)Transcendence rebuilt 🔄\n$(RESET)"
 			@printf "\n$(BLUE)==> $(CYAN)Transcendence is running ✅\n$(RESET)"
-			@printf "$(BLUE)==> $(BLUE)Accessible on: \n\t$(YELLOW)https://localhost:443\n$(RESET)"
+			@printf "$(BLUE)==> $(BLUE)Accessible on: \n\t$(YELLOW)https://localhost:8080\n$(RESET)"
 
 re-postgres:
 			@docker-compose -p $(NAME) -f $(DOCKER_COMPOSE_FILE) up -d --no-deps --build postgres

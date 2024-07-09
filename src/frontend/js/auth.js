@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   auth.js                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/08 14:07:14 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/09 17:16:50 by alaparic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ import { closeSocket } from "./pongRemote.js";
 import { stopAnimation, stopCountDown } from "./pongLocal.js";
 
 async function login(username, password) {
-    const loginEndpoint = 'https://localhost/api/auth/login';
+    const loginEndpoint = 'https://localhost:8080/api/auth/login';
     
     try {
         const response = await fetch(loginEndpoint, {
@@ -56,7 +56,7 @@ function isLoggedIn()
 }
 
 async function logout() {
-    const logoutEndpoint = 'https://localhost/api/auth/logout';
+    const logoutEndpoint = 'https://localhost:8080/api/auth/logout';
     try {
         const response = await fetch(logoutEndpoint, {
             method: 'GET',

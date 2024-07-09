@@ -86,4 +86,4 @@ In the project database we store the aplication information in 5 tables:
 
 The documentation for the API, it's routes as well as the schemas each route expects and returns can be found in the `/api/docs` route of the project.
 
-[Link to the API documentation.](https://localhost/api/docs)
+[Link to the API documentation.](https://localhost:8080/api/docs)

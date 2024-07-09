@@ -102,7 +102,7 @@ async function handleKeyDown(e) {
 		if (playerNumber == 2){
 			pressed == 'ArrowUp' ? pressed = 'w' : pressed = 's';
 		}
-		const apiUrl = `https://localhost/api/game/paddles?id_match=${stateMatch.id}&key=${pressed}`;
+		const apiUrl = `https://localhost:8080/api/game/paddles?id_match=${stateMatch.id}&key=${pressed}`;
 		try {
 			const response = await fetch(apiUrl);
 			if (response.ok){
@@ -357,7 +357,7 @@ async function newMatch(id_match){
 	
 	try {
 		stateMatch.game.name2 = '';
-		const apiUrl = `https://localhost/api/match/new?id_match=${id_match}&name1=${stateMatch.game.name1}&name2=${stateMatch.game.name2}`;
+		const apiUrl = `https://localhost:8080/api/match/new?id_match=${id_match}&name1=${stateMatch.game.name1}&name2=${stateMatch.game.name2}`;
 		const response = await fetch(apiUrl);
 		if (response.ok){
 			socket = new WebSocket(`ws://${ip_client}/ws/pong/${id_match}/`);
@@ -400,7 +400,7 @@ async function joinMatch(id_match){
 	}
 
 	try{
-		const apiUrl = `https://localhost/api/match/join?id_match=${id_match}&name1=${stateMatch.game.name1}`;
+		const apiUrl = `https://localhost:8080/api/match/join?id_match=${id_match}&name1=${stateMatch.game.name1}`;
 		const response = await fetch(apiUrl);
 		if (response.status == 404){
 			if (isTournament){
@@ -437,7 +437,7 @@ async function joinMatch(id_match){
 }
 
 async function deleteMatch(){
-	const apiUrl = `https://localhost/api/match/delete?id_match=${stateMatch.id}`;
+	const apiUrl = `https://localhost:8080/api/match/delete?id_match=${stateMatch.id}`;
 	try{
 		const response = await fetch(apiUrl, {
 			method: "DELETE",
@@ -452,7 +452,7 @@ async function deleteMatch(){
 }
 
 async function saveMatch(){
-	const apiUrl = `https://localhost/api/match/save?id_match=${stateMatch.id}&id_tournament=${id_tournament}`;
+	const apiUrl = `https://localhost:8080/api/match/save?id_match=${stateMatch.id}&id_tournament=${id_tournament}`;
 	try{
 		const response = await fetch(apiUrl);
 		if (response.ok){
@@ -465,7 +465,7 @@ async function saveMatch(){
 }
 
 async function resetBall(){
-	const apiUrl = `https://localhost/api/game/reset?id_match=${stateMatch.id}`;
+	const apiUrl = `https://localhost:8080/api/game/reset?id_match=${stateMatch.id}`;
 	try{
 		const response = await fetch(apiUrl);
 		if (response.ok){
@@ -478,7 +478,7 @@ async function resetBall(){
 }
 
 async function moveBall() {
-	const apiUrl = `https://localhost/api/game/ball?id_match=${stateMatch.id}`;
+	const apiUrl = `https://localhost:8080/api/game/ball?id_match=${stateMatch.id}`;
 	try{
 		const response = await fetch(apiUrl);
 		if (response.ok){
@@ -502,7 +502,7 @@ async function moveBall() {
 }
 
 async function updateScores(newScore1, newScore2){
-	const apiUrl = `https://localhost/api/match/updatescores?id_match=${stateMatch.id}&score1=${newScore1}&score2=${newScore2}`;
+	const apiUrl = `https://localhost:8080/api/match/updatescores?id_match=${stateMatch.id}&score1=${newScore1}&score2=${newScore2}`;
 	try{
 		const response = await fetch(apiUrl);
 		if (response.ok){

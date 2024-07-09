@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   play.js                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/08 14:08:44 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/09 17:16:50 by alaparic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ function showMatchTypeOptions() {
 }
 
 async function handleLocalVsHumanClick() {
-    const apiUrl = 'https://localhost/api/tournaments/user/matches';
+    const apiUrl = 'https://localhost:8080/api/tournaments/user/matches';
   
     const requestOptions = {
         method: 'GET',

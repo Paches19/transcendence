@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   tournaments.js                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/08 14:09:22 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/09 17:16:50 by alaparic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ import { closeSocket } from "./pongRemote.js";
 import { stopAnimation, stopCountDown } from "./pongLocal.js";
 
 async function fetchTournaments() {
-    const apiUrl = 'https://localhost/api/tournaments';
+    const apiUrl = 'https://localhost:8080/api/tournaments';
     return fetch(apiUrl, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -180,7 +180,7 @@ function addModalEventListeners() {
             number_participants: numPlayers,
         };
     
-        const apiUrl = 'https://localhost/api/tournaments/create';
+        const apiUrl = 'https://localhost:8080/api/tournaments/create';
         fetch(apiUrl, {
             method: 'POST',
             headers: {
@@ -231,7 +231,7 @@ async function joinTournament(tournamentId) {
     if (username) {
         console.log(`${username} logged in. Joining tournament with ID: ${tournamentId}`);
 
-        const apiUrl = `https://localhost/api/tournaments/${tournamentId}/join`;
+        const apiUrl = `https://localhost:8080/api/tournaments/${tournamentId}/join`;
 
         try {
             const response = await fetch(apiUrl, {

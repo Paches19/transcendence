@@ -398,7 +398,7 @@ function drawNet(){
 
 
 async function  startPongLocal(){	
-	const apiUrl = `https://localhost/api/match/new?id_match=${id}&name1=${name1}&name2=${name2}`;
+	const apiUrl = `https://localhost:8080/api/match/new?id_match=${id}&name1=${name1}&name2=${name2}`;
 	try{
 		const response = await fetch(apiUrl);
 		if (response.ok){
@@ -417,7 +417,7 @@ async function  startPongLocal(){
 }
 
 async function deleteMatch(){
-	const apiUrl = `https://localhost/api/match/delete?id_match=${id}`;
+	const apiUrl = `https://localhost:8080/api/match/delete?id_match=${id}`;
 	try{
 		const response = await fetch(apiUrl, {
 			method: 'DELETE'
@@ -432,7 +432,7 @@ async function deleteMatch(){
 }
 
 async function saveMatch(){
-	const apiUrl = `https://localhost/api/match/save?id_match=${id}&id_tournament=${id_tournament}`;
+	const apiUrl = `https://localhost:8080/api/match/save?id_match=${id}&id_tournament=${id_tournament}`;
 	try{
 		const response = await fetch(apiUrl);
 		if (response.ok){
@@ -445,7 +445,7 @@ async function saveMatch(){
 }
 
 async function resetBall(){
-	const apiUrl = `https://localhost/api/game/reset?id_match=${id}`;
+	const apiUrl = `https://localhost:8080/api/game/reset?id_match=${id}`;
 	try{
 		const response = await fetch(apiUrl);
 		if (response.ok){
@@ -462,7 +462,7 @@ async function handleKeyDown(e) {
 	if (state != 'pause' && (pressed == 'ArrowUp' || pressed == 'ArrowDown' ||
        (modality == "local" && (pressed == "w" || pressed == "W" || pressed == "s" || pressed == "S")) ||
        (modality == "solo"  && (pressed == "A" || pressed == "D")))){
-			const apiUrl = `https://localhost/api/game/paddles?id_match=${id}&key=${pressed}`;
+			const apiUrl = `https://localhost:8080/api/game/paddles?id_match=${id}&key=${pressed}`;
 			try {
 				const response = await fetch(apiUrl);
 				if (response.ok){
@@ -476,7 +476,7 @@ async function handleKeyDown(e) {
 }
 
 async function moveBall() {
-	const apiUrl = `https://localhost/api/game/ball?id_match=${id}`;
+	const apiUrl = `https://localhost:8080/api/game/ball?id_match=${id}`;
 	try{
 		const response = await fetch(apiUrl);
 		if (response.ok){
