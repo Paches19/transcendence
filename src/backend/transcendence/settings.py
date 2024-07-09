@@ -6,7 +6,7 @@
 #    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:41 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/08 08:48:08 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/07/09 17:25:47 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -80,7 +80,6 @@ CORS_ORIGIN_WHITELIST = [
     'http://localhost:8080',
     'https://localhost:8080',
     'https://localhost',
-    # 'https://192.168.1.23',
 ]
 
 TEMPLATES = [

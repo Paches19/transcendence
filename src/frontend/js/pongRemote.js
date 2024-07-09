@@ -15,6 +15,7 @@ import router from "./main.js";
 import initPlayPage from "./play.js";
 
 const ip_server = "localhost";
+const ip_client = "localhost";
 
 let ctx;
 let canvas;
@@ -359,7 +360,7 @@ async function newMatch(id_match){
 		const apiUrl = `https://localhost/api/match/new?id_match=${id_match}&name1=${stateMatch.game.name1}&name2=${stateMatch.game.name2}`;
 		const response = await fetch(apiUrl);
 		if (response.ok){
-			socket = new WebSocket(`wss://localhost/wss/pong/${id_match}/`);
+			socket = new WebSocket(`ws://${ip_client}/wss/pong/${id_match}/`);
 			configureSocketEvents();
 			
 			const data = await response.json();
@@ -418,7 +419,7 @@ async function joinMatch(id_match){
 			}).then(e => window.location.href = "/");
 		}
 		else if (response.ok) {
-			socket = new WebSocket(`wss://${ip_server}/wss/pong/${id_match}/`);
+			socket = new WebSocket(`ws://${ip_server}/wss/pong/${id_match}/`);
 			configureSocketEvents();
 			
 			const data = await response.json();
