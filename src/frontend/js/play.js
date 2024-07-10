@@ -3,14 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   play.js                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/09 17:16:50 by alaparic         ###   ########.fr       */
+/*   Updated: 2024/07/10 11:24:24 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import {startGameRemote,  closeSocket } from "./pongRemote.js";
 import { startGameLocal, stopAnimation, stopCountDown } from "./pongLocal.js";
 
 let selectedMatchID = null;
@@ -18,10 +17,9 @@ let mode = null;
 let id_tournament = 0;
 
 function initPlayPage() {
-	closeSocket();
-	stopAnimation();
+    stopAnimation();
 	stopCountDown();
-    renderGameOptions();
+	renderGameOptions();
     attachEventListeners();
 }
 
@@ -71,9 +69,13 @@ function showMatchTypeOptions() {
 	if (mode == 'local'){
    		document.getElementById('normal-match').addEventListener('click', () => loadLogin(null));
 	}else{
-		document.getElementById('normal-match').addEventListener('click', () => startGameRemote(0, id_tournament));
+		document.getElementById('normal-match').addEventListener('click', () => startMultiplayer);
 	}
 	document.getElementById('tournament-match').addEventListener('click', handleLocalVsHumanClick);
+}
+
+function startMultiplayer() {
+	console.log('startMultiplayer');
 }
 
 async function handleLocalVsHumanClick() {
@@ -128,7 +130,7 @@ function showMatchOptions(matches) {
 	            const user2Match = event.target.getAttribute('data-user2-match');
     	        loadLogin(user2Match);
 			}else{
-				startGameRemote(selectedMatchID, id_tournament);
+				startMultiplayer();
 			}
         });
     });

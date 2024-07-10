@@ -3,16 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   auth.js                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/09 17:16:50 by alaparic         ###   ########.fr       */
+/*   Updated: 2024/07/10 11:25:09 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import router from "./main.js";
 import updateNavbar from "./navbar.js";
-import { closeSocket } from "./pongRemote.js";
 import { stopAnimation, stopCountDown } from "./pongLocal.js";
 
 async function login(username, password) {
@@ -67,10 +66,9 @@ async function logout() {
 
         if (response.ok) {
             localStorage.removeItem('userToken');
-            updateNavbar();
 			stopAnimation();
-			closeSocket();
 			stopCountDown();
+            updateNavbar();
             router.route('/home');
             console.log('Logged out successfully.');
         }
