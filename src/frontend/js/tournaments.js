@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   tournaments.js                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/10 16:31:06 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/07/10 11:05:22 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { isLoggedIn } from "./auth.js";
 import router from "./main.js"
+import { stopAnimation, stopCountDown } from "./pongLocal.js";
 
 async function fetchTournaments() {
     const apiUrl = 'https://localhost/api/tournaments';
@@ -34,6 +35,8 @@ async function fetchTournaments() {
 }
 
 async function loadTournaments() {
+	stopAnimation();
+	stopCountDown();
     try {
         const tournaments = await fetchTournaments();
         updateTournamentHTML(tournaments);

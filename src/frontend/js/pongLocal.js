@@ -503,4 +503,9 @@ async function moveBall() {
 	}
 }
 
-export default startGameLocal;
+function stopCountDown(){
+	clearInterval(countdownInterval);
+	countdownInterval = null;
+}
+
+export {stopAnimation, startGameLocal, stopCountDown }

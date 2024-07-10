@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   profile.js                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:18 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/10 16:48:10 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/07/10 11:04:38 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { isLoggedIn } from './auth.js';
 import router from './main.js';
+import { stopAnimation, stopCountDown } from "./pongLocal.js";
 
 async function loadProfile() {
     if (!isLoggedIn()) {
@@ -19,7 +20,8 @@ async function loadProfile() {
         router.route('/login');
         return;
     }
-
+	stopAnimation();
+	stopCountDown();
     const apiUrl = 'https://localhost/api/users';
     try {
         const response = await fetch(apiUrl, {

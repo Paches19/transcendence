@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   editProfile.js                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 13:04:35 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/13 12:13:56 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/07/10 11:01:42 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 import { isLoggedIn } from './auth.js';
 import router from './main.js';
 import updateNavbar from './navbar.js';
+import { stopAnimation, stopCountDown } from "./pongLocal.js";
 
 async function loadEditProfile() {
     if (!isLoggedIn()) {
@@ -21,7 +22,8 @@ async function loadEditProfile() {
         router.route('/login');
         return;
     }
-
+	stopAnimation();
+	stopCountDown();
     const apiUrl = 'https://localhost/api/users';
     try {
         const response = await fetch(apiUrl, {
