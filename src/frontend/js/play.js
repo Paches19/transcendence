@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/10 11:12:01 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/10 11:53:22 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,8 @@ function attachEventListeners() {
 		showMatchTypeOptions()
 	});
     document.getElementById('remote-vs-human').addEventListener('click', () => {
-		mode = 'remote';
-		showMatchTypeOptions()
+		mode = 'multiplayer';
+		console.log('startMultiplayer');
 	});
 }
 
@@ -66,16 +66,8 @@ function showMatchTypeOptions() {
             </div>
         </div>
     `;
-	if (mode == 'local'){
-   		document.getElementById('normal-match').addEventListener('click', () => loadLogin(null));
-	}else{
-		document.getElementById('normal-match').addEventListener('click', () => startMultiplayer);
-	}
+   	document.getElementById('normal-match').addEventListener('click', () => loadLogin(null));
 	document.getElementById('tournament-match').addEventListener('click', handleLocalVsHumanClick);
-}
-
-function startMultiplayer() {
-	console.log('startMultiplayer');
 }
 
 async function handleLocalVsHumanClick() {
@@ -126,12 +118,8 @@ function showMatchOptions(matches) {
         button.addEventListener('click', (event) => {
             selectedMatchID = event.target.getAttribute('data-match-id');
 			id_tournament = event.target.getAttribute('data-tournament-id');
-			if (mode  === 'local'){
-	            const user2Match = event.target.getAttribute('data-user2-match');
-    	        loadLogin(user2Match);
-			}else{
-				startMultiplayer();
-			}
+			const user2Match = event.target.getAttribute('data-user2-match');
+    	    loadLogin(user2Match);
         });
     });
 }
@@ -206,31 +194,6 @@ async function handleLoginSubmit(event) {
         document.getElementById('login-msg').textContent = 'Error logging in. Please try again later.';
     }
 }
-
-//async function startGame() {
-    // const endpoint = selectedMatchID ? `/api/tournaments/${selectedMatchID}/start` : `/api/matches/start`;
-    
-    // try {
-    //     const response = await fetch(endpoint, {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         }
-    //     });
-
-    //     if (response.ok) {
-    //         const data = await response.json();
-    //         // Initialize the game with the match ID if available
-    //         console.log('Starting game with match ID:', selectedMatchID || 'Normal match');
-    //     } else {
-    //         const errorData = await response.json();
-    //         showNotification(`Error: ${errorData.message}`, false);
-    //     }
-    // } catch (error) {
-    //     showNotification('Error starting game. Please try again later.', false);
-    // }
-  //  showNotification(`Game starting`, true);
-//}
 
 function showNotification(message, isSuccess = true) {
     let notification = document.getElementById('notification');
