@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/10 11:25:09 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/10 11:01:05 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@ import updateNavbar from "./navbar.js";
 import { stopAnimation, stopCountDown } from "./pongLocal.js";
 
 async function login(username, password) {
-    const loginEndpoint = 'https://localhost:8080/api/auth/login';
+    const loginEndpoint = 'https://localhost/api/auth/login';
     
     try {
         const response = await fetch(loginEndpoint, {
@@ -55,7 +55,7 @@ function isLoggedIn()
 }
 
 async function logout() {
-    const logoutEndpoint = 'https://localhost:8080/api/auth/logout';
+    const logoutEndpoint = 'https://localhost/api/auth/logout';
     try {
         const response = await fetch(logoutEndpoint, {
             method: 'GET',

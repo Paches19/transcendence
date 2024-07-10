@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.js                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/04 14:24:45 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/09 17:16:50 by alaparic         ###   ########.fr       */
+/*   Updated: 2024/05/24 13:15:55 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ router.addRoute('/tournaments/:id', async id => {
 router.setDefaultRoute(loadPageNotFound);
 
 async function fetchTournaments() {
-    const apiUrl = 'https://localhost:8080/api/tournaments';
+    const apiUrl = 'https://localhost/api/tournaments';
     try {
         const response = await fetch(apiUrl, {
             method: 'GET',

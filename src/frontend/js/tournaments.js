@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/10 11:25:55 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/10 11:05:22 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@ import router from "./main.js"
 import { stopAnimation, stopCountDown } from "./pongLocal.js";
 
 async function fetchTournaments() {
-    const apiUrl = 'https://localhost:8080/api/tournaments';
+    const apiUrl = 'https://localhost/api/tournaments';
     return fetch(apiUrl, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -178,7 +178,7 @@ function addModalEventListeners() {
             number_participants: numPlayers,
         };
     
-        const apiUrl = 'https://localhost:8080/api/tournaments/create';
+        const apiUrl = 'https://localhost/api/tournaments/create';
         fetch(apiUrl, {
             method: 'POST',
             headers: {
@@ -229,7 +229,7 @@ async function joinTournament(tournamentId) {
     if (username) {
         console.log(`${username} logged in. Joining tournament with ID: ${tournamentId}`);
 
-        const apiUrl = `https://localhost:8080/api/tournaments/${tournamentId}/join`;
+        const apiUrl = `https://localhost/api/tournaments/${tournamentId}/join`;
 
         try {
             const response = await fetch(apiUrl, {

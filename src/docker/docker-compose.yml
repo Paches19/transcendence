@@ -3,10 +3,7 @@ version: "3.8"
 services:
     postgres:
         container_name: postgres
-        build:
-            context: ../
-            dockerfile: docker/postgres/Dockerfile
-        image: postgres_transcendence
+        image: postgres:16.2
         env_file:
             - .env
         environment:
@@ -49,7 +46,8 @@ services:
         env_file:
             - .env
         ports:
-            - "8080:443"
+            - "80:80"
+            - "443:443"
         networks:
             - transcendence_net
         restart: always
