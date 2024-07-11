@@ -6,15 +6,15 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 13:04:35 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/10 11:01:42 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/11 11:50:19 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
 
 import { isLoggedIn } from './auth.js';
 import router from './main.js';
 import updateNavbar from './navbar.js';
 import { stopAnimation, stopCountDown } from "./pongLocal.js";
+import { closeSocket } from "./pongRemote.js";
 
 async function loadEditProfile() {
     if (!isLoggedIn()) {
@@ -24,7 +24,8 @@ async function loadEditProfile() {
     }
 	stopAnimation();
 	stopCountDown();
-    const apiUrl = 'https://localhost/api/users';
+	closeSocket();
+    const apiUrl = '/api/users';
     try {
         const response = await fetch(apiUrl, {
             method: 'GET',
@@ -129,7 +130,7 @@ function loadHtmlEditProfile(currentUser) {
   }
   
   function updateUserAvatar(file) {
-    const apiUrl = 'https://localhost/api/users/avatar';
+    const apiUrl = '/api/users/avatar';
     const formData = new FormData();
     formData.append('file', file);
 
@@ -162,7 +163,7 @@ function loadHtmlEditProfile(currentUser) {
 }
 
 async function updateUserProfile(newUsername, newPassword) {
-  const apiUrl = 'https://localhost/api/users/update';
+  const apiUrl = '/api/users/update';
   const requestBody = {
       username: newUsername,
       password: newPassword,

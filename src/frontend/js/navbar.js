@@ -3,18 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   navbar.js                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 17:23:01 by adpachec          #+#    #+#             */
-/*   Updated: 2024/05/24 13:15:54 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/07/11 11:45:13 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import { isLoggedIn } from './auth.js';
+import { isLoggedIn }from './auth.js';
 import router from './main.js';
 
 async function loadUser() {
-    const apiUrl = 'https://localhost/api/users';
+    const apiUrl = '/api/users';
     try {
         const response = await fetch(apiUrl, {
             method: 'GET',
@@ -43,7 +43,7 @@ async function updateNavbar()
 		navBarDiv.innerHTML = `
 			<div class="user-info" id="user-info">
 				<a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-					<img src="https://localhost${user.profilePicture}" id="user-avatar" class="rounded-circle" alt="User Avatar">
+					<img src="${user.profilePicture}" id="user-avatar" class="rounded-circle" alt="User Avatar">
 					<span id="username">${user.username}</span>
 				</a>
 				<ul class="dropdown-menu" aria-labelledby="navbarDropdown">

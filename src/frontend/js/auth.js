@@ -6,16 +6,17 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 11:27:22 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/10 11:01:05 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/11 11:50:02 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import router from "./main.js";
 import updateNavbar from "./navbar.js";
+import { closeSocket } from "./pongRemote.js";
 import { stopAnimation, stopCountDown } from "./pongLocal.js";
 
 async function login(username, password) {
-    const loginEndpoint = 'https://localhost/api/auth/login';
+    const loginEndpoint = '/api/auth/login';
     
     try {
         const response = await fetch(loginEndpoint, {
@@ -55,7 +56,7 @@ function isLoggedIn()
 }
 
 async function logout() {
-    const logoutEndpoint = 'https://localhost/api/auth/logout';
+    const logoutEndpoint = '/api/auth/logout';
     try {
         const response = await fetch(logoutEndpoint, {
             method: 'GET',
@@ -66,9 +67,10 @@ async function logout() {
 
         if (response.ok) {
             localStorage.removeItem('userToken');
-			stopAnimation();
-			stopCountDown();
             updateNavbar();
+			closeSocket();
+			stopCountDown();
+            stopAnimation();
             router.route('/home');
             console.log('Logged out successfully.');
         }

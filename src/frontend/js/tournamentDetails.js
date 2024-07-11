@@ -3,15 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   tournamentDetails.js                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
+/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 18:11:12 by adpachec          #+#    #+#             */
-/*   Updated: 2024/06/10 16:45:13 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/07/11 11:34:09 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 async function fetchTournamentById(id) {
-    const apiUrl = `https://localhost/api/tournaments/${id}`;
+    const apiUrl = `/api/tournaments/${id}`;
     try {
         const response = await fetch(apiUrl, {
             method: 'GET',
@@ -161,7 +161,7 @@ async function joinTournament(tournamentId) {
     if (username) {
         console.log(`${username} logged in. Joining tournament with ID: ${tournamentId}`);
 
-        const apiUrl = `https://localhost/api/tournaments/${tournamentId}/join`;
+        const apiUrl = `/api/tournaments/${tournamentId}/join`;
 
         try {
             const response = await fetch(apiUrl, {
@@ -194,7 +194,7 @@ async function joinTournament(tournamentId) {
 async function leaveTournament(tournamentId) {
     const username = localStorage.getItem('userToken');
     if (username) {
-        const apiUrl = `https://localhost/api/tournaments/${tournamentId}/leave`;
+        const apiUrl = `/api/tournaments/${tournamentId}/leave`;
         try {
             const response = await fetch(apiUrl, {
                 method: 'POST',

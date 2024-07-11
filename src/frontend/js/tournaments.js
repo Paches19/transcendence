@@ -6,16 +6,17 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/10 11:05:22 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/11 11:35:34 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { isLoggedIn } from "./auth.js";
 import router from "./main.js"
 import { stopAnimation, stopCountDown } from "./pongLocal.js";
+import { closeSocket } from "./pongRemote.js";
 
 async function fetchTournaments() {
-    const apiUrl = 'https://localhost/api/tournaments';
+    const apiUrl = '/api/tournaments';
     return fetch(apiUrl, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -37,6 +38,7 @@ async function fetchTournaments() {
 async function loadTournaments() {
 	stopAnimation();
 	stopCountDown();
+	closeSocket();
     try {
         const tournaments = await fetchTournaments();
         updateTournamentHTML(tournaments);
@@ -178,7 +180,7 @@ function addModalEventListeners() {
             number_participants: numPlayers,
         };
     
-        const apiUrl = 'https://localhost/api/tournaments/create';
+        const apiUrl = '/api/tournaments/create';
         fetch(apiUrl, {
             method: 'POST',
             headers: {
@@ -229,7 +231,7 @@ async function joinTournament(tournamentId) {
     if (username) {
         console.log(`${username} logged in. Joining tournament with ID: ${tournamentId}`);
 
-        const apiUrl = `https://localhost/api/tournaments/${tournamentId}/join`;
+        const apiUrl = `/api/tournaments/${tournamentId}/join`;
 
         try {
             const response = await fetch(apiUrl, {
