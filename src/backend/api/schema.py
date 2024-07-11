@@ -3,18 +3,16 @@
 #                                                         :::      ::::::::    #
 #    schema.py                                          :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
+#    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:15 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/06 13:20:20 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/11 21:03:51 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-from pydantic import BaseModel, ValidationError, model_validator
 import datetime
-from .models import User
 from typing import List
-from ninja import ModelSchema, Schema
+from ninja import Schema
 
 """ Auth schemas """
 
