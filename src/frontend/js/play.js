@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/11 11:27:15 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/11 16:50:22 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,8 @@ function attachEventListeners() {
 		showMatchTypeOptions()
 	});
     document.getElementById('remote-vs-human').addEventListener('click', () => {
-		mode = 'remote';
-		showMatchTypeOptions()
+		mode = 'multiplayer';
+		console.log('startMultiplayer');
 	});
 }
 
