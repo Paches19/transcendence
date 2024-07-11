@@ -357,8 +357,7 @@ async function newMatch(id_match){
 		const apiUrl = `/api/match/new?id_match=${id_match}&name1=${stateMatch.game.name1}&name2=${stateMatch.game.name2}`;
 		const response = await fetch(apiUrl);
 		if (response.ok){
-			const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${wsProtocol}//${window.location.host}/ws/pong/${id_match}/`;
+            const wsUrl = `wss://${window.location.host}/wss/pong/${id_match}/`;
             socket = new WebSocket(wsUrl);
 			
 			configureSocketEvents();
@@ -419,8 +418,7 @@ async function joinMatch(id_match){
 			}).then(e => window.location.href = "/");
 		}
 		else if (response.ok) {
-			const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${wsProtocol}//${window.location.host}/ws/pong/${id_match}/`;
+            const wsUrl = `wss://${window.location.host}/wss/pong/${id_match}/`;
             socket = new WebSocket(wsUrl);
 			configureSocketEvents();
 			

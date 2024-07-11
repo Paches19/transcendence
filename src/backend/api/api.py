@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    api.py                                             :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
+#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/08 12:42:28 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/07/11 17:06:10 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -544,10 +544,11 @@ def save_match(request, id_match: int, id_tournament: int):
 		user1.save()
 
 		# user2
+		# TODO -> change this to created user
 		if (match.game.name2 != 'AI'):
 			user2 = get_object_or_404(User, username=match.game.name2)
 		else:
-			user2 = User.objects.create(username='AI', password='AI')    
+			user2 = User.objects.create(username='AI', password='AI')
 		user2.totalPoints += match.paddles.score2
 		user2.matchesTotal += 1
 		if match.paddles.score2 > match.paddles.score1:
@@ -558,6 +559,7 @@ def save_match(request, id_match: int, id_tournament: int):
 		user2.save()
 
 		# tournament data
+		# TODO -> finish this!!
 		if id_tournament != 0:
 			tournament = get_object_or_404(Tournament,tournamentID=id_tournament)
 			tournament.status = "ended"
