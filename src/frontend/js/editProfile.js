@@ -6,7 +6,7 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/27 13:04:35 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/11 11:50:19 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/11 17:30:55 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ function loadHtmlEditProfile(currentUser) {
 				  <div class="form-group" id="picture-group">
 					<label for="profile-picture">Profile Picture URL</label>
 					<input type="file" class="form-control-file" id="profile-picture-upload" accept="image/*">
-					<img id="profile-picture-preview" src="https://localhost${currentUser.profilePicture}" alt="Profile Picture Preview" class="img-thumbnail" style="margin-top: 10px; max-width: 200px;">
+					<img id="profile-picture-preview" src="${currentUser.profilePicture}" alt="Profile Picture Preview" class="img-thumbnail" style="margin-top: 10px; max-width: 200px;">
 				  </div>
 				  <div class="button-container">
 					<button type="button" class="btn btn-secondary" id="upload-picture"><span>Upload<br>Picture</span></button>
