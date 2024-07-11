@@ -6,20 +6,22 @@
 /*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/10 11:53:22 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/11 16:50:22 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 import { startGameLocal, stopAnimation, stopCountDown } from "./pongLocal.js";
+import { startGameRemote, closeSocket } from "./pongRemote.js";
 
 let selectedMatchID = null;
 let mode = null;
 let id_tournament = 0;
 
 function initPlayPage() {
-    stopAnimation();
+	stopAnimation();
 	stopCountDown();
-	renderGameOptions();
+	closeSocket();
+    renderGameOptions();
     attachEventListeners();
 }
 
@@ -66,12 +68,16 @@ function showMatchTypeOptions() {
             </div>
         </div>
     `;
-   	document.getElementById('normal-match').addEventListener('click', () => loadLogin(null));
+	if (mode == 'local'){
+   		document.getElementById('normal-match').addEventListener('click', () => loadLogin(null));
+	}else{
+		document.getElementById('normal-match').addEventListener('click', () => startGameRemote(0, id_tournament));
+	}
 	document.getElementById('tournament-match').addEventListener('click', handleLocalVsHumanClick);
 }
 
 async function handleLocalVsHumanClick() {
-    const apiUrl = 'https://localhost/api/tournaments/user/matches';
+    const apiUrl = '/api/tournaments/user/matches';
   
     const requestOptions = {
         method: 'GET',
@@ -118,8 +124,12 @@ function showMatchOptions(matches) {
         button.addEventListener('click', (event) => {
             selectedMatchID = event.target.getAttribute('data-match-id');
 			id_tournament = event.target.getAttribute('data-tournament-id');
-			const user2Match = event.target.getAttribute('data-user2-match');
-    	    loadLogin(user2Match);
+			if (mode  === 'local'){
+	            const user2Match = event.target.getAttribute('data-user2-match');
+    	        loadLogin(user2Match);
+			}else{
+				startGameRemote(selectedMatchID, id_tournament);
+			}
         });
     });
 }

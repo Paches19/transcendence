@@ -35,8 +35,6 @@ const refreshTime = 1000/30;
 
 function startGameLocal(mode, player2, id_match, id_tour){
 	modality = mode;
-	console.log("Modality: " + modality);
-	console.log("ID: ", id_match);
 	if (isLoggedIn()) {
 		name1 = getUsernameFromToken();
 		if (!player2)
@@ -228,7 +226,7 @@ function initAnimation(){
 		// Set font size relative to canvas size
 		const fontSize = Math.min(canvas.width, canvas.height) / 3;
 		ctx.strokeStyle = '#FFF';
-		ctx.font = `${fontSize}px Arial`;
+		ctx.font = `${fontSize}px Arial` ;
 		ctx.textAlign = 'center';
 		ctx.textBaseline = 'middle';
 
@@ -399,7 +397,7 @@ function drawNet(){
 
 
 async function  startPongLocal(){	
-	const apiUrl = `https://localhost/api/match/new?id_match=${id}&name1=${name1}&name2=${name2}`;
+	const apiUrl = `/api/match/new?id_match=${id}&name1=${name1}&name2=${name2}`;
 	try{
 		const response = await fetch(apiUrl);
 		if (response.ok){
@@ -418,7 +416,7 @@ async function  startPongLocal(){
 }
 
 async function deleteMatch(){
-	const apiUrl = `https://localhost/api/match/delete?id_match=${id}`;
+	const apiUrl = `/api/match/delete?id_match=${id}`;
 	try{
 		const response = await fetch(apiUrl, {
 			method: 'DELETE'
@@ -433,7 +431,7 @@ async function deleteMatch(){
 }
 
 async function saveMatch(){
-	const apiUrl = `https://localhost/api/match/save?id_match=${id}&id_tournament=${id_tournament}`;
+	const apiUrl = `/api/match/save?id_match=${id}&id_tournament=${id_tournament}`;
 	try{
 		const response = await fetch(apiUrl);
 		if (response.ok){
@@ -446,7 +444,7 @@ async function saveMatch(){
 }
 
 async function resetBall(){
-	const apiUrl = `https://localhost/api/game/reset?id_match=${id}`;
+	const apiUrl = `/api/game/reset?id_match=${id}`;
 	try{
 		const response = await fetch(apiUrl);
 		if (response.ok){
@@ -463,7 +461,7 @@ async function handleKeyDown(e) {
 	if (state != 'pause' && (pressed == 'ArrowUp' || pressed == 'ArrowDown' ||
        (modality == "local" && (pressed == "w" || pressed == "W" || pressed == "s" || pressed == "S")) ||
        (modality == "solo"  && (pressed == "A" || pressed == "D")))){
-			const apiUrl = `https://localhost/api/game/paddles?id_match=${id}&key=${pressed}`;
+			const apiUrl = `/api/game/paddles?id_match=${id}&key=${pressed}`;
 			try {
 				const response = await fetch(apiUrl);
 				if (response.ok){
@@ -477,7 +475,7 @@ async function handleKeyDown(e) {
 }
 
 async function moveBall() {
-	const apiUrl = `https://localhost/api/game/ball?id_match=${id}`;
+	const apiUrl = `/api/game/ball?id_match=${id}`;
 	try{
 		const response = await fetch(apiUrl);
 		if (response.ok){
