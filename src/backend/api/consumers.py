@@ -9,6 +9,7 @@
 #    Updated: 2024/05/27 12:38:07 by alaparic         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
+
 import contextlib
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
@@ -110,8 +111,9 @@ class PongConsumerRemote(AsyncJsonWebsocketConsumer):
 
                              
     async def disconnect(self, code):
+        print("Disconnected")
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
-        # code = 2000 if the match finished as game over
+        # code = 4000 if the match finished as game over
         if (code != 4000):
             await self.channel_layer.group_send(self.group_name, {
                 "type": "gameData.send",

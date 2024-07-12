@@ -1,18 +1,17 @@
-#******************************************************************************#
+# **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
 #    middleware.py                                      :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
+#    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:06 by alaparic          #+#    #+#              #
-#    Updated: 2024/05/27 12:38:07 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/11 23:02:09 by jutrera-         ###   ########.fr        #
 #                                                                              #
-#******************************************************************************#
+# **************************************************************************** #
 
 from django.http import JsonResponse
 from functools import wraps
-
 
 def require_auth(request):
     if not request.user.is_authenticated:

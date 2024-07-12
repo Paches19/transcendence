@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    populate_data.py                                   :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
+#    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:12 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/03 07:51:42 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/11 23:03:13 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
