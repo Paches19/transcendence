@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   play.js                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/12 09:49:46 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/13 14:10:02 by alaparic         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,13 +21,13 @@ function initPlayPage() {
 	stopAnimation();
 	stopCountDown();
 	closeSocket();
-    renderGameOptions();
-    attachEventListeners();
+	renderGameOptions();
+	attachEventListeners();
 }
 
 function renderGameOptions() {
-    const mainContent = document.getElementById('main-content');
-    mainContent.innerHTML = `
+	const mainContent = document.getElementById("main-content");
+	mainContent.innerHTML = `
         <div class="play-wrapper">
             <div class="play-options-container text-center mt-5">
                 <h1 class="play-title mb-4">Elige tu Modo de Juego</h1>
@@ -42,24 +42,23 @@ function renderGameOptions() {
 }
 
 function attachEventListeners() {
-	document.getElementById('solo-vs-ai').addEventListener('click', () => {
-		mode = 'solo';
+	document.getElementById("solo-vs-ai").addEventListener("click", () => {
+		mode = "solo";
 		startGameLocal(mode, null, 0, id_tournament);
 	});
-    document.getElementById('local-vs-human').addEventListener('click', () => {
-		mode = 'local';
-		showMatchTypeOptions()
+	document.getElementById("local-vs-human").addEventListener("click", () => {
+		mode = "local";
+		showMatchTypeOptions();
 	});
-    document.getElementById('remote-vs-human').addEventListener('click', () => {
-		mode = 'remote';
-		showMatchTypeOptions()
+	document.getElementById("remote-vs-human").addEventListener("click", () => {
+		mode = "remote";
+		showMatchTypeOptions();
 	});
 }
 
-
 function showMatchTypeOptions() {
-    const mainContent = document.getElementById('main-content');
-    mainContent.innerHTML = `
+	const mainContent = document.getElementById("main-content");
+	mainContent.innerHTML = `
         <div class="play-wrapper">
             <div class="play-title">Select Match Type</div>
             <div class="play-btn-group">
@@ -68,43 +67,57 @@ function showMatchTypeOptions() {
             </div>
         </div>
     `;
-	if (mode == 'local'){
-   		document.getElementById('normal-match').addEventListener('click', () => loadLogin(null));
-	}else{
-		document.getElementById('normal-match').addEventListener('click', () => startGameRemote(0, id_tournament));
+	if (mode == "local") {
+		document
+			.getElementById("normal-match")
+			.addEventListener("click", () => loadLogin(null));
+	} else {
+		document
+			.getElementById("normal-match")
+			.addEventListener("click", () => startGameRemote(0, id_tournament));
 	}
-	document.getElementById('tournament-match').addEventListener('click', handleLocalVsHumanClick);
+	document
+		.getElementById("tournament-match")
+		.addEventListener("click", handleLocalVsHumanClick);
 }
 
 async function handleLocalVsHumanClick() {
-    const apiUrl = '/api/tournaments/user/matches';
-  
-    const requestOptions = {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
-    };
-    
-    try {
-        const response = await fetch(apiUrl, requestOptions);
-        if (response.ok) {
-            const matches = await response.json();
-            showMatchOptions(matches);
-        } else {
-            showNotification('Error fetching matches. Please try again later.', false);
-        }
-    } catch (error) {
-        showNotification('Error fetching matches. Please try again later.', false);
-    }
+	const apiUrl = "/api/tournaments/user/matches";
+
+	const requestOptions = {
+		method: "GET",
+		headers: { "Content-Type": "application/json" },
+		credentials: "include",
+	};
+
+	try {
+		const response = await fetch(apiUrl, requestOptions);
+		if (response.ok) {
+			const matches = await response.json();
+			showMatchOptions(matches);
+		} else {
+			showNotification(
+				"Error fetching matches. Please try again later.",
+				false
+			);
+		}
+	} catch (error) {
+		showNotification(
+			"Error fetching matches. Please try again later.",
+			false
+		);
+	}
 }
 
 function showMatchOptions(matches) {
-    const mainContent = document.getElementById('main-content');
-    mainContent.innerHTML = `
+	const mainContent = document.getElementById("main-content");
+	mainContent.innerHTML = `
         <div class="play-wrapper">
             <div class="play-title">Select a Match</div>
             <ul id="match-list" class="match-list">
-                ${matches.map(match => `
+                ${matches
+					.map(
+						(match) => `
                     <li class="match-item">
                         <div class="match-header">
                             <div class="tournament-name">${match.tournamentName}</div>
@@ -114,37 +127,40 @@ function showMatchOptions(matches) {
                             <button class="play-btn play-btn-primary select-match-btn" data-match-id="${match.matchID}" data-user2-match="${match.player2_username}"data-tournament-id="${match.tournamentID}">Select</button>
                         </div>
                     </li>
-                `).join('')}
+                `
+					)
+					.join("")}
             </ul>
         </div>
     `;
 
-    const matchButtons = document.querySelectorAll('.select-match-btn');
-    matchButtons.forEach(button => {
-        button.addEventListener('click', (event) => {
-            selectedMatchID = event.target.getAttribute('data-match-id');
-			id_tournament = event.target.getAttribute('data-tournament-id');
-			if (mode  === 'local'){
-	            const user2Match = event.target.getAttribute('data-user2-match');
-    	        loadLogin(user2Match);
-			}else{
+	const matchButtons = document.querySelectorAll(".select-match-btn");
+	matchButtons.forEach((button) => {
+		button.addEventListener("click", (event) => {
+			selectedMatchID = event.target.getAttribute("data-match-id");
+			id_tournament = event.target.getAttribute("data-tournament-id");
+			if (mode === "local") {
+				const user2Match =
+					event.target.getAttribute("data-user2-match");
+				loadLogin(user2Match);
+			} else {
 				startGameRemote(selectedMatchID, id_tournament);
 			}
-        });
-    });
+		});
+	});
 }
 
 function loadLogin(user2Match) {
-    // Verificar si la superposición ya existe
-    if (document.querySelector('.login-overlay')) {
-        document.querySelector('.login-overlay').remove();
-    }
+	// Verificar si la superposición ya existe
+	if (document.querySelector(".login-overlay")) {
+		document.querySelector(".login-overlay").remove();
+	}
 
-    if (!user2Match) user2Match = "Name";
-	
-    const loginOverlay = document.createElement('div');
-    loginOverlay.className = 'login-overlay';
-    loginOverlay.innerHTML = `
+	if (!user2Match) user2Match = "Name";
+
+	const loginOverlay = document.createElement("div");
+	loginOverlay.className = "login-overlay";
+	loginOverlay.innerHTML = `
         <div class="wrapper">
             <div class="flip-card__inner">
                 <div class="flip-card__front">
@@ -160,69 +176,77 @@ function loadLogin(user2Match) {
             </div>   
         </div>
     `;
-    document.body.appendChild(loginOverlay);
-    
-    const closeBtn = document.getElementById('close-login-overlay');
-    closeBtn.addEventListener('click', () => {
-        document.querySelector('.login-overlay').remove();
-    });
+	document.body.appendChild(loginOverlay);
 
-    const loginForm = document.getElementById('login-form');
-    loginForm.addEventListener('submit', handleLoginSubmit);
+	const closeBtn = document.getElementById("close-login-overlay");
+	closeBtn.addEventListener("click", () => {
+		document.querySelector(".login-overlay").remove();
+	});
+
+	const loginForm = document.getElementById("login-form");
+	loginForm.addEventListener("submit", handleLoginSubmit);
 }
 
 async function handleLoginSubmit(event) {
-    event.preventDefault();
-	let player2_name = document.getElementById('userName').value;
+	event.preventDefault();
+	let player2_name = document.getElementById("userName").value;
 
-    const apiUrl = '/api/auth/login/local_match';
-    const requestBody = {
-        player2_username: player2_name,
-        player2_password: document.getElementById('password').value,
-        matchID: selectedMatchID ? selectedMatchID : -1  //-1 for normal match and it is created in the backend
-    };
-  
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-        credentials: 'include'
-    };
+	const apiUrl = "/api/auth/login/local_match";
+	const requestBody = {
+		player2_username: player2_name,
+		player2_password: document.getElementById("password").value,
+		matchID: selectedMatchID ? selectedMatchID : -1, //-1 for normal match and it is created in the backend
+	};
 
-    try {
-        const response = await fetch(apiUrl, requestOptions);
+	const requestOptions = {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(requestBody),
+		credentials: "include",
+	};
 
-        if (response.ok) {
-            const data = await response.json();
-            document.querySelector('.login-overlay').remove();
-			startGameLocal('local', player2_name, selectedMatchID, id_tournament);
-        } else {
-            const errorData = await response.json();
-            document.getElementById('login-msg').textContent = `Error: ${errorData.message}`;
-        }
-    } catch (error) {
-        document.getElementById('login-msg').textContent = 'Error logging in. Please try again later.';
-    }
+	try {
+		const response = await fetch(apiUrl, requestOptions);
+
+		if (response.ok) {
+			const data = await response.json();
+			document.querySelector(".login-overlay").remove();
+			startGameLocal(
+				"local",
+				player2_name,
+				selectedMatchID,
+				id_tournament
+			);
+		} else {
+			const errorData = await response.json();
+			document.getElementById(
+				"login-msg"
+			).textContent = `Error: ${errorData.message}`;
+		}
+	} catch (error) {
+		document.getElementById("login-msg").textContent =
+			"Error logging in. Please try again later.";
+	}
 }
 
 function showNotification(message, isSuccess = true) {
-    let notification = document.getElementById('notification');
-    if (notification) {
-        notification.remove();
-    }
-    notification = document.createElement('div');
-    notification.id = 'notification';
-    notification.textContent = message;
-    notification.className = `notification ${isSuccess ? true : false}`;
+	let notification = document.getElementById("notification");
+	if (notification) {
+		notification.remove();
+	}
+	notification = document.createElement("div");
+	notification.id = "notification";
+	notification.textContent = message;
+	notification.className = `notification ${isSuccess ? true : false}`;
 
-    document.body.appendChild(notification);
-    notification.classList.add('show');
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-            notification.remove();
-        }, 500);
-    }, 5000);
+	document.body.appendChild(notification);
+	notification.classList.add("show");
+	setTimeout(() => {
+		notification.classList.remove("show");
+		setTimeout(() => {
+			notification.remove();
+		}, 500);
+	}, 5000);
 }
 
 export default initPlayPage;

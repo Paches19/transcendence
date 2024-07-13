@@ -6,15 +6,13 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:15 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/13 13:40:56 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/13 14:09:25 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-from pydantic import BaseModel, ValidationError, model_validator
 import datetime
-from .models import User
 from typing import List
-from ninja import ModelSchema, Schema
+from ninja import Schema
 
 """ Auth schemas """
 
