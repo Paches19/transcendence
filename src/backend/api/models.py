@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:10 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/04 08:13:58 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/13 13:40:07 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,6 +17,7 @@ import datetime
 
 # Create your models here.
 
+
 class Paddles(models.Model):
     x1 = models.FloatField(default=0)
     y1 = models.FloatField(default=0)
@@ -25,11 +26,13 @@ class Paddles(models.Model):
     y2 = models.FloatField(default=0)
     score2 = models.IntegerField(default=0)
 
+
 class Ball(models.Model):
     x = models.FloatField(default=0)
     y = models.FloatField(default=0)
     vx = models.FloatField(default=0)
     vy = models.FloatField(default=0)
+
 
 class Game(models.Model):
     v = models.FloatField(default=0)
@@ -41,11 +44,13 @@ class Game(models.Model):
     name1 = models.CharField(max_length=40, default='Player1')
     name2 = models.CharField(max_length=40, default='Player2')
 
+
 class RemoteGame(models.Model):
     id = models.IntegerField(primary_key=True)
     paddles = Paddles()
     ball = Ball()
     game = Game()
+
 
 class Match(models.Model):
     matchID = models.AutoField(primary_key=True)

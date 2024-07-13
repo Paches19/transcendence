@@ -12,8 +12,9 @@
 import contextlib
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
+
 class PongConsumerRemote(AsyncJsonWebsocketConsumer):
-    
+
     async def connect(self):
         print("Connected")
         self.game_id = self.scope['url_route']['kwargs']['game_id']
@@ -31,24 +32,23 @@ class PongConsumerRemote(AsyncJsonWebsocketConsumer):
                 return await self.close()
 
         await self.accept()
-        
-		# Check if the group has two players
+
+        # Check if the group has two players
         if len(self.channel_layer.groups[self.group_name]) == 2:
             matchGroup = list(self.channel_layer.groups[self.group_name])
             for i, channel_name in enumerate(matchGroup):
                 player_number = "1" if i == 0 else "2"
                 await self.channel_layer.send(channel_name, {
-					"type": "gameData.send",
+                    "type": "gameData.send",
                     "data": {
                         "event": "ready",
                         "player": player_number,
                     }
-				})
-
+                })
 
     async def receive_json(self, content, **kwargs):
         event = content['event']
-        
+
         if event == "game_over":
             for channel_name in self.channel_layer.groups[self.group_name]:
                 await self.channel_layer.send(channel_name, {
@@ -73,42 +73,41 @@ class PongConsumerRemote(AsyncJsonWebsocketConsumer):
             for channel_name in self.channel_layer.groups[self.group_name]:
                 await self.channel_layer.send(channel_name, {
                     "type": "gameData.send",
-					"data": {
-						"event": "write_scores",
-						"score1": content['score1'],
-						"score2": content['score2'],
-					}
-				})
+                    "data": {
+                        "event": "write_scores",
+                        "score1": content['score1'],
+                        "score2": content['score2'],
+                    }
+                })
         elif event == "change_state":
             for channel_name in self.channel_layer.groups[self.group_name]:
                 await self.channel_layer.send(channel_name, {
-					"type": "gameData.send",
-					"data": {
-						"event": "change_state",
-						"state": content['state'],
-					}
-				})
-                
+                    "type": "gameData.send",
+                    "data": {
+                        "event": "change_state",
+                        "state": content['state'],
+                    }
+                })
+
         elif event == "move_paddles":
             for channel_name in self.channel_layer.groups[self.group_name]:
                 await self.channel_layer.send(channel_name, {
-					"type": "gameData.send",
-					"data": {
-						"event": "move_paddles",
-						"paddles": content['paddles'],
-					}
-				})
+                    "type": "gameData.send",
+                    "data": {
+                        "event": "move_paddles",
+                        "paddles": content['paddles'],
+                    }
+                })
         elif event == "move_ball":
             for channel_name in self.channel_layer.groups[self.group_name]:
                 await self.channel_layer.send(channel_name, {
-					"type": "gameData.send",
-					"data": {
-						"event": "move_ball",
-						"ball": content['ball'],
-					}
-				})
+                    "type": "gameData.send",
+                    "data": {
+                        "event": "move_ball",
+                        "ball": content['ball'],
+                    }
+                })
 
-                             
     async def disconnect(self, code):
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
         # code = 2000 if the match finished as game over
@@ -118,7 +117,7 @@ class PongConsumerRemote(AsyncJsonWebsocketConsumer):
                 "data": {
                     "event": "opponent_left",
                 }
-        })
+            })
 
     async def gameData_send(self, context):
         await self.send_json(context['data'])
