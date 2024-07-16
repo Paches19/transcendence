@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/13 14:08:50 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/15 19:53:41 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -549,11 +549,7 @@ def save_match(request, id_match: int, id_tournament: int):
         user1.save()
 
         # user2
-        # TODO -> change this to created user
-        if (match.game.name2 != 'AI'):
-            user2 = get_object_or_404(User, username=match.game.name2)
-        else:
-            user2 = User.objects.create(username='AI', password='AI')
+        user2 = get_object_or_404(User, username=match.game.name2)
         user2.totalPoints += match.paddles.score2
         user2.matchesTotal += 1
         if match.paddles.score2 > match.paddles.score1:
