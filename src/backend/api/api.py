@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/15 19:53:41 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/16 08:10:59 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -560,12 +560,10 @@ def save_match(request, id_match: int, id_tournament: int):
         user2.save()
 
         # tournament data
-        # TODO -> finish this!!
         if id_tournament != 0:
             tournament = get_object_or_404(
                 Tournament, tournamentID=id_tournament)
-            tournament.status = "ended"
-            tournament.save()
+            checkTournamentFinished(tournament)
         else:
             tournament = None
 
