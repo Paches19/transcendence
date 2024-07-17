@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/17 12:21:54 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/07/17 13:23:58 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ function handleDocumentClick(e) {
 
 function viewTournaments(tournaments) { 
     return tournaments.map(tournament => {
-        const isParticipant = tournament.participants.some(participant => participant.user_id === getUsernameFromToken());
+        const isParticipant = tournament.participants.some(participant => participant.username === getUsernameFromToken());
 
         return `
             <div class="tournament-entry">
