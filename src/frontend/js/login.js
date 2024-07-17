@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   login.js                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:21:53 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/11 11:44:46 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/17 12:11:42 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import { login } from './auth.js';
+import { login, isLoggedIn } from './auth.js';
 import updateNavbar from "./navbar.js";
 import router from './main.js';
 
@@ -51,6 +51,12 @@ async function handleLoginSubmit(event) {
 }
 
 function loadLogin() {
+
+    if (isLoggedIn())
+    {
+        return ;
+    }
+    
     document.getElementById('main-content').innerHTML = `
         <div class="wrapper">
             <div class="flip-card__inner">

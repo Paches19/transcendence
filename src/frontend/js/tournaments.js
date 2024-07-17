@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   tournaments.js                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:29 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/11 11:35:34 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/17 12:21:54 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-import { isLoggedIn } from "./auth.js";
+import { isLoggedIn, getUsernameFromToken } from "./auth.js";
 import router from "./main.js"
 import { stopAnimation, stopCountDown } from "./pongLocal.js";
 import { closeSocket } from "./pongRemote.js";
@@ -90,25 +90,29 @@ function handleDocumentClick(e) {
     }
 }
 
-function viewTournaments(tournaments) {
-    return tournaments.map(tournament => `
-        <div class="tournament-entry">
-            <h3 class="tournament-name">${tournament.name}</h3>
-            <div class="tournament-details" style="display: none;">
-                <p>Status: ${tournament.status}</p>
-                <div class="participants-container">
-                    <h4>Participants: ${tournament.number_participants}</h4>
-                    <div class="participants-list">
-                        ${tournament.participants.map(participant => `<span>${participant.username}</span>`).join('')}
+function viewTournaments(tournaments) { 
+    return tournaments.map(tournament => {
+        const isParticipant = tournament.participants.some(participant => participant.user_id === getUsernameFromToken());
+
+        return `
+            <div class="tournament-entry">
+                <h3 class="tournament-name">${tournament.name}</h3>
+                <div class="tournament-details" style="display: none;">
+                    <p>Status: ${tournament.status}</p>
+                    <div class="participants-container">
+                        <h4>Participants: ${tournament.number_participants}</h4>
+                        <div class="participants-list">
+                            ${tournament.participants.map(participant => `<span>${participant.username}</span>`).join('')}
+                        </div>
+                    </div>
+                    <div class="button-div">
+                        <button class="button view-tournament-btn" data-name="${tournament.name}" data-id="${tournament.id}">View Details</button>
+                        ${!isParticipant && tournament.status !== 'In Progress' ? `<button class="button join-tournament-btn" data-id="${tournament.id}">Join Tournament</button>` : ''}
                     </div>
                 </div>
-                <div class="button-div">
-                    <button class="button view-tournament-btn" data-name="${tournament.name}" data-id="${tournament.id}">View Details</button>
-                    ${tournament.status !== 'In Progress' ? `<button class="button join-tournament-btn" data-id="${tournament.id}">Join Tournament</button>` : ''}
-                </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function showCreateTournamentModal() {
@@ -162,10 +166,16 @@ function addModalEventListeners() {
         e.preventDefault();
         
         const tournamentName = document.getElementById('tournamentName').value;
+        
         const numPlayers = document.getElementById('numPlayers').value;
     
         if (tournamentName.length > 30) {
             showNotification('Error: Tournament name must be 30 characters or fewer.', false);
+            return;
+        }
+
+        if (!/^[a-zA-Z0-9]+$/.test(tournamentName)) {
+            showNotification('Error: Tournament name can only contain alphanumeric characters.', false);
             return;
         }
     
