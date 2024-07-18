@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/18 16:50:13 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/18 19:17:38 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -575,6 +575,10 @@ def save_match(request, id_match: int, id_tournament: int):
             matchToSave = Match.objects.create(user1=user1, user2=user2)
         else:
             matchToSave = get_object_or_404(Match, matchID=match.id)
+            if (matchToSave.user1.username != user1.username):
+                matchToSave.user1 = user1
+            if (matchToSave.user2.username != user2.username):
+                matchToSave.user2 = user2
         matchToSave.pointsUser1 = match.paddles.score1
         matchToSave.pointsUser2 = match.paddles.score2
         matchToSave.winner = matchWinner
