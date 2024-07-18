@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/15 19:53:41 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/18 07:33:01 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -79,8 +79,10 @@ def local_match(request, formData: localMatchSchema):
     return {"msg": "ok"}
 
 
-@app.post("auth/login", tags=['Auth'])
+@app.post("auth/login", tags=['Auth'], response={200: SuccessSchema, 400: ErrorSchema})
 def login_user(request, login_in: LoginSchema):
+    if request.user.is_authenticated and request.user.online:
+        return 400, {"error_msg": "User already logged in"}
     user = authenticate(request, username=login_in.username,
                         password=login_in.password)
     if user is not None:
@@ -89,7 +91,7 @@ def login_user(request, login_in: LoginSchema):
         user.save()
         return {"msg": "Login successful"}
     else:
-        return {"error_msg": "Login failed"}
+        return 400, {"error_msg": "Login failed"}
 
 
 @app.get("auth/logout", tags=['Auth'])
@@ -560,12 +562,10 @@ def save_match(request, id_match: int, id_tournament: int):
         user2.save()
 
         # tournament data
-        # TODO -> finish this!!
         if id_tournament != 0:
             tournament = get_object_or_404(
                 Tournament, tournamentID=id_tournament)
-            tournament.status = "ended"
-            tournament.save()
+            checkTournamentFinished(tournament)
         else:
             tournament = None
 
