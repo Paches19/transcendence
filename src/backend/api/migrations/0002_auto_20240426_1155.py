@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:26 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/16 07:57:10 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/16 08:16:47 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -91,12 +91,6 @@ def generate_friends_data(apps, schema_editor):
     user1 = User.objects.get(username="user1")
     user2 = User.objects.get(username="user10")
     Friend.objects.create(user1=user1, user2=user2, status=True)
-    alaparic = User.objects.get(username="alaparic")
-    adpachec = User.objects.get(username="adpachec")
-    jutrera = User.objects.get(username="jutrera-")
-    Friend.objects.create(user1=alaparic, user2=adpachec, status=True)
-    Friend.objects.create(user1=alaparic, user2=jutrera, status=True)
-    Friend.objects.create(user1=adpachec, user2=jutrera, status=True)
 
 
 def generate_matches_data(apps, schema_editor):
