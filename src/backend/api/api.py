@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/18 07:33:01 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/18 16:50:13 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -387,6 +387,7 @@ def get_user_matches(request):
                 "matchID": match.matchID,
                 "tournamentID": match.tournament.tournamentID,
                 "tournamentName": match.tournament.name,
+                "played": match.winner is not None,
                 "player1_username": user.username,
                 "player2_username": opponent.username
             })
