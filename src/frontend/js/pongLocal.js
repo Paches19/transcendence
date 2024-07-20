@@ -458,9 +458,16 @@ async function resetBall(){
 
 async function handleKeyDown(e) {
     let pressed = e.key;
+	if (e.ctrlKey && pressed == 'v'){
+		pressed = 'VelocityUp';
+	}
+	if (e.ctrlKey && pressed == 'c'){
+		pressed = 'VelocityDown';
+	}
 	if (state != 'pause' && (pressed == 'ArrowUp' || pressed == 'ArrowDown' ||
        (modality == "local" && (pressed == "w" || pressed == "W" || pressed == "s" || pressed == "S")) ||
-       (modality == "solo"  && (pressed == "A" || pressed == "D")))){
+       (modality == "solo"  && (pressed == "A" || pressed == "D")) ||
+	    pressed == 'VelocityUp' || pressed == 'VelocityDown')){
 			const apiUrl = `/api/game/paddles?id_match=${id}&key=${pressed}`;
 			try {
 				const response = await fetch(apiUrl);
@@ -494,6 +501,7 @@ async function moveBall() {
 				gameOver();
 			}
 			else if (responsedata.msg == "playing")
+				console.log("Playing");
 				drawBall(responsedata.ball);
 		}
 	} catch (error) {

@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    api.py                                             :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
+#    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/15 19:53:41 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/20 14:45:09 by jutrera-         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -409,6 +409,10 @@ def move_paddles(request, id_match: int, key: str):
         elif key == 's' or key == 'S' or key == 'D':
             match.paddles.y2 = min(
                 1 - match.game.playerHeight - border, match.paddles.y2 + match.game.v)
+        elif key == 'VelocityUp':
+            match.game.v += 0.01
+        elif key == 'VelocityDown' and match.game.v > 0:
+            match.game.v -= 0.01
         return 200, {"msg": key, "paddles": match.paddles}
     except Exception as e:
         return 400, {"error_msg": "Error moving paddle" + str(e)}
@@ -418,33 +422,38 @@ def move_paddles(request, id_match: int, key: str):
 def move_ball(request, id_match: int):
     try:
         match = get_object_or_404(RemoteGame, id=id_match)
-        if match.ball.x < match.paddles.x1 or match.ball.x > match.paddles.x2:
+        if (match.ball.x + match.game.ballWidth < match.paddles.x1) or (match.ball.x > match.paddles.x2 + match.game.playerWidth):
             return 200, {"msg": "donotplay", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
+ 
         # Update ball position
         if match.ball.y + match.ball.vy <= 0 or match.ball.y + match.ball.vy + match.game.ballWidth >= 1:
             match.ball.vy = -match.ball.vy
         match.ball.x += match.ball.vx
         match.ball.y += match.ball.vy
+
         # Check for collisions with walls
+
         # Left wall (Paddle 1)
-        if match.ball.x < match.paddles.x1:
+        if match.ball.x + match.game.ballWidth < match.paddles.x1:
             match.paddles.score2 += 1
             if match.paddles.score2 >= match.game.finalScore:
                 return 200, {"msg": "gameover", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
             else:
                 return 200, {"msg": "scored", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
 
-    # Right wall (Paddle 2)
-        elif match.ball.x > match.paddles.x2:
+        # Right wall (Paddle 2)
+        elif match.ball.x > match.paddles.x2 + match.game.playerWidth:
             match.paddles.score1 += 1
             if match.paddles.score1 >= match.game.finalScore:
                 return 200, {"msg": "gameover", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
             else:
                 return 200, {"msg": "scored", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
 
-    # Paddle collisions
-        elif (match.ball.y <= match.game.playerHeight + match.paddles.y2 and match.ball.y >= match.paddles.y2 and match.ball.x + match.game.ballWidth >= match.paddles.x2) or \
-                (match.ball.y <= match.game.playerHeight + match.paddles.y1 and match.ball.y >= match.paddles.y1 and match.ball.x <= match.paddles.x1 + match.game.playerWidth):
+        # Paddle collisions
+        elif (match.ball.y <= match.game.playerHeight + match.paddles.y2 and match.ball.y + match.game.ballHeight >= match.paddles.y2 and \
+              match.ball.x + match.game.ballWidth >= match.paddles.x2 and match.ball.x + match.game.ballWidth <= match.paddles.x2 + match.game.playerWidth) or \
+             (match.ball.y <= match.game.playerHeight + match.paddles.y1 and match.ball.y  + match.game.ballHeight >= match.paddles.y1 and \
+              match.ball.x <= match.paddles.x1 + match.game.playerWidth and match.ball.x >= match.paddles.x1):
             match.ball.vx = -match.ball.vx
             if match.ball.x < match.paddles.x1 + match.game.playerWidth:
                 match.ball.x = match.paddles.x1 + match.game.playerWidth
@@ -452,10 +461,10 @@ def move_ball(request, id_match: int):
                 match.ball.x = match.paddles.x2 - match.game.ballWidth
 
             if (match.ball.y > match.paddles.y1 + match.game.playerHeight * 0.75 or match.ball.y > match.paddles.y2 + match.game.playerHeight * 0.75) and match.ball.vy < 3:
-                match.ball.vy += 0.004
+                match.ball.vy += 0.005
 
             if (match.ball.y < match.paddles.y1 + match.game.playerHeight * 0.25 or match.ball.y < match.paddles.y2 + match.game.playerHeight * 0.25) and match.ball.vy > -3:
-                match.ball.vy -= 0.004
+                match.ball.vy -= 0.005
         return 200, {"msg": "playing", "ball": match.ball, "score1": match.paddles.score1, "score2": match.paddles.score2}
     except Exception as e:
         return 400, {"error_msg": "Error moving ball" + str(e)}
@@ -493,7 +502,7 @@ def new_match(request, id_match: int, name1: str, name2: str):
     match.game.finalScore = 3
 
     # Los valores de las variables son porcentajes del tamaño de la pantalla
-    match.game.v = 0.02
+    match.game.v = 0.03
     match.game.ballWidth = 0.02
     match.game.ballHeight = 0.02
     match.game.playerWidth = 0.02

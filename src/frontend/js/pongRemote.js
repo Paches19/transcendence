@@ -110,10 +110,14 @@ function attachGameControlEventListeners() {
 
 async function handleKeyDown(e) {
 	let pressed = e.key;
-	if (
-		stateMatch.state != "pause" &&
-		(pressed == "ArrowUp" || pressed == "ArrowDown")
-	) {
+	if (e.ctrlKey && pressed == 'v'){
+		pressed = 'VelocityUp';
+	}
+	if (e.ctrlKey && pressed == 'c'){
+		pressed = 'VelocityDown';
+	}
+	if (stateMatch.state != "pause" &&	(pressed == "ArrowUp" || pressed == "ArrowDown" ||
+		pressed == "VelocityUp" || pressed == "VelocityDown")) {
 		if (playerNumber == 2) {
 			pressed == "ArrowUp" ? (pressed = "w") : (pressed = "s");
 		}
