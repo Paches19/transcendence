@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    settings.py                                        :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
+#    By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:41 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/11 23:04:59 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/07/18 16:53:41 by adpachec         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -71,6 +71,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'transcendence.urls'
+
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = False

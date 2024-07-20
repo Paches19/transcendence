@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   register.js                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:22:20 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/11 11:33:09 by jutrera-         ###   ########.fr       */
+/*   Updated: 2024/07/17 12:05:56 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,14 @@ function validateInputs(username, password)
     if (password.length < 4)
 	{
         return 'Your password must be at least 4 characters long.';
+    }
+
+    if (!/^[a-zA-Z0-9]+$/.test(username)) {
+        return 'Your username can only contain alphanumeric characters.';
+    }
+
+    if (!/^[a-zA-Z0-9]+$/.test(password)) {
+        return 'Your password can only contain alphanumeric characters.';
     }
 	
     return null;

@@ -3,7 +3,7 @@
 /*                                                        :::      ::::::::   */
 /*   login.js                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:21:53 by adpachec          #+#    #+#             */
 /*   Updated: 2024/07/20 14:46:47 by jutrera-         ###   ########.fr       */
@@ -55,6 +55,12 @@ async function handleLoginSubmit(event) {
 }
 
 function loadLogin() {
+
+    if (isLoggedIn())
+    {
+        return ;
+    }
+    
     document.getElementById('main-content').innerHTML = `
         <div class="wrapper">
             <div class="flip-card__inner">

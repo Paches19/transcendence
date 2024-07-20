@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    populate_data.py                                   :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
+#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:12 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/11 23:03:13 by jutrera-         ###   ########.fr        #
+#    Updated: 2024/07/18 17:13:48 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -44,8 +44,8 @@ def populate_matches(user: User):
     all_matches = Match.objects.all()
     matches = []
     for match in all_matches:
-        if len(matches) >= 10:
-            matches.pop(0)
+        #if len(matches) >= 10:
+        #    matches.pop(0)
         if (match.user1.id == user.id or match.user2.id == user.id) and match.winner != None:
             is_user1 = match.user1.id == user.id
             matches.append({

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   play.js                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+        */
+/*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 11:49:24 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/13 14:10:02 by alaparic         ###   ########.fr       */
+/*   Updated: 2024/07/19 13:42:20 by adpachec         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,8 @@ function showMatchOptions(matches) {
             <div class="play-title">Select a Match</div>
             <ul id="match-list" class="match-list">
                 ${matches
-					.map(
+					.filter(match => !match.played)
+                    .map(
 						(match) => `
                     <li class="match-item">
                         <div class="match-header">

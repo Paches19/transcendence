@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:26 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/15 20:24:05 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/18 17:29:39 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,13 +24,6 @@ def generate_users_data(apps, schema_editor):
         User.objects.create_user(username=f"user{i+1}", password=f"pass123")
     # create a user with the project name
     User.objects.create_user(username="transcendence", password="pass123")
-    # create a user for each memeber of the project
-    User.objects.create_user(username="alaparic", password="pass123",
-                             profilePicture="/api/static/avatars/12.jpeg")
-    User.objects.create_user(username="adpachec", password="pass123",
-                             profilePicture="/api/static/avatars/13.jpeg")
-    User.objects.create_user(username="jutrera-", password="pass123",
-                             profilePicture="/api/static/avatars/14.jpeg")
 
 
 def generate_tournaments_data(apps, schema_editor):
@@ -183,11 +176,44 @@ def generate_tournament_matches_data(apps, schema_editor):
 
 def generate_special_users(apps, schema_editor):
     User = apps.get_model("api", "User")
+    Friend = apps.get_model("api", "Friend")
     # create AI user
     User.objects.create_user(
         username=f"AI", password=f"pass123", profilePicture="/api/static/avatars/15.jpg")
-    # create a user with no stats
-    User.objects.create_user(username="noob", password="pass123")
+    # create a user for each memeber of the project
+    User.objects.create_user(username="alaparic", password="pass123",
+                             profilePicture="/api/static/avatars/12.jpeg")
+    User.objects.create_user(username="adpachec", password="pass123",
+                             profilePicture="/api/static/avatars/13.jpeg")
+    User.objects.create_user(username="jutrera-", password="pass123",
+                             profilePicture="/api/static/avatars/14.jpeg")
+    alaparic = User.objects.get(username="alaparic")
+    adpachec = User.objects.get(username="adpachec")
+    jutrera = User.objects.get(username="jutrera-")
+    Friend.objects.create(user1=alaparic, user2=adpachec, status=True)
+    Friend.objects.create(user1=alaparic, user2=jutrera, status=True)
+    Friend.objects.create(user1=adpachec, user2=jutrera, status=True)
+
+
+def generate_special_torurnaments(apps, schema_editor):
+    Tournament = apps.get_model("api", "Tournament")
+    User = apps.get_model("api", "User")
+    UserTournament = apps.get_model("api", "UserTournament")
+    Match = apps.get_model("api", "Match")
+
+    # create a full tournament
+    fullTournament = Tournament.objects.create(name="fullTournament", date=datetime.date.today().isoformat(), number_participants=2, status="In Progress")
+    user1 = User.objects.get(username="user1")
+    user2 = User.objects.get(username="user2")
+    UserTournament.objects.create(user=user1, tournament=fullTournament)
+    UserTournament.objects.create(user=user2, tournament=fullTournament)
+    Match.objects.create(user1=user1, user2=user2,
+                         pointsUser1=0, pointsUser2=0, date=datetime.date.today(), winner=None, tournament=fullTournament)
+
+    # create a tournament with 1 participant
+    tournament1 = Tournament.objects.get(name="tournament1")
+    tournament1.save()
+
 
 
 class Migration(migrations.Migration):
@@ -203,5 +229,6 @@ class Migration(migrations.Migration):
         migrations.RunPython(generate_friends_data),
         migrations.RunPython(generate_matches_data),
         migrations.RunPython(generate_tournament_matches_data),
-        migrations.RunPython(generate_special_users)
+        migrations.RunPython(generate_special_users),
+        migrations.RunPython(generate_special_torurnaments),
     ]

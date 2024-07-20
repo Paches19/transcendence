@@ -29,8 +29,8 @@ services:
             - "PYTHONDONTWRITEBYTECODE=1"
             - "PYTHONUNBUFFERED=1"
             - "DEBUG=0"
-        expose:
-            - "8000"
+        ports:
+            - "8000:8000"
         networks:
             - transcendence_net
         depends_on:
@@ -47,6 +47,7 @@ services:
             - .env
         ports:
             - "8080:443"
+            - "8090:80"
         networks:
             - transcendence_net
         restart: always
