@@ -6,7 +6,7 @@
 /*   By: adpachec <adpachec@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/08 12:21:53 by adpachec          #+#    #+#             */
-/*   Updated: 2024/07/17 12:11:42 by adpachec         ###   ########.fr       */
+/*   Updated: 2024/07/20 14:46:47 by jutrera-         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,12 @@ async function handleLoginSubmit(event) {
             }, 2500);
         } else {
             if (loginMsg) {
-                loginMsg.innerText = 'Hmm, that username and password don’t seem to match.';
-                loginMsg.classList.remove('success-msg');
+				if (isLoggedIn()) {
+					loginMsg.innerText = 'You are already logged in!';
+				} else {
+	                loginMsg.innerText = 'Hmm, that username and password don’t seem to match.';
+				}
+				loginMsg.classList.remove('success-msg');
                 loginMsg.classList.add('error-msg');
             }
         }
