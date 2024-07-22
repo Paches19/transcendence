@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:26 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/18 17:29:39 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/22 22:59:48 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -193,6 +193,9 @@ def generate_special_users(apps, schema_editor):
     Friend.objects.create(user1=alaparic, user2=adpachec, status=True)
     Friend.objects.create(user1=alaparic, user2=jutrera, status=True)
     Friend.objects.create(user1=adpachec, user2=jutrera, status=True)
+     # create the goat user
+    User.objects.create_user(username="lacabra", password="pass123",
+                             profilePicture="/api/static/avatars/16.jpg")
 
 
 def generate_special_torurnaments(apps, schema_editor):
@@ -211,8 +214,10 @@ def generate_special_torurnaments(apps, schema_editor):
                          pointsUser1=0, pointsUser2=0, date=datetime.date.today(), winner=None, tournament=fullTournament)
 
     # create a tournament with 1 participant
-    tournament1 = Tournament.objects.get(name="tournament1")
-    tournament1.save()
+    notStarted = Tournament.objects.create(name="notStarted", number_participants=2)
+    user1 = User.objects.get(username="user1")
+    UserTournament.objects.create(user=user1, tournament=notStarted)
+    notStarted.save()
 
 
 
