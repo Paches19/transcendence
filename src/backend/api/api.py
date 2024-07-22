@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    api.py                                             :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: jutrera- <jutrera-@student.42madrid.com    +#+  +:+       +#+         #
+#    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/18 19:17:38 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/22 23:24:32 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -345,7 +345,7 @@ def leave_tournament(request, tournament_id: int):
     if not UserTournament.objects.filter(user=user, tournament=tournament).exists():
         return 400, {"error_msg": "User not in tournament"}
 
-    if tournament.status == "Ended":
+    if tournament.status == "ended":
         return 400, {"error_msg": "Tournament has ended"}
 
     # If tournament is in progress, user looses unplayed matches
@@ -575,7 +575,6 @@ def save_match(request, id_match: int, id_tournament: int):
         if id_tournament != 0:
             tournament = get_object_or_404(
                 Tournament, tournamentID=id_tournament)
-            checkTournamentFinished(tournament)
         else:
             tournament = None
 
@@ -593,6 +592,8 @@ def save_match(request, id_match: int, id_tournament: int):
         matchToSave.winner = matchWinner
         matchToSave.tournament = tournament
         matchToSave.save()
+        if id_tournament != 0:
+            checkTournamentFinished(tournament)
         return 200, {"msg": "Match saved"}
     except RemoteGame.DoesNotExist:
         return 200, {"msg": "Match was saved before"}
