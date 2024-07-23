@@ -418,3 +418,14 @@
         font-size: 2vh;
     }
 }
+
+@media (min-width: 1450px) {
+
+    .play-title {
+        font-size: 2vh !important;
+    }
+
+    .play-btn {
+        font-size: 1.2vh !important;
+    }
+}

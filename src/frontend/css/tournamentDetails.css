@@ -198,3 +198,15 @@
         font-size: 1vh;
     }
 }
+
+@media (min-width: 1425px) {
+
+.custom-card-header {
+    font-size: 2vh !important;
+}
+
+.table-responsive {
+    font-size: 1.2vh !important;
+}
+
+}

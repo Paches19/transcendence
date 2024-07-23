@@ -378,3 +378,10 @@
         justify-content: center;
     }
 }
+
+@media (min-width: 1400px) {
+
+    .view-tournament-btn, .join-tournament-btn {
+        font-size: 1vh;
+    }
+}

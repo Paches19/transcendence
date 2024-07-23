@@ -358,3 +358,12 @@
         font-size: 2vh;
     }
 }
+
+@media (min-width: 1450px) {
+    .stats-toggler, .history-toggler, .friends-button {
+        font-size: 1.2vh;
+    }
+    .stats-content{
+        font-size: 1vh;
+    }
+}
