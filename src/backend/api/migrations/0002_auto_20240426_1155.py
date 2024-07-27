@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:38:26 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/22 22:59:48 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/23 17:18:10 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -195,7 +195,7 @@ def generate_special_users(apps, schema_editor):
     Friend.objects.create(user1=adpachec, user2=jutrera, status=True)
      # create the goat user
     User.objects.create_user(username="lacabra", password="pass123",
-                             profilePicture="/api/static/avatars/16.jpg")
+                             profilePicture="/api/static/avatars/16.jpeg")
 
 
 def generate_special_torurnaments(apps, schema_editor):

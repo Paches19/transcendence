@@ -6,7 +6,7 @@
 #    By: alaparic <alaparic@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/27 12:37:59 by alaparic          #+#    #+#              #
-#    Updated: 2024/07/22 23:24:32 by alaparic         ###   ########.fr        #
+#    Updated: 2024/07/27 19:24:04 by alaparic         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -178,7 +178,7 @@ def update_avatar(request, file: UploadedFile = File(...)):
 
     # Delete previous avatar unless default
     if request.user.profilePicture != "/api/static/avatars/default.jpg":
-        os.remove(request.user.profilePicture)
+        os.remove("/app" + request.user.profilePicture)
 
     # Save the uploaded image
     relative_file_route = os.path.join("api", "static", "avatars",
