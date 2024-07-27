@@ -1,8 +1,0 @@
-docker build -t servidor-nginx .
-
-docker run --name servidor-nginx-instance -p 8080:8080 -d servidor-nginx
-
-docker start servidor-nginx-instance
-
-docker stop servidor-nginx-instance
-docker rm servidor-nginx-instance

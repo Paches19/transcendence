@@ -2,7 +2,7 @@
 
 The last project of the 42 common core.
 
-This project is **single page application** that allows users to create accounts, log in, and play a game of pong against other users.
+This project is **single page application** that allows users to create accounts, log in, play a game of pong against other users, participate in tournaments and compare your stats with friends.
 
 The project is divided into three main parts:
 
@@ -39,7 +39,7 @@ This project was a team effort. You can checkout the team members here:
 
 # Run project
 
-## With Docker
+Using docker you can run the project with the following setup:
 
 ```bash
 cp .example.env src/docker/.env
@@ -50,25 +50,11 @@ vim src/docker/.env
 make
 ```
 
-## Without docker
-
-Run the backend
-
-```bash
-cd /src/backend
-
-docker run --name some-postgres -e POSTGRES_PASSWORD=postgres123 -e POSTGRES_USER=postgres -e POSTGRES_DB=transcendence_db -p 5432:5432 -d postgres
-
-export POSTGRES_DB=transcendence_db POSTGRES_USER=postgres POSTGRES_PASSWORD=postgres123
-
-python manage.py migrate
-
-python manage.py runserver
-```
+Once the project is running you can access the web page at [localhost:8080](https://localhost:8080)
 
 # Database schema
 
-In the project database we store the aplication information in 5 tables:
+In the project database we store the application information in 5 tables:
 
 -   `user`: Stores user information for their login credentials as well as user statistics from matches
 
@@ -80,10 +66,10 @@ In the project database we store the aplication information in 5 tables:
 
 -   `friend`: Table that stores the relationships between users, indicating if they are friends or if they have a pending friend request
 
-![DB schema image](https://github.com/Paches19/transcendence/assets/21156058/9b4bf1d4-24a8-4cc7-82ee-a3a51a1e5cf5)
+![DB schema image](https://github.com/user-attachments/assets/3c13c92b-eb6d-4193-b0cd-51da3e169d31)
 
 # API routes
 
 The documentation for the API, it's routes as well as the schemas each route expects and returns can be found in the `/api/docs` route of the project.
 
-[Link to the API documentation.](https://localhost/api/docs)
+[Link to the API documentation.](https://localhost:8080/api/docs)
